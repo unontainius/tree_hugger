@@ -3,10 +3,13 @@
 @import 'tailwindcss/utilities';
 
 button {
-    background-color: red;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: dodgerblue;
     padding-inline: 1.5rem	;
     padding-block: 0.5rem;
-    border-radius: 0.75rem;
+    border-radius: 2rem;
     border: 2px solid white;
     color: white;
     font-weight: 600;

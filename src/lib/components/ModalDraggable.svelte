@@ -103,20 +103,20 @@
         left: 0;
         right: 0;
         bottom: 0;
-  
+        border-radius: 0;
 		z-index: 10;
 		padding: 0;
 		margin: 0;
 		opacity: 0.5;
 		width: 100%;
 		height: 100%;
-		/* background-color: darkgrey; */
         background: rgb(19,19,19);
         background: -moz-radial-gradient(circle, rgba(19,19,19,1) 0%, rgba(126,126,126,1) 100%);
         background: -webkit-radial-gradient(circle, rgba(19,19,19,1) 0%, rgba(126,126,126,1) 100%);
         background: radial-gradient(circle, rgba(19,19,19,1) 0%, rgba(126,126,126,1) 100%);
         filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#131313",endColorstr="#7e7e7e",GradientType=1);
 	}
+
 	.my-form {
 		z-index: 20;
 		background-color: lightgrey;
@@ -155,9 +155,7 @@
 		cursor: pointer;
         transform: scale(1);
 	}
-    .button:hover {
-        transform: scale(1);
-    }
+
 	.detail {
 		padding: 32px;
 	}
