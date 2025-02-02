@@ -7,6 +7,7 @@
 <div class="test-content" style="background-color: {backgroundColor}">
     <h3>Test Component</h3>
     <p>This is a test component with random background color.</p>
+    <p>Background color: {backgroundColor}</p>
 </div>
 
 <style>

@@ -13,32 +13,59 @@
         isMinimized: boolean;
     }
 
+    type WindowSize = 'small' | 'medium' | 'large' | 'custom';
+
     const { 
         title = '', 
         onClose, 
         footerButtons = [],
-        component,
+        children,
         componentProps = {},
         initialPosition,
         initialSize,
         onPositionChange,
-        onSizeChange
+        onSizeChange,
+        minWidth = 200,
+        minHeight = 150,
+        preset = 'custom'
     } = $props<{
         title: string;
         onClose: () => void;
         footerButtons?: { text: string; onClick: () => void; }[];
-        component?: typeof SvelteComponent;
+        children?: any;
         componentProps?: Record<string, any>;
         initialPosition?: { x: number; y: number };
         initialSize?: { width: number; height: number };
         onPositionChange?: (position: { x: number; y: number }) => void;
         onSizeChange?: (size: { width: number; height: number }) => void;
+        minWidth?: number;
+        minHeight?: number;
+        preset?: WindowSize;
     }>();
+
+    function getPresetSize(preset: WindowSize): { width: number; height: number } {
+        switch (preset) {
+            case 'small':
+                return { width: 400, height: 200 };
+            case 'medium':
+                return { 
+                    width: Math.floor(window.innerWidth * 0.5), 
+                    height: Math.floor(window.innerHeight * 0.4) 
+                };
+            case 'large':
+                return { 
+                    width: Math.floor(window.innerWidth * 0.8), 
+                    height: Math.floor(window.innerHeight * 0.6) 
+                };
+            default:
+                return { width: 400, height: 300 };
+        }
+    }
 
     const id = crypto.randomUUID();
     let shell: HTMLDivElement;
     let position = $state(initialPosition || { x: 100, y: 100 });
-    let size = $state(initialSize || { width: 400, height: 300 });
+    let size = $state(initialSize || getPresetSize(preset));
     let isDragging = $state(false);
     let isResizing = $state(false);
     let dragTimer: ReturnType<typeof setTimeout> | null = null;
@@ -46,7 +73,7 @@
     let resizeMode = $state<'none' | 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'>('none');
     let resizeStart = $state({ x: 0, y: 0 });
     let resizeInitialSize = $state({ width: 0, height: 0 });
-    const minSize = { width: 200, height: 150 };
+    const minSize = { width: minWidth, height: minHeight };
     const maxSize = { width: window.innerWidth - 40, height: window.innerHeight - 40 };
 
     // Add touch support variables
@@ -279,10 +306,13 @@
             });
             shell.style.transition = '';
             previousState = null;
-            normalState = null;
+            if (!isMinimized) {
+                normalState = null;
+            }
+            isMaximized = false;
         } else {
             normalState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
-            previousState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
+            previousState = normalState;
             const from = { x: position.x, y: position.y, ...size };
             const to = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
             const { duration, css } = getTransitionStyles(from, to);
@@ -294,8 +324,8 @@
                 size = { width: window.innerWidth, height: window.innerHeight };
             });
             shell.style.transition = '';
+            isMaximized = true;
         }
-        isMaximized = !isMaximized;
     }
 
     async function handleMinimize() {
@@ -311,14 +341,11 @@
                 if (previousState) {
                     position = previousState.position;
                     size = previousState.size;
+                    isMaximized = previousState.isMaximized;
                 }
             });
             shell.style.transition = '';
-            if (isMaximized && normalState) {
-                previousState = normalState;
-            } else {
-                previousState = null;
-            }
+            previousState = null;
         } else {
             if (isMaximized && !normalState) {
                 normalState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
@@ -373,7 +400,7 @@
                 <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
             </button>
             <button class="control-btn maximize" onclick={handleMaximize}>
-                <MIcon name={isMaximized ? "restore" : "maximize"} size="24px" />
+                <MIcon name={isMaximized ? "minimize-2" : "maximize"} size="24px" />
             </button>
             <button class="control-btn close" onclick={onClose}>
                 <MIcon name="x" size="24px" />
@@ -382,10 +409,13 @@
     </div>
     
     <div class="body">
-        {#if component}
-            <svelte:component this={component} {...componentProps} />
+        {#if children}
+            {@render children({...componentProps})}
+                <!-- <svelte:component this={component} {...componentProps} /> -->
         {:else}
-            <slot />
+            <div class="body-content">
+                <p>No component provided</p>
+            </div>
         {/if}
     </div>
     
@@ -435,7 +465,17 @@
 
     .body {
         flex: 1;
-        overflow: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+        position: relative;
+    }
+
+    .body-content {
+        padding: 20px;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
     }
 
     .footer {
@@ -446,6 +486,7 @@
         justify-content: flex-end;
         background: #f5f5f5;
         gap: 10px;
+        flex-shrink: 0;
     }
 
     .resize-handle {
@@ -536,7 +577,9 @@
     .control-btn:hover {
         background: rgba(0,0,0,0.1);
     }
-
+    .control-btn.close {
+        color: #ff4444;
+    }
     .control-btn.close:hover {
         background: #ff4444;
         color: white;

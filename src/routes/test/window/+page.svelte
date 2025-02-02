@@ -4,7 +4,8 @@
     import { windowPersist } from '$lib/stores/windowPersistStore';
     import TaskBar from '$lib/components/TaskBar.svelte';
     import { onMount } from 'svelte';
-    
+    import { SvelteComponent } from 'svelte';
+
     let windows = $state<{
         id: number;
         title: string;
@@ -145,14 +146,15 @@
                 { text: 'Save', onClick: () => handleFooterAction('save') },
                 { text: 'Cancel', onClick: () => handleFooterAction('cancel') }
             ]}
-            component={Test1}
             componentProps={{ backgroundColor: window.color }}
             initialPosition={window.position}
             initialSize={window.size}
             onPositionChange={(pos) => updateWindowPosition(window.id, pos)}
             onSizeChange={(size) => updateWindowSize(window.id, size)}
         >
-            <div class="window-content">
+            <Test1 />
+
+            <!-- <div class="window-content">
                 <h2>Window Content</h2>
                 <p>This is window #{window.id}</p>
                 <p>Try:</p>
@@ -162,7 +164,7 @@
                     <li>Use window controls (minimize, maximize, close)</li>
                     <li>Resize from any edge or corner</li>
                 </ul>
-            </div>
+            </div> -->
         </Window>
     {/each}
 </div>
