@@ -2,6 +2,7 @@
     import Window from '$lib/components/Window.svelte';
     import Test1 from '$lib/components/Test1.svelte';
     import { windowPersist } from '$lib/stores/windowPersistStore';
+    import TaskBar from '$lib/components/TaskBar.svelte';
     import { onMount } from 'svelte';
     
     let windows = $state<{
@@ -166,9 +167,15 @@
     {/each}
 </div>
 
+<TaskBar />
+
 <style>
+    :global(body) {
+        background-color: #474747;
+    }
     .test-container {
-        padding: 20px;
+        padding: 0px;
+        margin: 0px;
     }
 
     .button-container {
@@ -219,5 +226,9 @@
 
     li {
         margin: 5px 0;
+    }
+
+    :global(body) {
+        margin-bottom: 60px;
     }
 </style> 

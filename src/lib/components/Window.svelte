@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     import { windows } from '$lib/stores/windowStore';
+    import { taskbarStore } from '$lib/stores/taskbarStore';
     import MIcon from './MIcon.svelte';
-    import { browser } from '$app/environment';
     import { cubicOut } from 'svelte/easing';
     import type { SvelteComponent } from 'svelte';
 
@@ -55,6 +55,7 @@
 
     let isMaximized = $state(false);
     let isMinimized = $state(false);
+    let normalState: WindowState | null = null;
     let previousState: WindowState | null = null;
 
     $effect(() => {
@@ -70,6 +71,29 @@
 
     $effect(() => {
         onSizeChange?.(size);
+    });
+
+    $effect(() => {
+        const unsubscribe = taskbarStore.subscribe(value => {
+            const item = value.find(i => i.id === id);
+            if (item && !item.isMinimized && isMinimized) {
+                // Restore window
+                position = item.position;
+                size = item.size;
+                isMinimized = false;
+                if (isMaximized && !normalState) {
+                    normalState = { 
+                        position: item.position, 
+                        size: item.size, 
+                        isMaximized: false, 
+                        isMinimized: false 
+                    };
+                }
+                // Remove from taskbar
+                taskbarStore.removeItem(id);
+            }
+        });
+        return unsubscribe;
     });
 
     function handleMouseDown(e: MouseEvent) {
@@ -207,6 +231,7 @@
 
     onDestroy(() => {
         windows.remove(id);
+        taskbarStore.removeItem(id);
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
         document.removeEventListener('touchmove', handleTouchMove);
@@ -239,21 +264,24 @@
     // Update maximize/minimize handlers to use animations
     async function handleMaximize() {
         if (isMaximized && previousState) {
+            const stateToRestore = normalState || previousState;
             const from = { x: position.x, y: position.y, ...size };
-            const to = { ...previousState.position, ...previousState.size };
-            const { duration, css } = getTransitionStyles(from, to);
+            const to = { ...stateToRestore.position, ...stateToRestore.size };
+            const { duration } = getTransitionStyles(from, to);
             
             shell.style.transition = `all ${duration}ms cubic-bezier(0.33, 1, 0.68, 1)`;
             await new Promise(resolve => {
                 shell.ontransitionend = resolve;
-                if (previousState) {
-                    position = previousState.position;
-                    size = previousState.size;
+                if (stateToRestore) {
+                    position = stateToRestore.position;
+                    size = stateToRestore.size;
                 }
             });
             shell.style.transition = '';
             previousState = null;
+            normalState = null;
         } else {
+            normalState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
             previousState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
             const from = { x: position.x, y: position.y, ...size };
             const to = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
@@ -272,6 +300,7 @@
 
     async function handleMinimize() {
         if (isMinimized && previousState) {
+            taskbarStore.removeItem(id);
             const from = { x: position.x, y: position.y, ...size };
             const to = { ...previousState.position, ...previousState.size };
             const { duration, css } = getTransitionStyles(from, to);
@@ -285,17 +314,31 @@
                 }
             });
             shell.style.transition = '';
-            previousState = null;
+            if (isMaximized && normalState) {
+                previousState = normalState;
+            } else {
+                previousState = null;
+            }
         } else {
-            previousState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
+            if (isMaximized && !normalState) {
+                normalState = { position: {...position}, size: {...size}, isMaximized: false, isMinimized: false };
+            }
+            previousState = { position: {...position}, size: {...size}, isMaximized: isMaximized, isMinimized: false };
+            taskbarStore.addItem({
+                id,
+                title,
+                isMinimized: true,
+                position: { ...position },
+                size: { ...size }
+            });
             const from = { x: position.x, y: position.y, ...size };
-            const to = { x: 0, y: window.innerHeight - 40, width: 200, height: 40 };
+            const to = { x: 0, y: window.innerHeight, width: 200, height: 40 };
             const { duration, css } = getTransitionStyles(from, to);
             
             shell.style.transition = `all ${duration}ms cubic-bezier(0.33, 1, 0.68, 1)`;
             await new Promise(resolve => {
                 shell.ontransitionend = resolve;
-                position = { x: 0, y: window.innerHeight - 40 };
+                position = { x: 0, y: window.innerHeight };
                 size = { width: 200, height: 40 };
             });
             shell.style.transition = '';
@@ -308,6 +351,7 @@
     }
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div 
     class="shell {isMaximized ? 'maximized' : ''} {isMinimized ? 'minimized' : ''}"
     bind:this={shell}
@@ -317,21 +361,22 @@
         width: {size.width}px;
         height: {size.height}px;
         cursor: {isDragging ? 'grabbing' : 'default'};
+        visibility: {isMinimized ? 'hidden' : 'visible'};
     "
     onmousedown={handleMouseDown}
     ontouchstart={handleTouchStart}
 >
-    <div class="header" ondblclick={handleHeaderDoubleClick}>
+    <div class="header" ondblclick={handleHeaderDoubleClick} aria-label="Window Header" aria-roledescription="Window Header">
         <span class="title">{title}</span>
         <div class="window-controls">
             <button class="control-btn minimize" onclick={handleMinimize}>
-                <MIcon name={isMinimized ? "maximize" : "minimize"} size="16px" />
+                <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
             </button>
             <button class="control-btn maximize" onclick={handleMaximize}>
-                <MIcon name={isMaximized ? "restore" : "maximize"} size="16px" />
+                <MIcon name={isMaximized ? "restore" : "maximize"} size="24px" />
             </button>
             <button class="control-btn close" onclick={onClose}>
-                <MIcon name="close" size="16px" />
+                <MIcon name="x" size="24px" />
             </button>
         </div>
     </div>
@@ -353,14 +398,14 @@
     </div>
 
     <!-- All resize handles -->
-    <div class="resize-handle n" onmousedown={(e) => handleResizeStart(e, 'n')} />
-    <div class="resize-handle e" onmousedown={(e) => handleResizeStart(e, 'e')} />
-    <div class="resize-handle s" onmousedown={(e) => handleResizeStart(e, 's')} />
-    <div class="resize-handle w" onmousedown={(e) => handleResizeStart(e, 'w')} />
-    <div class="resize-handle ne" onmousedown={(e) => handleResizeStart(e, 'ne')} />
-    <div class="resize-handle nw" onmousedown={(e) => handleResizeStart(e, 'nw')} />
-    <div class="resize-handle se" onmousedown={(e) => handleResizeStart(e, 'se')} />
-    <div class="resize-handle sw" onmousedown={(e) => handleResizeStart(e, 'sw')} />
+    <div class="resize-handle n" onmousedown={(e) => handleResizeStart(e, 'n')}></div>
+    <div class="resize-handle e" onmousedown={(e) => handleResizeStart(e, 'e')}></div>
+    <div class="resize-handle s" onmousedown={(e) => handleResizeStart(e, 's')}></div>
+    <div class="resize-handle w" onmousedown={(e) => handleResizeStart(e, 'w')}></div>
+    <div class="resize-handle ne" onmousedown={(e) => handleResizeStart(e, 'ne')}></div>
+    <div class="resize-handle nw" onmousedown={(e) => handleResizeStart(e, 'nw')}></div>
+    <div class="resize-handle se" onmousedown={(e) => handleResizeStart(e, 'se')}></div>
+    <div class="resize-handle sw" onmousedown={(e) => handleResizeStart(e, 'sw')}></div>
 </div>
 
 <style>
@@ -401,18 +446,6 @@
         justify-content: flex-end;
         background: #f5f5f5;
         gap: 10px;
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 8px;
-        color: #666;
-    }
-
-    .close-btn:hover {
-        color: #ff4444;
     }
 
     .resize-handle {
@@ -486,7 +519,6 @@
 
     .window-controls {
         display: flex;
-        gap: 4px;
     }
 
     .control-btn {
@@ -496,6 +528,9 @@
         cursor: pointer;
         color: #666;
         border-radius: 4px;
+        margin-inline: 0;
+        box-shadow: none;
+
     }
 
     .control-btn:hover {
