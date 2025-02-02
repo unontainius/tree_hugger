@@ -449,22 +449,24 @@ export type TieRelationRow = Database['public']['Tables']['tie_relation']['Row']
 export type TieTypeRow = Database['public']['Tables']['tie_type']['Row'];
 
 // You can also export Insert and Update types if needed
-export type CelebrationInsert = Database['public']['Tables']['celebration']['Insert'];
-export type ClubInsert = Database['public']['Tables']['club']['Insert'];
-export type ClubMembersInsert = Database['public']['Tables']['club_members']['Insert'];
-export type EventTypeInsert = Database['public']['Tables']['event_type']['Insert'];
-export type ImagesInsert = Database['public']['Tables']['images']['Insert'];
-export type PersonInsert = Database['public']['Tables']['person']['Insert'];
-export type TieInsert = Database['public']['Tables']['tie']['Insert'];
-export type TieRelationInsert = Database['public']['Tables']['tie_relation']['Insert'];
-export type TieTypeInsert = Database['public']['Tables']['tie_type']['Insert'];
+export type CelebrationInsertRow = Database['public']['Tables']['celebration']['Insert'];
+export type ClubInsertRow = Database['public']['Tables']['club']['Insert'];
+export type ClubMembersInsertRow = Database['public']['Tables']['club_members']['Insert'];
+export type EventTypeInsertRow = Database['public']['Tables']['event_type']['Insert'];
+export type ImagesInsertRow = Database['public']['Tables']['images']['Insert'];
+export type PersonInsertRow = Database['public']['Tables']['person']['Insert'];
+export type TieInsertRow = Database['public']['Tables']['tie']['Insert'];
+export type TieRelationInsertRow = Database['public']['Tables']['tie_relation']['Insert'];
+export type TieTypeInsertRow = Database['public']['Tables']['tie_type']['Insert'];
 
-export type CelebrationUpdate = Database['public']['Tables']['celebration']['Update'];
-export type ClubUpdate = Database['public']['Tables']['club']['Update'];
-export type ClubMembersUpdate = Database['public']['Tables']['club_members']['Update'];
-export type EventTypeUpdate = Database['public']['Tables']['event_type']['Update'];
-export type ImagesUpdate = Database['public']['Tables']['images']['Update'];
-export type PersonUpdate = Database['public']['Tables']['person']['Update'];
-export type TieUpdate = Database['public']['Tables']['tie']['Update'];
-export type TieRelationUpdate = Database['public']['Tables']['tie_relation']['Update'];
-export type TieTypeUpdate = Database['public']['Tables']['tie_type']['Update'];
+export type CelebrationUpdateRow = Database['public']['Tables']['celebration']['Update'];
+export type ClubUpdateRow = Database['public']['Tables']['club']['Update'];
+export type ClubMembersUpdateRow = Database['public']['Tables']['club_members']['Update'];
+export type EventTypeUpdateRow = Database['public']['Tables']['event_type']['Update'];
+export type ImagesUpdateRow = Database['public']['Tables']['images']['Update'];
+export type PersonUpdateRow = Database['public']['Tables']['person']['Update'];
+export type TieUpdateRow = Database['public']['Tables']['tie']['Update'];
+export type TieRelationUpdateRow = Database['public']['Tables']['tie_relation']['Update'];
+export type TieTypeUpdateRow = Database['public']['Tables']['tie_type']['Update'];
+
+
