@@ -81,14 +81,14 @@
 <div class="taskbar" style:display={items.length ? 'flex' : 'none'}>
     <div class="items">
         {#each items as item (item.id)}
-            <div
+            <button
                 class="item"
                 onclick={() => handleItemClick(item)}
                 oncontextmenu={(e) => handleContextMenu(e, item)}
                 animate:flip={{ duration: 300 }}
             >
                 {item.title}
-            </div>
+    </button>
         {/each}
     </div>
 
@@ -103,12 +103,12 @@
             "
             transition:fade={{ duration: 150 }}
         >
-            <div class="menu-item" onclick={handleOpen}>
+            <button class="menu-item" onclick={handleOpen}>
                 Open
-            </div>
-            <div class="menu-item" onclick={handleClose}>
+            </button>
+            <button class="menu-item" onclick={handleClose}>
                 Close
-            </div>
+            </button>
         </div>
     {/if}
 </div>
@@ -120,7 +120,7 @@
         left: 0;
         right: 0;
         height: 60px;
-        background: #f5f5f5;
+        background : #555555;
         border-top: 1px solid #ddd;
         display: flex;
         align-items: center;
@@ -136,7 +136,7 @@
 
     .item {
         padding: 8px 16px;
-        background: white;
+        background: rgb(1, 82, 114);
         border-radius: 4px;
         cursor: pointer;
         user-select: none;
@@ -146,13 +146,13 @@
     }
 
     .item:hover {
-        background: #f0f0f0;
+        background: #1ffc02;
     }
 
     @keyframes slideIn {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(-20px);
         }
         to {
             opacity: 1;
@@ -162,8 +162,8 @@
 
     .context-menu {
         position: fixed;
-        background: white;
-        border-radius: 4px;
+        background: rgb(34, 34, 34);
+        border-radius: 0.5rem;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         padding: 4px 0;
         min-width: 150px;
@@ -182,11 +182,13 @@
     }
 
     .menu-item {
+        background: transparent;
         padding: 8px 16px;
+        width: calc(100% - 32px);
         cursor: pointer;
     }
 
     .menu-item:hover {
-        background: #f0f0f0;
+        background: #1ffc02;
     }
 </style> 

@@ -4,7 +4,8 @@
     import { windowPersist } from '$lib/stores/windowPersistStore';
     import TaskBar from '$lib/components/TaskBar.svelte';
     import { onMount } from 'svelte';
-    import { SvelteComponent } from 'svelte';
+    import { loginRequestedState } from '$lib/stores/authStore';
+	import LoginForm from '$lib/components/LoginForm.svelte';
 
     let windows = $state<{
         id: number;
@@ -14,7 +15,7 @@
         size: { width: number; height: number };
     }[]>([]);
     let nextId = 0;
-
+ 
     function clearAllWindows() {
         windowPersist.clear();
         windows = [];
@@ -52,20 +53,29 @@
     function addWindow() {
         // Try to find a free spot by checking existing window positions
         const usedPositions = new Set(windows.map(w => `${w.position.x},${w.position.y}`));
-        let position = { x: 100, y: 100 };
+        let position = { 
+            x: Math.min(100, window.innerWidth - 400), 
+            y: Math.min(100, window.innerHeight - 300) 
+        };
         
         // If default position is taken, increment by 20px until we find a free spot
         while (usedPositions.has(`${position.x},${position.y}`)) {
-            position.x += 20;
-            position.y += 20;
+            position.x = Math.min(position.x + 20, window.innerWidth - 400);
+            position.y = Math.min(position.y + 20, window.innerHeight - 300);
             
             // Reset to top if we've gone too far
             if (position.x > window.innerWidth - 400 || position.y > window.innerHeight - 300) {
-                position = { x: 100, y: 100 };
+                position = { 
+                    x: Math.min(100, window.innerWidth - 400), 
+                    y: Math.min(100, window.innerHeight - 300) 
+                };
             }
         }
 
-        const size = { width: 400, height: 300 };
+        const size = { 
+            width: Math.min(400, window.innerWidth - 40), 
+            height: Math.min(300, window.innerHeight - 40) 
+        };
 
         const newWindow = { 
             id: nextId++, 
@@ -128,16 +138,16 @@
     }
 </script>
 
-<div class="test-container">
-    <div class="button-container">
-        <button class="add-btn" onclick={addWindow}>
-            Add Window
-        </button>
-        <button class="clear-btn" onclick={clearAllWindows}>
-            Clear All Windows
-        </button>
-    </div>
+<div class="button-container">
+    <button class="add-btn" onclick={addWindow}>
+        Add Window
+    </button>
+    <button class="clear-btn" onclick={clearAllWindows}>
+        Clear All Windows
+    </button>
+</div>
 
+<div class="test-container">
     {#each windows as window (window.id)}
         <Window
             title={window.title}
@@ -153,21 +163,21 @@
             onSizeChange={(size) => updateWindowSize(window.id, size)}
         >
             <Test1 />
-
-            <!-- <div class="window-content">
-                <h2>Window Content</h2>
-                <p>This is window #{window.id}</p>
-                <p>Try:</p>
-                <ul>
-                    <li>Drag the header (hold for 200ms)</li>
-                    <li>Double-click header to maximize</li>
-                    <li>Use window controls (minimize, maximize, close)</li>
-                    <li>Resize from any edge or corner</li>
-                </ul>
-            </div> -->
         </Window>
     {/each}
 </div>
+
+{#if $loginRequestedState}
+    <Window title="Login" 
+        onClose={() => loginRequestedState.update((state: boolean) => false)} 
+        initialPosition={{ x: 100, y: 100 }} 
+        initialSize={{ width: 400, height: 300 }}
+        showFooter={false}
+        >
+        <LoginForm onclose={() => loginRequestedState.update((state: boolean) => false)} />
+    </Window>
+{/if}
+
 
 <TaskBar />
 
@@ -178,12 +188,15 @@
     .test-container {
         padding: 0px;
         margin: 0px;
+        padding-block-start: 3.7rem;
+        background-color: #555555;
+
     }
 
     .button-container {
         position: fixed;
-        top: 20px;
-        left: 20px;
+        top: 0;
+        left: 1rem;
         display: flex;
         gap: 10px;
         z-index: 3000;
@@ -212,22 +225,6 @@
 
     .clear-btn:hover {
         background: #d32f2f;
-    }
-
-    .window-content {
-        padding: 20px;
-    }
-
-    .window-content h2 {
-        margin-top: 0;
-    }
-
-    ul {
-        padding-left: 20px;
-    }
-
-    li {
-        margin: 5px 0;
     }
 
     :global(body) {

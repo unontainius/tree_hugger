@@ -2,9 +2,9 @@
     import { onMount, onDestroy } from 'svelte';
     import { windows } from '$lib/stores/windowStore';
     import { taskbarStore } from '$lib/stores/taskbarStore';
+    import { createEventDispatcher } from 'svelte';
     import MIcon from './MIcon.svelte';
     import { cubicOut } from 'svelte/easing';
-    import type { SvelteComponent } from 'svelte';
 
     interface WindowState {
         position: { x: number; y: number };
@@ -27,7 +27,11 @@
         onSizeChange,
         minWidth = 200,
         minHeight = 150,
-        preset = 'custom'
+        preset = 'custom',
+        showFooter = true,
+        hideMinimize = false,
+        hideMaximize = false,
+        hideClose = false
     } = $props<{
         title: string;
         onClose: () => void;
@@ -41,7 +45,13 @@
         minWidth?: number;
         minHeight?: number;
         preset?: WindowSize;
+        showFooter?: boolean;
+        hideMinimize?: boolean;
+        hideMaximize?: boolean;
+        hideClose?: boolean;
     }>();
+
+    const dispatch = createEventDispatcher();
 
     function getPresetSize(preset: WindowSize): { width: number; height: number } {
         switch (preset) {
@@ -79,6 +89,11 @@
     // Add touch support variables
     let touchStartX = 0;
     let touchStartY = 0;
+
+    // Add touch resize variables
+    let touchResizeMode: typeof resizeMode = 'none';
+    let touchResizeStart = { x: 0, y: 0 };
+    let touchResizeInitialSize = { width: 0, height: 0 };
 
     let isMaximized = $state(false);
     let isMinimized = $state(false);
@@ -144,60 +159,20 @@
 
         const deltaX = e.clientX - resizeStart.x;
         const deltaY = e.clientY - resizeStart.y;
+        const maxWidth = window.innerWidth - position.x;
+        const maxHeight = window.innerHeight - position.y;
         let newSize = { ...size };
         let newPosition = { ...position };
 
         switch (resizeMode) {
-            case 'n':
-                const newHeightN = resizeInitialSize.height - deltaY;
-                if (newHeightN >= minSize.height && newHeightN <= maxSize.height) {
-                    newPosition.y = position.y + deltaY;
-                    newSize.height = newHeightN;
-                }
-                break;
-            case 'w':
-                const newWidthW = resizeInitialSize.width - deltaX;
-                if (newWidthW >= minSize.width && newWidthW <= maxSize.width) {
-                    newPosition.x += deltaX;
-                    newSize.width = newWidthW;
-                }
-                break;
-            case 'nw':
-                const newHeightNW = resizeInitialSize.height - deltaY;
-                const newWidthNW = resizeInitialSize.width - deltaX;
-                if (newHeightNW >= minSize.height && newHeightNW <= maxSize.height) {
-                    newPosition.y += deltaY;
-                    newSize.height = newHeightNW;
-                }
-                if (newWidthNW >= minSize.width && newWidthNW <= maxSize.width) {
-                    newPosition.x += deltaX;
-                    newSize.width = newWidthNW;
-                }
-                break;
-            case 'ne':
-                const newHeightNE = resizeInitialSize.height - deltaY;
-                if (newHeightNE >= minSize.height && newHeightNE <= maxSize.height) {
-                    newPosition.y += deltaY;
-                    newSize.height = newHeightNE;
-                }
-                newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
-                break;
-            case 'sw':
-                const newWidthSW = resizeInitialSize.width - deltaX;
-                if (newWidthSW >= minSize.width && newWidthSW <= maxSize.width) {
-                    newPosition.x += deltaX;
-                    newSize.width = newWidthSW;
-                }
-                newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
-                break;
-            case 'se':
-                newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
-                newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
-                break;
             case 'e':
                 newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
                 break;
             case 's':
+                newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
+                break;
+            case 'se':
+                newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
                 newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
                 break;
         }
@@ -230,6 +205,19 @@
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
         
+        // Check if touch started on a resize handle
+        if (e.target instanceof HTMLElement) {
+            const handle = e.target.closest('.resize-handle');
+            if (handle instanceof HTMLElement) {
+                isResizing = true;
+                touchResizeMode = handle.classList[1] as typeof resizeMode;
+                touchResizeStart = { x: touch.clientX, y: touch.clientY };
+                touchResizeInitialSize = { ...size };
+                e.preventDefault(); // Prevent scrolling while resizing
+                return;
+            }
+        }
+
         if (e.target instanceof HTMLElement && e.target.closest('.header')) {
             dragTimer = setTimeout(() => {
                 isDragging = true;
@@ -251,7 +239,28 @@
             onPositionChange?.({ x: newX, y: newY });
             position = { x: newX, y: newY };
         } else if (isResizing) {
-            handleResize({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
+            const deltaX = touch.clientX - touchResizeStart.x;
+            const deltaY = touch.clientY - touchResizeStart.y;
+            let newSize = { ...size };
+            let newPosition = { ...position };
+
+            switch (touchResizeMode) {
+                case 'e':
+                    newSize.width = Math.min(maxSize.width, Math.max(minSize.width, touchResizeInitialSize.width + deltaX));
+                    break;
+                case 's':
+                    newSize.height = Math.min(maxSize.height, Math.max(minSize.height, touchResizeInitialSize.height + deltaY));
+                    break;
+                case 'se':
+                    newSize.width = Math.min(maxSize.width, Math.max(minSize.width, touchResizeInitialSize.width + deltaX));
+                    newSize.height = Math.min(maxSize.height, Math.max(minSize.height, touchResizeInitialSize.height + deltaY));
+                    break;
+            }
+
+            onPositionChange?.(newPosition);
+            onSizeChange?.(newSize);
+            position = newPosition;
+            size = newSize;
         }
     }
 
@@ -259,8 +268,9 @@
         windows.register(id);
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
-        document.addEventListener('touchmove', handleTouchMove);
-        document.addEventListener('touchend', handleMouseUp);
+        document.addEventListener('touchmove', handleTouchMove as EventListener, { capture: true });
+        document.addEventListener('touchend', handleMouseUp as EventListener, { capture: true });
+        shell?.addEventListener('touchstart', handleTouchStart as EventListener, { capture: true });
     });
 
     onDestroy(() => {
@@ -268,8 +278,9 @@
         taskbarStore.removeItem(id);
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
-        document.removeEventListener('touchmove', handleTouchMove);
-        document.removeEventListener('touchend', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove as EventListener, { capture: true });
+        document.removeEventListener('touchend', handleMouseUp as EventListener, { capture: true });
+        shell?.removeEventListener('touchstart', handleTouchStart as EventListener, { capture: true });
     });
 
     // Animation utility
@@ -419,27 +430,31 @@
         visibility: {isMinimized ? 'hidden' : 'visible'};
     "
     onmousedown={handleMouseDown}
-    ontouchstart={handleTouchStart}
 >
     <div class="header" ondblclick={handleHeaderDoubleClick} aria-label="Window Header" aria-roledescription="Window Header">
         <span class="title">{title}</span>
         <div class="window-controls">
-            <button class="control-btn minimize" onclick={handleMinimize}>
-                <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
-            </button>
-            <button class="control-btn maximize" onclick={handleMaximize}>
-                <MIcon name={isMaximized ? "minimize-2" : "maximize"} size="24px" />
-            </button>
-            <button class="control-btn close" onclick={onClose}>
-                <MIcon name="x" size="24px" />
-            </button>
+            {#if !hideMinimize}
+                <button class="control-btn minimize" onclick={handleMinimize}>
+                    <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
+                </button>
+            {/if}
+            {#if !hideMaximize}
+                <button class="control-btn maximize" onclick={handleMaximize}>
+                    <MIcon name={isMaximized ? "minimize-2" : "maximize"} size="24px" />
+                </button>
+            {/if}
+            {#if !hideClose}
+                <button class="control-btn close" onclick={onClose}>
+                    <MIcon name="x" size="24px" />
+                </button>
+            {/if}
         </div>
     </div>
     
     <div class="body">
         {#if children}
-            {@render children({...componentProps})}
-                <!-- <svelte:component this={component} {...componentProps} /> -->
+            {@render children(componentProps)}
         {:else}
             <div class="body-content">
                 <p>No component provided</p>
@@ -447,23 +462,26 @@
         {/if}
     </div>
     
+    {#if showFooter}
     <div class="footer">
         <div class="footer-buttons">
             {#each footerButtons as button}
                 <button onclick={button.onClick}>{button.text}</button>
-            {/each}
+                {/each}
+            </div>
         </div>
-    </div>
+    {/if}
 
     <!-- All resize handles -->
-    <div class="resize-handle n" onmousedown={(e) => handleResizeStart(e, 'n')}></div>
-    <div class="resize-handle e" onmousedown={(e) => handleResizeStart(e, 'e')}></div>
-    <div class="resize-handle s" onmousedown={(e) => handleResizeStart(e, 's')}></div>
-    <div class="resize-handle w" onmousedown={(e) => handleResizeStart(e, 'w')}></div>
-    <div class="resize-handle ne" onmousedown={(e) => handleResizeStart(e, 'ne')}></div>
-    <div class="resize-handle nw" onmousedown={(e) => handleResizeStart(e, 'nw')}></div>
-    <div class="resize-handle se" onmousedown={(e) => handleResizeStart(e, 'se')}></div>
-    <div class="resize-handle sw" onmousedown={(e) => handleResizeStart(e, 'sw')}></div>
+    <div class="resize-handle e" 
+        onmousedown={(e) => handleResizeStart(e, 'e')}
+    ></div>
+    <div class="resize-handle s" 
+        onmousedown={(e) => handleResizeStart(e, 's')}
+    ></div>
+    <div class="resize-handle se" 
+        onmousedown={(e) => handleResizeStart(e, 'se')}
+    ></div>
 </div>
 
 <style>
@@ -473,7 +491,7 @@
     .shell {
         position: fixed;
         background: white;
-        border-radius: 4px;
+        border-radius: 0.5rem;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
@@ -522,18 +540,10 @@
         background: transparent;
     }
 
-    .resize-handle.n {
-        top: 0;
-        left: 0;
-        height: 4px;
-        width: 100%;
-        cursor: n-resize;
-    }
-
     .resize-handle.e {
         right: 0;
         top: 0;
-        width: 4px;
+        width: 8px;
         height: 100%;
         cursor: e-resize;
     }
@@ -541,49 +551,17 @@
     .resize-handle.s {
         bottom: 0;
         left: 0;
-        height: 4px;
+        height: 8px;
         width: 100%;
         cursor: s-resize;
-    }
-
-    .resize-handle.w {
-        left: 0;
-        top: 0;
-        width: 4px;
-        height: 100%;
-        cursor: w-resize;
-    }
-
-    .resize-handle.ne {
-        right: 0;
-        top: 0;
-        width: 8px;
-        height: 8px;
-        cursor: ne-resize;
-    }
-
-    .resize-handle.nw {
-        left: 0;
-        top: 0;
-        width: 8px;
-        height: 8px;
-        cursor: nw-resize;
     }
 
     .resize-handle.se {
         right: 0;
         bottom: 0;
-        width: 8px;
-        height: 8px;
+        width: 16px;
+        height: 16px;
         cursor: se-resize;
-    }
-
-    .resize-handle.sw {
-        left: 0;
-        bottom: 0;
-        width: 8px;
-        height: 8px;
-        cursor: sw-resize;
     }
 
     .window-controls {

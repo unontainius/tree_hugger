@@ -9,6 +9,10 @@
         <MIcon name="people" size="1.5rem" />
         People
     </a>
+    <a href="/test/window">
+        <MIcon name="people" size="1.5rem" />
+        Windows
+    </a>
 </div>
 
 <style>
@@ -17,6 +21,7 @@
         flex-direction: row;
         align-items: center;
         justify-content: center;
+        gap: 1rem;
     }
 
 </style>

@@ -28,6 +28,9 @@
     p {
         padding: 1rem;
     }
+    button {
+        border-radius: 50%;
+    }
     .toast-container {
         position: fixed;
         top: 1rem;
