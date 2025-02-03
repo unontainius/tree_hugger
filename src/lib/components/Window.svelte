@@ -144,69 +144,76 @@
 
         const deltaX = e.clientX - resizeStart.x;
         const deltaY = e.clientY - resizeStart.y;
+        let newSize = { ...size };
+        let newPosition = { ...position };
 
         switch (resizeMode) {
             case 'n':
                 const newHeightN = resizeInitialSize.height - deltaY;
                 if (newHeightN >= minSize.height && newHeightN <= maxSize.height) {
-                    position.y += deltaY;
-                    size.height = newHeightN;
+                    newPosition.y = position.y + deltaY;
+                    newSize.height = newHeightN;
                 }
                 break;
             case 'w':
                 const newWidthW = resizeInitialSize.width - deltaX;
                 if (newWidthW >= minSize.width && newWidthW <= maxSize.width) {
-                    position.x += deltaX;
-                    size.width = newWidthW;
+                    newPosition.x += deltaX;
+                    newSize.width = newWidthW;
                 }
                 break;
             case 'nw':
                 const newHeightNW = resizeInitialSize.height - deltaY;
                 const newWidthNW = resizeInitialSize.width - deltaX;
                 if (newHeightNW >= minSize.height && newHeightNW <= maxSize.height) {
-                    position.y += deltaY;
-                    size.height = newHeightNW;
+                    newPosition.y += deltaY;
+                    newSize.height = newHeightNW;
                 }
                 if (newWidthNW >= minSize.width && newWidthNW <= maxSize.width) {
-                    position.x += deltaX;
-                    size.width = newWidthNW;
+                    newPosition.x += deltaX;
+                    newSize.width = newWidthNW;
                 }
                 break;
             case 'ne':
                 const newHeightNE = resizeInitialSize.height - deltaY;
                 if (newHeightNE >= minSize.height && newHeightNE <= maxSize.height) {
-                    position.y += deltaY;
-                    size.height = newHeightNE;
+                    newPosition.y += deltaY;
+                    newSize.height = newHeightNE;
                 }
-                size.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
+                newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
                 break;
             case 'sw':
                 const newWidthSW = resizeInitialSize.width - deltaX;
                 if (newWidthSW >= minSize.width && newWidthSW <= maxSize.width) {
-                    position.x += deltaX;
-                    size.width = newWidthSW;
+                    newPosition.x += deltaX;
+                    newSize.width = newWidthSW;
                 }
-                size.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
+                newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
                 break;
             case 'se':
-                size.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
-                size.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
+                newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
+                newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
                 break;
             case 'e':
-                size.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
+                newSize.width = Math.min(maxSize.width, Math.max(minSize.width, resizeInitialSize.width + deltaX));
                 break;
             case 's':
-                size.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
+                newSize.height = Math.min(maxSize.height, Math.max(minSize.height, resizeInitialSize.height + deltaY));
                 break;
         }
+
+        onPositionChange?.(newPosition);
+        onSizeChange?.(newSize);
+        position = newPosition;
+        size = newSize;
     }
 
     function handleMouseMove(e: MouseEvent) {
         if (isDragging) {
             const newX = Math.max(0, Math.min(window.innerWidth - size.width, position.x + e.movementX));
             const newY = Math.max(0, Math.min(window.innerHeight - size.height, position.y + e.movementY));
-            position.x = newX;
-            position.y = newY;
+            onPositionChange?.({ x: newX, y: newY });
+            position = { x: newX, y: newY };
         } else if (isResizing) {
             handleResize(e);
         }
@@ -241,8 +248,8 @@
         if (isDragging) {
             const newX = Math.max(0, Math.min(window.innerWidth - size.width, position.x + movementX));
             const newY = Math.max(0, Math.min(window.innerHeight - size.height, position.y + movementY));
-            position.x = newX;
-            position.y = newY;
+            onPositionChange?.({ x: newX, y: newY });
+            position = { x: newX, y: newY };
         } else if (isResizing) {
             handleResize({ clientX: touch.clientX, clientY: touch.clientY } as MouseEvent);
         }
@@ -374,7 +381,28 @@
     }
 
     function handleHeaderDoubleClick() {
-        handleMaximize();
+        if (isMaximized) {
+            // Restore to normal state
+            const stateToRestore = normalState || { 
+                position: { x: 100, y: 100 }, 
+                size: getPresetSize(preset) 
+            };
+            position = stateToRestore.position;
+            size = stateToRestore.size;
+            isMaximized = false;
+            normalState = null;
+        } else {
+            // Save current state and maximize
+            normalState = { 
+                position: {...position}, 
+                size: {...size}, 
+                isMaximized: false, 
+                isMinimized: false 
+            };
+            position = { x: 0, y: 0 };
+            size = { width: window.innerWidth, height: window.innerHeight };
+            isMaximized = true;
+        }
     }
 </script>
 
