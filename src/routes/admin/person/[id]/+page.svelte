@@ -54,6 +54,13 @@
 
 	let formIsDirty = $state(false);
 	let fileToUpload: File | null = $state(null);
+	// let debugMessage = $state(''); // For tracking state changes
+
+	// let debugState = $state({
+	// 	showImageSelector: false,
+	// 	personId: null as string | null,
+	// 	windowMounted: false
+	// });
 
 	onMount(async () => {
 		await loadPageData();
@@ -75,7 +82,7 @@
 				maiden_name: null,
 				middle_name: null,
 				phone_number: null,
-				sex: 'Other',
+				sex: 'Female',
 				last_edited_by: (await user)?.email || ''
 			};
 		}
@@ -181,9 +188,7 @@
 			document.body.appendChild(fileInput);
 
 			fileInput.onchange = async (e: Event) => {
-				const target = e.target as HTMLInputElement;
-				const file = target.files?.[0];
-
+				const file = (e.target as HTMLInputElement).files?.[0];
 				if (file) {
 					try {
 						fileToUpload = file;
@@ -199,6 +204,8 @@
 	}
 	async function handleAddImageFromDatabase() {
 		if (!(await isLoggedIn())) return;
+		// debugState.showImageSelector = true;
+		// debugState.personId = person?.id || null;
 		showImageSelector = true;
 	}
 
@@ -250,27 +257,34 @@
 	async function handleSaveForm() {
 		if (!(await isLoggedIn())) return;
 		if (!person) return;
+		console.log('handleSaveForm', person);
 		toasts.success(`saving changes for ${person.first_name} ${person.last_name}`);
-		await db.Person.update(person.id, {
-			first_name: person.first_name,
-			middle_name: person.middle_name,
-			last_name: person.last_name,
-			maiden_name: person.maiden_name,
-			alias: person.alias,
-			sex: person.sex,
-			born: person.born,
-			died: person.died,
-			phone_number: person.phone_number,
-			email: person.email
-		});
+		if (addingNewUser) {
+			const data = await db.Person.create(person).then(async (newPerson) => {
+				if (newPerson) {
+					addingNewUser = false;
+					await changePerson(newPerson);
+				}
+			});
+
+		} else {
+			await db.Person.update(person.id, {
+				first_name: person.first_name,
+
+				middle_name: person.middle_name,
+
+				last_name: person.last_name,
+				maiden_name: person.maiden_name,
+				alias: person.alias,
+				sex: person.sex,
+				born: person.born,
+				died: person.died,
+				phone_number: person.phone_number,
+				email: person.email
+			});
+		}
 		formIsDirty = false;
 	}
-
-	$effect(() => {
-		// if (formIsDirty) {
-		// 	toasts.info('Form is dirty', 1500);
-		// }
-	});
 
 	// 	// Refresh the person data
 	// 	if (person) {
@@ -331,11 +345,29 @@
 		if (!person) return;
 		changePerson(person);
 	}
+
+	// Update the state with both the boolean and a message
+	function openImageSelector() {
+		showImageSelector = true;
+		// debugMessage = 'Image selector opened';
+	}
+
+	function closeImageSelector() {
+		// debugState.showImageSelector = false;
+		// debugState.personId = null;
+		showImageSelector = false;
+	}
+
+	// Add this to track window mounting
+	$effect(() => {
+		// debugState.windowMounted = showImageSelector;
+	});
 </script>
 
 <div class="nav-container">
-	<a class="back-btn" href="/admin"><MIcon name="back" size="5rem" /></a>
+	<a class="back-btn" href="/admin/person"><MIcon name="back" size="5rem" /></a>
 	{#if !addingNewUser}
+
 		<div class="btn-add-container">
 			<button class="btn-add-new-person" onclick={() => changePerson(null)}>
 				<MIcon name="plus" size="52px" />
@@ -425,9 +457,14 @@
 							<div class="image-container-column">
 								<!-- Image -->
 								<div class="image">
-									<img src={person.image_url} alt="Person Avatar" />
+									{#if person.image_url?.length && person.image_url.length > 10}
+										<img src={person.image_url} alt="Person Avatar" />
+									{:else}
+										<img src="/images/noimage3.png" alt=" no Personal Avatar yet" />
+									{/if}
 								</div>
 								<!-- Image buttons -->
+
 							</div>
 							<div class="image-buttons-column">
 								<button
@@ -672,34 +709,59 @@
 </div>
 
 
-{#if person}
-	{#if showCropper}
-		<ImageCropper
-			personId={person.id}
-			imageUrl={tempImageUrl || person.image_url}
-			{showCropper}
-			onComplete={handleImageCropComplete}
-			onCancel={handleCropCancel}
-		/>
-	{/if}
-
-	{#if showImageSelector}
+{#if person && showImageSelector}
+	<div style="position: fixed; inset: 0; z-index: 9998;">
 		<Window
-			title={`Add ${relationshipType}`}
-			onClose={() => {
-				showImageSelector = false;
-			}}
+			title="Image Selector"
+			onClose={closeImageSelector}
 			showMinimize={false}
 			showMaximize={true}
 			showFooter={false}
-			initialSize = {{width: imageSelectorWidth, height: imageSelectorHeight}}
-			>
-				<ImageSelector personId={person.id} onComplete={handleImageSelectorComplete} />
-			</Window>
-
-
-	{/if}
+			initialSize={{ width: imageSelectorWidth, height: imageSelectorHeight }}
+		>
+			<ImageSelector 
+				personId={person.id} 
+				onComplete={handleImageSelectorComplete} 
+			/>
+		</Window>
+	</div>
 {/if}
+
+{#if person && showCropper}
+	<div style="position: fixed; inset: 0; z-index: 9998;">
+		<Window
+			title="Crop Image"
+			onClose={handleCropCancel}
+			showMinimize={false}
+			showMaximize={false}
+			showFooter={false}
+			initialSize={{ width: window.innerWidth > 520 ? 520 : window.innerWidth, height: 660 }}
+			initialPosition={{ x: (window.innerWidth / 2) - (window.innerWidth > 520 ? 520 : window.innerWidth / 2), y: (window.innerHeight / 2) - (660 / 2) }}
+		>
+			<ImageCropper
+
+
+				personId={person.id}
+
+
+
+
+				imageUrl={tempImageUrl || person.image_url}
+				{showCropper}
+				onComplete={handleImageCropComplete}
+				onCancel={handleCropCancel}
+			/>
+		</Window>
+	</div>
+{/if}
+
+<!-- Add debug display here, outside of script -->
+<!-- {#if debugState.showImageSelector}
+	<div style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; z-index: 10000;">
+		ImageSelector Debug:
+		<pre>{JSON.stringify(debugState, null, 2)}</pre>
+	</div>
+{/if} -->
 
 <style>
 	.page-container {

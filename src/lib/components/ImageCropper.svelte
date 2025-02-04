@@ -85,109 +85,86 @@
     });
 </script>
 
+
 <div class="cropper-container">
     {#if showCropper && imageUrl}
+        <div class="controls">
+            <div class="buttons">
+                <button 
+                    class="btn-cancel" 
+                    onclick={handleCancel}
+                    disabled={isLoading}
+                >
+                    <MIcon name="x" size="1.5rem" />
+                    Cancel
+                </button>
+                <button 
+                    class="btn-save" 
+                    onclick={handleSave}
+                    disabled={isLoading}
+                >
+                    <MIcon name="save" size="1.5rem" />
+                    Save
+                </button>
+            </div>
+        </div>
         <div class="cropper-wrapper">
-            <div class="cropper">
-                <img
-                    bind:this={imageElement}
-                    src={imageUrl}
-                    alt="To crop"
-                    crossorigin="anonymous"
-                />
-            </div>
-            <div class="controls">
-                <div class="buttons">
-                    <button 
-                        class="btn-cancel" 
-                        onclick={handleCancel}
-                        disabled={isLoading}
-                    >
-                        <MIcon name="x" size="1.5rem" />
-                        Cancel
-                    </button>
-                    <button 
-                        class="btn-save" 
-                        onclick={handleSave}
-                        disabled={isLoading}
-                    >
-                        <MIcon name="save" size="1.5rem" />
-                        Save
-                    </button>
-                </div>
-            </div>
+            <img
+                bind:this={imageElement}
+                src={imageUrl}
+                alt="To crop"
+                crossorigin="anonymous"
+            />
         </div>
     {/if}
 
     {#if error}
-        <div class="error">
-            {error}
-        </div>
+        <div class="error">{error}</div>
     {/if}
-
-    <button 
-        class="btn-crop"
-        onclick={() => showCropper = true}
-        disabled={!imageUrl}
-    >
-        <MIcon name="crop" size="1.5rem" />
-        Crop Image
-    </button>
 </div>
 
 <style>
     .cropper-container {
+        display: flex;
+        flex-direction: column;
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .cropper-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        height: 100%;
+        background: rgb(32, 32, 32);
         padding: 1rem;
-    }
-
-    .cropper {
-        width: 100%;
-        max-width: 500px;
-        height: 500px;
-        position: relative;
-        background: #333;
-    }
-
-    .cropper img {
-        max-width: 100%;
-        max-height: 100%;
+        box-sizing: border-box;
     }
 
     .controls {
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        width: 100%;
-        max-width: 500px;
+        flex: 0 0 auto;
+        padding: 0.5rem;
+        background: rgb(22, 22, 22);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
     }
 
     .buttons {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 1rem;
     }
 
-    .btn-save, .btn-cancel, .btn-crop {
+    .cropper-wrapper {
+        flex: 1 1 auto;
+        position: relative;
+        width: 100%;
+        height: calc(100% - 80px);
+        background: rgb(22, 22, 22);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .cropper-wrapper img {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .btn-save, .btn-cancel {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -208,21 +185,20 @@
         color: white;
     }
 
-    .btn-crop {
-        background: #2196F3;
-        color: white;
+    .btn-save:hover, .btn-cancel:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-save:disabled, .btn-cancel:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .error {
         color: #f44336;
         padding: 0.5rem;
+        margin-top: 0.5rem;
         border-radius: 0.25rem;
         background: rgba(244, 67, 54, 0.1);
-    }
-
-    @media (max-width: 600px) {
-        .cropper {
-            height: 300px;
-        }
     }
 </style> 

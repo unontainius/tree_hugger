@@ -11,10 +11,7 @@
             <MIcon name="people" size="1.5rem" />
             People
         </a>
-        <a href="/test/window">
-            <MIcon name="people" size="1.5rem" />
-            Windows
-        </a>
+
     </div>
 
 <style>

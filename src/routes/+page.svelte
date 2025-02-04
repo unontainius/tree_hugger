@@ -15,6 +15,7 @@
 
 <style>
 	.column {
+		padding-block-start: 5rem;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;

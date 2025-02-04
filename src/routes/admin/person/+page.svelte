@@ -4,6 +4,7 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import PersonCard from '$lib/components/PersonCard.svelte';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	let people = $state<PersonRow[] | null>(null);
 	let selectedPerson = $state<PersonRow | null>(null);
@@ -34,33 +35,41 @@
 	}
 	// enabledRow = '189f1ddd-41b6-480b-b269-d34687704956';
 
-	$effect(() => {
-		async function loadData() {
-			isLoading = true;
-			try {
-		
-				const data = await db.Person.all(
-					Object.entries(filters).map(([fieldname, fieldvalue]) => ({ fieldname, fieldvalue }))
-				);
-				
-				if (data) {
-					people = data;
-					if (people.length > 0) {
-						personFields = Object.keys(people[0]).filter((field) => !excludedFields.includes(field));
-					}
-					applySort();
-				} else {
-					people = [];
+	async function loadData() {
+		console.log('Loading data, isLoading:', isLoading);
+		isLoading = true;
+		try {
+			const data = await db.Person.all(
+				Object.entries(filters).map(([fieldname, fieldvalue]) => ({ fieldname, fieldvalue }))
+			);
+			console.log('Data loaded:', data);
+			
+			if (data) {
+				people = data;
+				if (people.length > 0) {
+					personFields = Object.keys(people[0]).filter((field) => !excludedFields.includes(field));
 				}
-			} catch (error) {
-				console.error('Error loading people:', error);
+				applySort();
+			} else {
 				people = [];
-			} finally {
-				isLoading = false;
 			}
+		} catch (error) {
+			console.error('Error loading people:', error);
+			people = [];
+		} finally {
+			isLoading = false;
+			console.log('Loading complete, isLoading:', isLoading);
 		}
+	}
 
+	onMount(() => {
 		loadData();
+	});
+
+	$effect(() => {
+		if (Object.keys(filters).length > 0) {
+			loadData();
+		}
 	});
 
 	function formatDateToLocal(date: string) {

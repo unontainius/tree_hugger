@@ -28,9 +28,9 @@ export default {
     },
     Person: {
         // Create a new person
-        async create(tablename: string, data: PersonInsertRow   ): Promise<PersonRow | null> {
+        async create(data: PersonInsertRow   ): Promise<PersonRow | null> {
             const { data: newData, error } = await supabase
-                .from(tablename)
+                .from('person')
                 .insert(data)
                 .single();
 

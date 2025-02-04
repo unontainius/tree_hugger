@@ -7,10 +7,14 @@
 	import Modal from './Modal.svelte';
 	import { toasts } from '$lib/stores/toastStore';
 
-	let { personId, onComplete } = $props<{
+	const { personId, onComplete } = $props<{
 		personId: string;
-		onComplete?: () => void;
+		onComplete: () => void;
 	}>();
+
+	$effect(() => {
+		console.log('ImageSelector mounted:', { personId });
+	});
 
 	let images = $state<{ name: string; url: string; path: string }[]>([]);
 	let isLoading = $state(false);
@@ -146,14 +150,15 @@
         padding: 4rem;
     }
 	.selector {
-		width: 80vw;
-		height: 100%;
+		width: 100%;
+		height: calc(100vh - 237px);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 1rem;
 		padding: 0.1rem;
 	}
+
 
 	.image-grid {
 		display: grid;
@@ -203,9 +208,10 @@
 		border-top: 1px solid #eee;
 		position: relative;
 		bottom: 0;
-		border-bottom-right-radius: 12px;
-		border-bottom-left-radius: 12px;
+		border-bottom-right-radius: 0.5rem;
+		border-bottom-left-radius: 0.5rem;
 	}
+
 
 	.btn-select {
 		background: #4caf50;

@@ -21,7 +21,10 @@
         footerButtons = [],
         children,
         componentProps = {},
-        initialPosition = { x: (window.innerWidth - 400) / 2, y: (window.innerHeight - 290) / 3.5 },
+        initialPosition = { 
+            x: Math.min((window.innerWidth - 400) / 2, window.innerWidth - 400), 
+            y: Math.min((window.innerHeight - 290) / 3.5, window.innerHeight - 290) 
+        },
         initialSize = { width: 400, height: 270 },
         onPositionChange,
         onSizeChange,
@@ -66,8 +69,8 @@
                 };
             case 'large':
                 return { 
-                    width: Math.floor(window.innerWidth * 0.8), 
-                    height: Math.floor(window.innerHeight * 0.6) 
+                    width: Math.floor(window.innerWidth * 0.9), 
+                    height: Math.floor(window.innerHeight * 0.8) 
                 };
             default:
                 return { width: 400, height: 300 };
@@ -86,7 +89,7 @@
     let resizeStart = $state({ x: 0, y: 0 });
     let resizeInitialSize = $state({ width: 0, height: 0 });
     const minSize = { width: minWidth, height: minHeight };
-    const maxSize = { width: window.innerWidth - 40, height: window.innerHeight - 40 };
+    const maxSize = { width: window.innerWidth , height: window.innerHeight };
 
     // Add touch support variables
     let touchStartX = 0;
@@ -138,6 +141,33 @@
             }
         });
         return unsubscribe;
+    });
+
+    $effect(() => {
+        console.log('Window props:', {
+            title,
+            position,
+            size,
+            isMaximized,
+            isMinimized,
+            showMinimize,
+            showMaximize,
+            showFooter
+        });
+    });
+
+    $effect(() => {
+        if (title) {  // Only log when title exists to avoid noise
+            console.log('Window mounted:', {
+                title,
+                position,
+                size,
+                children,
+                showMinimize,
+                showMaximize,
+                showFooter
+            });
+        }
     });
 
     function handleMouseDown(e: MouseEvent) {
@@ -424,7 +454,7 @@
     class="shell {isMaximized ? 'maximized' : ''} {isMinimized ? 'minimized' : ''}"
     bind:this={shell}
     style="
-        z-index: {zIndex};
+        z-index: 9999;
         transform: translate({position.x}px, {position.y}px);
         width: {size.width}px;
         height: {size.height}px;
