@@ -1,30 +1,40 @@
 <script lang="ts">
 	import type { PersonRow } from '$lib/types/database.types.js';
+	import { onMount, onDestroy } from 'svelte';
+	import { imageService } from '$lib/services/imageService';
+	import { isLoggedIn } from '$lib/utils/authUtils';
+	import { toasts } from '$lib/stores/toastStore';
+	import { goto } from '$app/navigation';
+	import { authService } from '$lib/services/authService.js';
 	import MIcon from '$lib/components/MIcon.svelte';
 	import db from '$lib/services/treeDb';
-	import { onMount, onDestroy } from 'svelte';
 	import PersonCard from '$lib/components/PersonCard.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import ImageSelector from '$lib/components/ImageSelector.svelte';
-	import { imageService } from '$lib/services/imageService';
-	import { isLoggedIn } from '$lib/utils/authUtils';
-	import ModalDraggable from '$lib/components/Modal.svelte';
-	import { toasts } from '$lib/stores/toastStore';
-	import { goto, invalidate } from '$app/navigation';
 	import RelationshipForm from '$lib/components/RelationshipForm.svelte';
-	import Modal from '$lib/components/Modal.svelte';
-	
+	import Window from '$lib/components/Window.svelte';
+
 	let { data } = $props();
 	let person = $state<PersonRow | null>(data.data as PersonRow);
 	let parents = $state<{ parent_b: PersonRow[]; parent_c: PersonRow[] } | null>(null);
 	let siblings = $state<PersonRow[] | null>(null);
 	let children = $state<{ partners: { partner: PersonRow; children: PersonRow[] }[] } | null>(null);
+	let user = authService.getCurrentUser();
 
-	let relationshipType = $state<string | 'all' | 'parents' | 'children' | 'siblings' | 'partners' | 'children' | 'partners' | 'unknown'>('all');
+	let relationshipType = $state<
+		| string
+		| 'all'
+		| 'parents'
+		| 'children'
+		| 'siblings'
+		| 'partners'
+		| 'children'
+		| 'partners'
+		| 'unknown'
+	>('all');
 	let relationshipFormPersonA = $state<PersonRow | null>(null);
 	let relationshipFormPersonB = $state<PersonRow | null>(null);
 	let relationshipFormPersonC = $state<PersonRow | null>(null);
-
 
 	let isLoading = $state(true);
 
@@ -34,9 +44,13 @@
 
 	let showCropper = $state(false);
 	let showImageSelector = $state(false);
+	let imageSelectorWidth = $state(window.innerWidth * 0.8);
+	let imageSelectorHeight = $state(window.innerHeight * 0.8);
 	let showDeleteConfirmation = $state(false);
 	let showRemoveImageConfirmation = $state(false);
 	let showRelationshipForm = $state(false);
+	let addingNewUser = $state(false);
+
 
 	let formIsDirty = $state(false);
 	let fileToUpload: File | null = $state(null);
@@ -46,52 +60,70 @@
 	});
 
 	async function loadPageData(loadWhat: string = 'all') {
-		if (!person) return;
-		
-		try {
-			toasts.info(`Loading data for ${person.first_name} ${person.last_name}`, 1000);
-			
-			if (loadWhat === 'all') {
-				// Get fresh person data
-				const freshPerson = await db.Person.single(person.id);
-				if (freshPerson) {
-					person = freshPerson;
+		if (!person) {
+			addingNewUser = true;
+			person = {
+				alias: null,
+				born: new Date().toISOString(),
+				created_at: new Date().toISOString(),
+				died: null,
+				email: null,
+				first_name: '',
+				id: crypto.randomUUID(),
+				image_url: null,
+				last_name: '',
+				maiden_name: null,
+				middle_name: null,
+				phone_number: null,
+				sex: 'Other',
+				last_edited_by: (await user)?.email || ''
+			};
+		}
+		67;
+		if (!addingNewUser) {
+			try {
+				toasts.info(`Loading data for ${person.first_name} ${person.last_name}`, 1000);
+
+				if (loadWhat === 'all') {
+					// Get fresh person data
+					const freshPerson = await db.Person.single(person.id);
+					if (freshPerson) {
+						person = freshPerson;
+					}
 				}
-			}
-			// Load relationships
-			if (loadWhat === 'all' ||loadWhat === 'parents' || loadWhat === 'siblings') {
-				parents = await db.Tie.Parents(person.id);
-				if (parents) {
-					for (const parentB of parents.parent_b) {
-						for (const parentC of parents.parent_c) {
-							siblings = await db.Tie.Siblings(person.id, parentB, parentC);
+				// Load relationships
+				if (loadWhat === 'all' || loadWhat === 'parents' || loadWhat === 'siblings') {
+					parents = await db.Tie.Parents(person.id);
+					if (parents) {
+						for (const parentB of parents.parent_b) {
+							for (const parentC of parents.parent_c) {
+								siblings = await db.Tie.Siblings(person.id, parentB, parentC);
+							}
 						}
 					}
 				}
-			}
 
-			if (loadWhat === 'all' || loadWhat === 'children' || loadWhat === 'partners') {
-				children = await db.Tie.Children(person.id);
+				if (loadWhat === 'all' || loadWhat === 'children' || loadWhat === 'partners') {
+					children = await db.Tie.Children(person.id);
+				}
+			} catch (error) {
+				console.error('Error loading data:', error);
+				toasts.error('Failed to load person data');
+			} finally {
+				isLoading = false;
 			}
-
-		} catch (error) {
-			console.error('Error loading data:', error);
-			toasts.error('Failed to load person data');
-		} finally {
-			isLoading = false;
 		}
 	}
 
-	async function changePerson(newPerson: PersonRow) {
-		if (!newPerson) return;
+	async function changePerson(newPerson: PersonRow | null) {
 		if (formIsDirty) {
 			await handleSaveForm();
 		}
 		// Replace current URL in history instead of adding new entry
-		await goto(`/admin/person/${newPerson.id}`, {
+		await goto(`/admin/person/${newPerson?.id}`, {
 			replaceState: true // This prevents adding to browser history
 		});
-		
+
 		// Update the person state
 		person = newPerson;
 		formIsDirty = false;
@@ -100,7 +132,7 @@
 		siblings = null;
 		children = null;
 		isLoading = true;
-		
+
 		// Load the new data
 		await loadPageData();
 	}
@@ -110,24 +142,24 @@
 	}
 
 	async function handleRemoveImage() {
-		if (!await isLoggedIn()) return;
+		if (!(await isLoggedIn())) return;
 		console.log('remove image');
 	}
 	async function handleDeletePerson() {
-		if (!await isLoggedIn()) return;
+		if (!(await isLoggedIn())) return;
 		console.log('delete person');
 	}
 	async function handleDeleteImage() {
-		if (!await isLoggedIn()) return;
+		if (!(await isLoggedIn())) return;
 		if (!person?.image_url) return;
-		
+
 		try {
 			// Extract path from URL
 			const path = person.image_url.split('/').pop();
 			if (!path) throw new Error('Invalid image URL');
-			
+
 			await imageService.deleteImage(path);
-			
+
 			// Update person record
 			await db.Person.update(person.id, { image_url: null });
 			const updatedPerson = await db.Person.single(person.id);
@@ -139,8 +171,8 @@
 		}
 	}
 	async function handleAddImageFromLocal() {
-		if (!await isLoggedIn()) return;
-		
+		if (!(await isLoggedIn())) return;
+
 		if (!fileInput) {
 			fileInput = document.createElement('input');
 			fileInput.type = 'file';
@@ -151,7 +183,7 @@
 			fileInput.onchange = async (e: Event) => {
 				const target = e.target as HTMLInputElement;
 				const file = target.files?.[0];
-				
+
 				if (file) {
 					try {
 						fileToUpload = file;
@@ -166,7 +198,7 @@
 		fileInput.click();
 	}
 	async function handleAddImageFromDatabase() {
-		if (!await isLoggedIn()) return;
+		if (!(await isLoggedIn())) return;
 		showImageSelector = true;
 	}
 
@@ -182,8 +214,6 @@
 	}
 
 	async function handleImageCropComplete(croppedBlob: Blob) {
-
-		
 		try {
 			// Upload to Supabase Storage
 			const { url } = await imageService.uploadImage(croppedBlob);
@@ -218,7 +248,7 @@
 		showCropper = false;
 	}
 	async function handleSaveForm() {
-		if (!await isLoggedIn()) return;
+		if (!(await isLoggedIn())) return;
 		if (!person) return;
 		toasts.success(`saving changes for ${person.first_name} ${person.last_name}`);
 		await db.Person.update(person.id, {
@@ -231,15 +261,15 @@
 			born: person.born,
 			died: person.died,
 			phone_number: person.phone_number,
-			email: person.email,
+			email: person.email
 		});
 		formIsDirty = false;
 	}
-	
+
 	$effect(() => {
-		if (formIsDirty) {
-			toasts.info('Form is dirty', 1500);
-		}
+		// if (formIsDirty) {
+		// 	toasts.info('Form is dirty', 1500);
+		// }
 	});
 
 	// 	// Refresh the person data
@@ -265,184 +295,227 @@
 		formIsDirty = false;
 	});
 
-async function handleAddRelationship(relationship: string = 'unknown', otherPerson: PersonRow | null = null) {
-	if (!await isLoggedIn()) return;
-	relationshipType = relationship;
-	relationshipFormPersonA = null;
-	relationshipFormPersonB = null;
-	relationshipFormPersonC = null;
-	if (relationship === 'Parent') {
-		relationshipFormPersonA = person;
+	async function handleAddRelationship(
+		relationship: string = 'unknown',
+		otherPerson: PersonRow | null = null
+	) {
+		if (!(await isLoggedIn())) return;
+		relationshipType = relationship;
+		relationshipFormPersonA = null;
 		relationshipFormPersonB = null;
 		relationshipFormPersonC = null;
-	} else if (relationship === 'Sibling') {
-		relationshipFormPersonA = null;
-		relationshipFormPersonB = parents?.parent_b[0] || null;
-		relationshipFormPersonC = parents?.parent_c[0] || null;
-	} else if (relationship === 'Partner') {
-		relationshipFormPersonA = null;
-		relationshipFormPersonB = person;
-		relationshipFormPersonC = otherPerson;
-	} else if (relationship === 'Child') {
-		relationshipFormPersonA = null;
-		relationshipFormPersonB = person;
-		relationshipFormPersonC = otherPerson;
+		if (relationship === 'Parent') {
+			relationshipFormPersonA = person;
+			relationshipFormPersonB = null;
+			relationshipFormPersonC = null;
+		} else if (relationship === 'Sibling') {
+			relationshipFormPersonA = null;
+			relationshipFormPersonB = parents?.parent_b[0] || null;
+			relationshipFormPersonC = parents?.parent_c[0] || null;
+		} else if (relationship === 'Partner') {
+			relationshipFormPersonA = null;
+			relationshipFormPersonB = person;
+			relationshipFormPersonC = otherPerson;
+		} else if (relationship === 'Child') {
+			relationshipFormPersonA = null;
+			relationshipFormPersonB = person;
+			relationshipFormPersonC = otherPerson;
+		}
+		showRelationshipForm = true;
 	}
-	showRelationshipForm = true;
 
-}
-
-async function handleRelationshipFormResponse(reason: string) {
-	showRelationshipForm = false;
-}
-async function handleCloseRelationshipForm() {
-	if (!person) return;
-	changePerson(person);
-}
+	async function handleRelationshipFormResponse(reason: string) {
+		showRelationshipForm = false;
+	}
+	async function handleCloseRelationshipForm() {
+		if (!person) return;
+		changePerson(person);
+	}
 </script>
 
 <div class="nav-container">
-	<a class="back-btn" href="/admin/person"><MIcon name="back" size="5rem" /></a>
+	<a class="back-btn" href="/admin"><MIcon name="back" size="5rem" /></a>
+	{#if !addingNewUser}
+		<div class="btn-add-container">
+			<button class="btn-add-new-person" onclick={() => changePerson(null)}>
+				<MIcon name="plus" size="52px" />
+			</button>
+		</div>
+	{/if}
 </div>
 
+
 {#if showRelationshipForm}
-<Modal 
-	visible={showRelationshipForm}
-	title={`Add ${relationshipType}`}
-	showOverlay={true}
-	cancelOnOverlayClick={true}
-	acceptBtnText="Accept"
-	cancelBtnText="Cancel"
-	showFooter={false}
-	dialogReason={handleRelationshipFormResponse}
-	>
-	<RelationshipForm 
-		person_a = {relationshipFormPersonA}
-		person_b = {relationshipFormPersonB}
-		person_c = {relationshipFormPersonC}
-		onclose={() => handleCloseRelationshipForm()}
-	/>
-</Modal>
+	<Window
+		title={`Add ${relationshipType}`}
+		onClose={() => {
+			showRelationshipForm = false;
+		}}
+		showMinimize={false}
+		showMaximize={false}
+		showFooter={false}
+		initialSize = {{width: 320, height: 500}}
+		>
+		<RelationshipForm
+			person_a={relationshipFormPersonA}
+			person_b={relationshipFormPersonB}
+			person_c={relationshipFormPersonC}
+			onclose={() => handleCloseRelationshipForm()}
+
+		/>
+	</Window>
 {/if}
 
 <div class="page-container">
 	<div class="content-container">
-		{#if !person}
-			<p>Loading ...</p>
-		{:else}
-			<!-- Parents -->
-			<div class="row-container">
-				<div class="column-container">
-					<div class="header">
-						Parents
-						<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
+		{#if !addingNewUser}
+			{#if person}
+				<!-- Parents -->
+				<div class="row-container">
+					<div class="column-container">
+						<div class="header">
+							Parents
+							<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
+								<MIcon name="plus" size="42px" />
+							</button>
+						</div>
 
-							<MIcon name="plus" size="42px" />
-						</button>
-					</div>
-
-					<div class="row-content-container">
-						{#if parents}
-							<!-- Parent B -->
-							{#each parents.parent_b as parent}
-								<PersonCard person={parent} onclick={() => changePerson(parent)} />
-							{/each}
-							<!-- Parent C -->
-							{#each parents.parent_c as parent}
-								<PersonCard person={parent} onclick={() => changePerson(parent)} />
-							{/each}
-						{/if}
+						<div class="row-content-container">
+							{#if parents}
+								<!-- Parent B -->
+								{#each parents.parent_b as parent}
+									<PersonCard person={parent} onclick={() => changePerson(parent)} />
+								{/each}
+								<!-- Parent C -->
+								{#each parents.parent_c as parent}
+									<PersonCard person={parent} onclick={() => changePerson(parent)} />
+								{/each}
+							{/if}
+						</div>
 					</div>
 				</div>
-			</div>
-			<!-- Immediate Family -->
-			<div class="row-container">
-				<div class="column-container">
-					<div class="header">
-						Imediate Family
-						<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
-							<MIcon name="plus" size="42px" />
-						</button>
-					</div>
-					<div class="row-content-container">
-						{#if siblings}
-							{#each siblings as sibling}
-								<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
-							{/each}
-						{/if}
+				<!-- Immediate Family -->
+				<div class="row-container">
+					<div class="column-container">
+						<div class="header">
+							Imediate Family
+							<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
+								<MIcon name="plus" size="42px" />
+							</button>
+						</div>
+						<div class="row-content-container">
+							{#if siblings}
+								{#each siblings as sibling}
+									<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
+								{/each}
+							{/if}
+						</div>
 					</div>
 				</div>
-			</div>
-			<!-- Main Character info -->
-			<div class="image-controls-row">
-				<div class="image-container-column">
-					<h1>{person.first_name} {person.last_name}</h1>
+			{/if}
+		{/if}
+		<!-- Main Character info -->
+		<div class="image-controls-row">
+			{#if !addingNewUser}
+				{#if person}
+					<div class="image-container-column">
+						<h1>{person.first_name} {person.last_name}</h1>
 
-					<div class="image-header-row">
-						<div class="image-container-column">
-							<!-- Image -->
-							<div class="image">
-								<img src={person.image_url} alt="Person Avatar" />
+						<div class="image-header-row">
+							<div class="image-container-column">
+								<!-- Image -->
+								<div class="image">
+									<img src={person.image_url} alt="Person Avatar" />
+								</div>
+								<!-- Image buttons -->
 							</div>
-							<!-- Image buttons -->
+							<div class="image-buttons-column">
+								<button
+									class="image-btn"
+									onclick={handleAddImageFromLocal}
+									title="Load Image from your Device"
+								>
+									<MIcon name="open-file" size="32px" />
+								</button>
+								<button
+									class="image-btn"
+									onclick={handleAddImageFromDatabase}
+									title="Download Image from our database"
+								>
+									<MIcon name="download" size="32px" />
+								</button>
+								<button
+									class="image-btn"
+									onclick={handleRemoveImage}
+									title="Remove this Image from this Person"
+								>
+									<MIcon name="no-image" size="32px" />
+								</button>
+							</div>
 						</div>
-						<div class="image-buttons-column">
-							<button class="image-btn" 
-								onclick={handleAddImageFromLocal} 
-								title="Load Image from your Device"
-							>
-								<MIcon name="open-file" size="32px" />
-							</button>
-							<button class="image-btn" 
-								onclick={handleAddImageFromDatabase} 
-								title="Download Image from our database"
-							>
-								<MIcon name="download" size="32px" />
-							</button>
+						<div class="image-delete-row">
 							<button
-								class="image-btn"
-								onclick={handleRemoveImage}
-								title="Remove this Image from this Person"
+								class="btn-delete"
+								onclick={handleDeletePerson}
+								title="Permanently Delete this Person from the database"
 							>
-								<MIcon name="no-image" size="32px" />
+								<MIcon name="bomb" size="64px" />
+								Erase this Person from Existance. Forever! No backsies. The end. Finito
 							</button>
-
 						</div>
 					</div>
-					<div class="image-delete-row">
-						<button class="btn-delete" 
-							onclick={handleDeletePerson}
-							title="Permanently Delete this Person from the database"
-						>
-							<MIcon name="bomb" size="24px" />
-							Erase this Person from Existance
-						</button>
-					</div>
+				{/if}
+			{:else}
+				<div class="new-person-col">
+					<h1>New Person</h1>
 				</div>
+			{/if}
+			{#if person}
 
-				<!-- Person info (2 columns)-->
+					<!-- Person info (2 columns)-->
+
 				<div class="info-column">
 					<div class="info-row">
 						<div class="info-content-column">
 							<div class="field">
 								<h2>First</h2>
-								<input type="text" bind:value={person.first_name} onchange={() => formIsDirty = true}/>
+								<input
+									type="text"
+									bind:value={person.first_name}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
 							<div class="field">
 								<h2>Middle</h2>
-								<input type="text" bind:value={person.middle_name} onchange={() => formIsDirty = true}/>
+								<input
+									type="text"
+									bind:value={person.middle_name}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
 							<div class="field">
 								<h2>Last Name</h2>
-								<input type="text" bind:value={person.last_name} onchange={() => formIsDirty = true}/>
+								<input
+									type="text"
+									bind:value={person.last_name}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
 							<div class="field">
 								<h2>Maiden</h2>
-								<input type="text" bind:value={person.maiden_name} onchange={() => formIsDirty = true}/>
+								<input
+									type="text"
+									bind:value={person.maiden_name}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
 							<div class="field">
 								<h2>Alias</h2>
-								<input type="text" bind:value={person.alias} onchange={() => formIsDirty = true}/>
+								<input
+									type="text"
+									bind:value={person.alias}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
 						</div>
 						<div class="info-content-column">
@@ -457,7 +530,11 @@ async function handleCloseRelationshipForm() {
 							<div class="field">
 								<h2>Born</h2>
 								<div class="row-content-container-text">
-									<input type="date" bind:value={person.born} onchange={() => formIsDirty = true}/>
+									<input
+										type="date"
+										bind:value={person.born}
+										onchange={() => (formIsDirty = true)}
+									/>
 									{#if person.born}
 										<button
 											class="btn-clear"
@@ -472,20 +549,32 @@ async function handleCloseRelationshipForm() {
 									{/if}
 								</div>
 							</div>
-	
+
 							<div class="field">
 								<h2>Phone</h2>
-								<input type="text" bind:value={person.phone_number} onchange={() => formIsDirty = true}/>
+								<input
+									type="text"
+									bind:value={person.phone_number}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
 							<div class="field">
 								<h2>Email</h2>
-								<input type="email" bind:value={person.email} onchange={() => formIsDirty = true}/>
+								<input
+									type="email"
+									bind:value={person.email}
+									onchange={() => (formIsDirty = true)}
+								/>
 							</div>
-	
+
 							<div class="field">
 								<h2>Died</h2>
 								<div class="row-content-container-text">
-									<input type="date" bind:value={person.died} onchange={() => formIsDirty = true}/>
+									<input
+										type="date"
+										bind:value={person.died}
+										onchange={() => (formIsDirty = true)}
+									/>
 									{#if person.died}
 										<button
 											class="btn-clear"
@@ -502,14 +591,16 @@ async function handleCloseRelationshipForm() {
 							</div>
 						</div>
 					</div>
-					<div class="flex flex-row self-end gap-2">
+					<div class="flex flex-row gap-2 self-end">
 						<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
 							<MIcon name="tick-2" size="42px" /> Save Changes
 						</button>
 					</div>
 				</div>
-			</div>
+			{/if}
+		</div>
 
+		{#if !addingNewUser}
 			<!-- Relationships -->
 			{#if isLoading}
 				<p>Loading ...</p>
@@ -525,12 +616,18 @@ async function handleCloseRelationshipForm() {
 											<MIcon name="plus" size="42px" />
 										</button>
 									</div>
-									<PersonCard person={partnerGroup.partner} onclick={() => changePerson(partnerGroup.partner)} />
+									<PersonCard
+										person={partnerGroup.partner}
+										onclick={() => changePerson(partnerGroup.partner)}
+									/>
 								</div>
 								<div class="column-container left">
 									<div class="header left">
 										Children
-										<button class="btn-add" onclick={() => handleAddRelationship('Child', partnerGroup.partner)}>
+										<button
+											class="btn-add"
+											onclick={() => handleAddRelationship('Child', partnerGroup.partner)}
+										>
 											<MIcon name="plus" size="42px" />
 										</button>
 									</div>
@@ -569,11 +666,16 @@ async function handleCloseRelationshipForm() {
 			{/if}
 		{/if}
 	</div>
+	<div class="wave"></div>
+	<div class="wave"></div>
+	<div class="wave"></div>
 </div>
+
+
 {#if person}
 	{#if showCropper}
-		<ImageCropper 
-			personId={person.id} 
+		<ImageCropper
+			personId={person.id}
 			imageUrl={tempImageUrl || person.image_url}
 			{showCropper}
 			onComplete={handleImageCropComplete}
@@ -582,42 +684,29 @@ async function handleCloseRelationshipForm() {
 	{/if}
 
 	{#if showImageSelector}
-		<ModalDraggable
-			visible={showImageSelector}
-			title="Select Image"
-			showOverlay={true}
-			cancelOnOverlayClick={true}
-			acceptBtnText="Select"
-			cancelBtnText="Cancel"
-			showFooter={false}
-			dialogReason={(reason: string) => {
-				handleConfirmationRecived(reason);
+		<Window
+			title={`Add ${relationshipType}`}
+			onClose={() => {
+				showImageSelector = false;
 			}}
+			showMinimize={false}
+			showMaximize={true}
+			showFooter={false}
+			initialSize = {{width: imageSelectorWidth, height: imageSelectorHeight}}
 			>
-			<ImageSelector 
-				personId={person.id} 
-				onComplete={handleImageSelectorComplete}
-				/>
-		</ModalDraggable>
+				<ImageSelector personId={person.id} onComplete={handleImageSelectorComplete} />
+			</Window>
+
+
 	{/if}
 {/if}
 
 <style>
-	:global(body) {
-		margin: 0;
-		padding: 0;
-		overflow-x: hidden;
-	}
 	.page-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		background-color: #f0f0f0;
-		background-image: url('/images/leaves.jpg');
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
 		padding: 0;
 		margin: 0;
 		padding-block: 1rem;
@@ -688,10 +777,11 @@ async function handleCloseRelationshipForm() {
 		box-shadow: 0 0 1.5rem 0 rgba(0, 0, 0, 0.8);
 	}
 	.image:hover {
-		transform: rotate(0deg) scale(1.4);
-		box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.8);
-		z-index: 100;
+		z-index: 10000;
+		transform: rotate(0deg) scale(1.5);
 	}
+
+
 	.image img {
 		width: 100%;
 		height: 100%;
@@ -740,7 +830,7 @@ async function handleCloseRelationshipForm() {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		justify-content: center;
+		justify-content: start;
 		width: 100%;
 	}
 	.info-column {
@@ -752,7 +842,7 @@ async function handleCloseRelationshipForm() {
 		min-width: 320px;
 		max-width: 520px;
 		flex: 1;
-	}	
+	}
 	.info-row {
 		display: flex;
 		flex-direction: row;
@@ -796,6 +886,7 @@ async function handleCloseRelationshipForm() {
 		border-radius: 0.25rem;
 		border: 1px solid rgb(122, 122, 122);
 		box-shadow: 0 0 0.25rem 0 rgba(0, 0, 0, 0.5);
+		color: black;
 	}
 
 	.field {
@@ -845,11 +936,38 @@ async function handleCloseRelationshipForm() {
 		cursor: not-allowed;
 	}
 	.nav-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 2rem;
 		position: absolute;
-		top: 2rem;
-		left: 1.5rem;
+		top: 0;
+		left: 0;
 		color: white;
+
 	}
+	.btn-add-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.btn-add-new-person {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 5rem;
+		padding: 0.5rem;
+		background-color: dodgerblue;
+		border-radius: 5rem;
+
+	}
+
 	.left {
 		justify-content: flex-start;
 		align-items: center;
@@ -858,7 +976,31 @@ async function handleCloseRelationshipForm() {
 		justify-content: flex-start;
 		align-items: start;
 	}
+	.new-person-col {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+	.btn-add-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 
+	}
+	.btn-add-new-person {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 5rem;
+		padding: 0.5rem;
+
+	}
 
 	@media (max-width: 768px) {
 		.image-controls-row {
@@ -904,7 +1046,8 @@ async function handleCloseRelationshipForm() {
 			width: 100%;
 		}
 
-		input, select {
+		input,
+		select {
 			width: 100%;
 		}
 

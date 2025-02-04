@@ -1,5 +1,15 @@
 <script lang="ts">
-	let { visible, title, children, dialogReason = $bindable(), acceptBtnText, cancelBtnText, showOverlay, cancelOnOverlayClick, showFooter=true } = $props();
+	let {
+		visible,
+		title,
+		children,
+		dialogReason = $bindable(),
+		acceptBtnText,
+		cancelBtnText,
+		showOverlay,
+		cancelOnOverlayClick,
+		showFooter = true
+	} = $props();
 
 	let show = $state(visible);
 	let footerShown = $state(showFooter);
@@ -11,19 +21,39 @@
 </script>
 
 {#if show}
+	<div
+		class="modal-backdrop"
+		onclick={() => handleClose('cancel')}
+		onkeydown={() => handleClose('cancel')}
+		tabindex="-1"
+		role="button"
+	>
+		<div class="modal-content" 
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			tabindex="-1"
+			role="button"
+		>
+			{@render children()}
+		</div>
+	</div>
+
+{/if}
+
+{#if show}
 	{#if showOverlay}
-		<button class="overlay" onclick={() => cancelOnOverlayClick && handleClose('cancel')} aria-label="Close Dialogue" >
+		<button
+			class="overlay"
+			onclick={() => cancelOnOverlayClick && handleClose('cancel')}
+			aria-label="Close Dialogue"
+		>
 		</button>
 	{/if}
 
 	<div class="my-form">
 		<div class="header">
 			<div class="header-text">{title}</div>
-			<button
-				onclick={() => handleClose('cancel')}
-				class="form-close"
-				aria-label="Close"
-			>
+			<button onclick={() => handleClose('cancel')} class="form-close" aria-label="Close">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
 					<path
 						fill="currentColor"
@@ -43,13 +73,11 @@
 		</div>
 		{#if showFooter}
 			<div class="footer">
-				<button
-					onclick={() => handleClose('cancel')}
-					class="footer-button cancel">{cancelBtnText}</button
+				<button onclick={() => handleClose('cancel')} class="footer-button cancel"
+					>{cancelBtnText}</button
 				>
-				<button
-					onclick={() => handleClose('accept')}
-					class="footer-button accept">{acceptBtnText}</button
+				<button onclick={() => handleClose('accept')} class="footer-button accept"
+					>{acceptBtnText}</button
 				>
 			</div>
 		{/if}
@@ -115,11 +143,11 @@
 		border: 0;
 		border-radius: 0;
 		cursor: pointer;
-        transform: scale(1);
+		transform: scale(1);
 	}
 
 	.detail {
-		padding:0;
+		padding: 0;
 	}
 	.footer {
 		display: flex;
@@ -152,4 +180,23 @@
 		align-self: center;
 	}
 
+	.modal-backdrop {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1000;
+	}
+
+	.modal-content {
+		background: white;
+		padding: 20px;
+		border-radius: 4px;
+		min-width: 300px;
+	}
 </style>

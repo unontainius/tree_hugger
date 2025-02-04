@@ -1,103 +1,98 @@
 <script lang="ts">
+    import { loginRequestedState } from '$lib/stores/authStore';
     import { authService } from '$lib/services/authService';
     import MIcon from './MIcon.svelte';
-    import { toasts } from '$lib/stores/toastStore';
-    let email = $state('');
+
+    let username = $state('');
     let password = $state('');
+    let error = $state('');
     let isLoading = $state(false);
 
     const { onclose } = $props();
 
     async function handleSubmit() {
-        if (!email || !password) return;
-        isLoading = true;
-        
         try {
-            await authService.login(email, password);
-            onclose()
-        } catch (error) {
-            console.error('Login error:', error);
-        } finally {
-            isLoading = false;
+            await authService.login(username, password);
+            loginRequestedState.set(false);
+            error = '';
+            onclose();
+        } catch (err) {
+            error = err instanceof Error ? err.message : 'Login failed';
         }
+    }
+
+    function handleClose() {
+        loginRequestedState.set(false);
+        onclose();
     }
 </script>
 
-<form class="login-form" onsubmit={
-    (e) => {
-        e.preventDefault();
-        handleSubmit();
-    }
-}>
+<div class="login-form">
+    <form onsubmit = {(e) => {e.preventDefault;handleSubmit()}}>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input 
+                type="text" 
+                id="username"
+                bind:value={username}
+                required
+                disabled={isLoading}
+                autocomplete="username"
+            />
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input 
+                type="password" 
+                id="password"
+                bind:value={password}
+                required
+                disabled={isLoading}
+                autocomplete="current-password"
+            />
+        </div>
+        {#if error}
 
-    <div class="field">
-        <label for="email">Email</label>
-        <input 
-            type="email" 
-            id="email"
-            bind:value={email}
-            required
-            disabled={isLoading}
-            autocomplete="on"
-        />
-    </div>
-    <div class="field">
-        <label for="password">Password</label>
-        <input 
-            type="password" 
-            id="password"
-            bind:value={password}
-            required
-            disabled={isLoading}
-            autocomplete="on"
-        />
-    </div>
-    <div class="btns" >    
-        <button type="button" class="danger" onclick={onclose}>
-            Cancel  
-        </button>
-
-        <button type="submit" disabled={isLoading}>
-            {#if isLoading}
-                <MIcon name="loading" size="1.5rem" />
-            {:else}
-                Login
-            {/if}
-        </button>
-    </div>
-</form>
+            <div class="error">{error}</div>
+        {/if}
+        <div class="button-group">
+            <button type="button" onclick={handleClose}>Cancel</button>
+            <button type="submit" disabled={isLoading}>Login</button>
+        </div>
+    </form>
+</div>
 
 <style>
     .login-form {
-        display: flex;
-        flex-direction: column;
-        margin: 0;
-        gap: 1rem;
         width: 100%;
-        height: 100%;
-        padding: 1rem;
-        padding-inline: 2rem;
-        background: white;
-        border-bottom-right-radius: 1rem;
-        border-bottom-left-radius: 1rem;
+        padding: 2rem;
+        padding-block-end: 1rem;
     }
 
-    .field {
+    .form-group {
         display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+
+    .error {
+        color: red;
+        margin-bottom: 1rem;
+    }
+    .button-group {
+        display: flex;
+        justify-content: flex-end;
+    }
+    button {
+        margin:0;
+        margin-left: 1rem;
     }
     input {
-        border: 1px solid #ccc;
-        border-radius: 0.25rem;
         padding: 0.5rem;
-    }   
-    .btns {
-        display: flex;
-        justify-content: space-between;
+        border: 1px solid #b6b6b6;
+        border-radius: 0.25rem;
     }
-    .danger {
-        background: rgb(66, 66, 66);
-    }
-
 </style> 

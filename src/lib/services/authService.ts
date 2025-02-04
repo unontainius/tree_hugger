@@ -18,8 +18,9 @@ export const authService = {
 
             if (error) throw error;
             user.set(data.user);
-            toasts.success('Successfully logged in');
+            toasts.success('Successfully logged in',  500);
             return data.user;
+
         } catch (error) {
             console.error('Login error:', error);
             toasts.error('Login failed');
@@ -32,7 +33,7 @@ export const authService = {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             user.set(null);
-            toasts.success('Successfully logged out');
+            toasts.success('Successfully logged out',  500);
         } catch (error) {
             console.error('Logout error:', error);
             toasts.error('Logout failed');

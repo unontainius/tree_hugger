@@ -1,19 +1,21 @@
 <script lang="ts">
 	import MIcon from "$lib/components/MIcon.svelte";
-
-
 </script>
 
-<div class="row">
-    <a href="/admin/person">
-        <MIcon name="people" size="1.5rem" />
-        People
-    </a>
-    <a href="/test/window">
-        <MIcon name="people" size="1.5rem" />
-        Windows
-    </a>
-</div>
+    <div class="nav-container">
+        <a class="back-btn" href="/"><MIcon name="back" size="5rem" /></a>
+    </div>
+
+    <div class="row">
+        <a href="/admin/person">
+            <MIcon name="people" size="1.5rem" />
+            People
+        </a>
+        <a href="/test/window">
+            <MIcon name="people" size="1.5rem" />
+            Windows
+        </a>
+    </div>
 
 <style>
     .row {
@@ -23,5 +25,7 @@
         justify-content: center;
         gap: 1rem;
     }
-
+    a:hover {
+        color: #ff00f2;
+    }
 </style>

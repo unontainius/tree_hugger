@@ -2,9 +2,9 @@
     import { onMount, onDestroy } from 'svelte';
     import { windows } from '$lib/stores/windowStore';
     import { taskbarStore } from '$lib/stores/taskbarStore';
-    import { createEventDispatcher } from 'svelte';
     import MIcon from './MIcon.svelte';
     import { cubicOut } from 'svelte/easing';
+    import Tab from './Tab.svelte';
 
     interface WindowState {
         position: { x: number; y: number };
@@ -21,17 +21,20 @@
         footerButtons = [],
         children,
         componentProps = {},
-        initialPosition,
-        initialSize,
+        initialPosition = { x: (window.innerWidth - 400) / 2, y: (window.innerHeight - 290) / 3.5 },
+        initialSize = { width: 400, height: 270 },
         onPositionChange,
         onSizeChange,
-        minWidth = 200,
+        minWidth = 300,
         minHeight = 150,
         preset = 'custom',
+
+
         showFooter = true,
-        hideMinimize = false,
-        hideMaximize = false,
-        hideClose = false
+        showMinimize = true,
+        showMaximize = true,
+        showClose = true
+
     } = $props<{
         title: string;
         onClose: () => void;
@@ -46,12 +49,11 @@
         minHeight?: number;
         preset?: WindowSize;
         showFooter?: boolean;
-        hideMinimize?: boolean;
-        hideMaximize?: boolean;
-        hideClose?: boolean;
-    }>();
+        showMinimize?: boolean;
+        showMaximize?: boolean;
+        showClose?: boolean;
 
-    const dispatch = createEventDispatcher();
+    }>();
 
     function getPresetSize(preset: WindowSize): { width: number; height: number } {
         switch (preset) {
@@ -434,21 +436,26 @@
     <div class="header" ondblclick={handleHeaderDoubleClick} aria-label="Window Header" aria-roledescription="Window Header">
         <span class="title">{title}</span>
         <div class="window-controls">
-            {#if !hideMinimize}
-                <button class="control-btn minimize" onclick={handleMinimize}>
-                    <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
-                </button>
-            {/if}
-            {#if !hideMaximize}
-                <button class="control-btn maximize" onclick={handleMaximize}>
-                    <MIcon name={isMaximized ? "minimize-2" : "maximize"} size="24px" />
-                </button>
-            {/if}
-            {#if !hideClose}
-                <button class="control-btn close" onclick={onClose}>
-                    <MIcon name="x" size="24px" />
-                </button>
-            {/if}
+            <Tab>
+                {#if showMinimize}
+                    <button class="control-btn minimize" onclick={handleMinimize}>
+                        <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
+
+                    </button>
+                {/if}
+                {#if showMaximize}
+                    <button class="control-btn maximize" onclick={handleMaximize}>
+                        <MIcon name={isMaximized ? "minimize" : "maximize-x"} size="24px" />
+
+                    </button>
+                {/if}
+                {#if showClose}
+                    <button class="control-btn close" onclick={onClose}>
+                        <MIcon name="x" size="24px" />
+
+                    </button>
+                {/if}
+            </Tab>
         </div>
     </div>
     
@@ -463,10 +470,10 @@
     </div>
     
     {#if showFooter}
-    <div class="footer">
-        <div class="footer-buttons">
-            {#each footerButtons as button}
-                <button onclick={button.onClick}>{button.text}</button>
+        <div class="footer">
+            <div class="footer-buttons">
+                {#each footerButtons as button}
+                    <button onclick={button.onClick}>{button.text}</button>
                 {/each}
             </div>
         </div>
@@ -490,12 +497,14 @@
     }
     .shell {
         position: fixed;
-        background: white;
+        background: rgb(32, 32, 32);
         border-radius: 0.5rem;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        border: 1px solid #ccc;
+        color: white;
     }
 
     .header {
@@ -504,18 +513,27 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: #f5f5f5;
+        background: #013d55;
         cursor: grab;
         user-select: none;
+        color: white;
     }
-
+    .title {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
     .body {
-        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         overflow-y: auto;
         overflow-x: hidden;
-        min-height: 0;
+        min-height: 120px;
         position: relative;
+
     }
+
 
     .body-content {
         padding: 20px;
@@ -565,8 +583,13 @@
     }
 
     .window-controls {
-        display: flex;
+        position: relative;
+        top: 11px;
+        right: 0px;
+
     }
+
+
 
     .control-btn {
         background: none;
@@ -581,14 +604,12 @@
     }
 
     .control-btn:hover {
-        background: rgba(0,0,0,0.1);
+        transform: scale(1.4);
     }
+
     .control-btn.close {
+        justify-self: flex-end;
         color: #ff4444;
-    }
-    .control-btn.close:hover {
-        background: #ff4444;
-        color: white;
     }
 
     .shell.maximized {

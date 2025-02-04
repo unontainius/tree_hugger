@@ -70,6 +70,7 @@
 		selectedImage = null;
 		error = null;
         showConfirmation = false;
+		onComplete?.();
 	}
     function handleDelete() {
         if (!selectedImage) return;

@@ -3,10 +3,10 @@
 	import db from '$lib/services/treeDb';
 	import MIcon from '$lib/components/MIcon.svelte';
 	import PersonCard from '$lib/components/PersonCard.svelte';
-    import { goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 
 	let people = $state<PersonRow[] | null>(null);
-    let selectedPerson = $state<PersonRow | null>(null);
+	let selectedPerson = $state<PersonRow | null>(null);
 	let filters = $state<{ [key: string]: string }>({});
 	let personFields: string[] = $state([]);
 	let sortState = $state<{ field: string; ascending: boolean }[]>([]);
@@ -14,6 +14,7 @@
 	let showEditor = $state(false);
 	let editModalResponse = $state<string | null>(null);
 	let showFilter = $state(false);
+	let isLoading = $state(false);
 
 	// Array of field names to exclude from filter and sorting selection
 	const excludedFields = ['id', `created_at`, `last_edited_by`];
@@ -34,26 +35,39 @@
 	// enabledRow = '189f1ddd-41b6-480b-b269-d34687704956';
 
 	$effect(() => {
-		db.Person.all(
-			Object.entries(filters).map(([fieldname, fieldvalue]) => ({ fieldname, fieldvalue }))
-		).then((data: PersonRow[] | null) => {
-			if (data) {
-				people = data;
-				if (people.length > 0) {
-					personFields = Object.keys(people[0]).filter((field) => !excludedFields.includes(field));
+		async function loadData() {
+			isLoading = true;
+			try {
+		
+				const data = await db.Person.all(
+					Object.entries(filters).map(([fieldname, fieldvalue]) => ({ fieldname, fieldvalue }))
+				);
+				
+				if (data) {
+					people = data;
+					if (people.length > 0) {
+						personFields = Object.keys(people[0]).filter((field) => !excludedFields.includes(field));
+					}
+					applySort();
+				} else {
+					people = [];
 				}
-				applySort();
-			} else {
+			} catch (error) {
+				console.error('Error loading people:', error);
 				people = [];
+			} finally {
+				isLoading = false;
 			}
-		});
+		}
+
+		loadData();
 	});
 
 	function formatDateToLocal(date: string) {
-        if(date.length > 8){
-            return new Date(date).toLocaleDateString();
-        }
-        return date;
+		if (date.length > 8) {
+			return new Date(date).toLocaleDateString();
+		}
+		return date;
 	}
 	function updateFilter(fieldname: string, value: string) {
 		filters = { ...filters, [fieldname]: value };
@@ -151,39 +165,80 @@
 	}
 </script>
 
-<div class="row">
-	<button
-		class="btn-icon blue with-text"
-		onclick={() => {
-			sortState = [];
-			applySort();
-		}}><MIcon name="no-sort" size="24px" /> Clear Sort</button
-	>
-	<button
-		class="btn-icon blue with-text"
-		onclick={() => {handleShowModal('')}}><MIcon name="no-filter" size="24px" />Filters</button
-	>
-</div>
 
-<div class="catalog">
-    {#if people}
-        {#each people as person}
-            {#if person.first_name != 'No'}
-                <PersonCard {person} onclick={() => handlePersonClick(person.id)} />
-            {/if}
-        {/each}
-    {/if}
+<div class="nav-container">
+	<a class="back-btn" href="/admin"><MIcon name="back" size="5rem" /></a>
+	{#if !isLoading}
+		<div class="btn-add-container">
+			<a class="btn-add-new-person" href="/admin/person/0">
+				<MIcon name="plus" size="52px" />
+			</a>
+		</div>
+	{/if}
 </div>
+{#if isLoading}
+	<div class="loading-container">
+		<div class="loading-icon-container">
+			<MIcon name="people" size="128px"  />
+		</div>
+		<h1>Loading People onto the bus...</h1>
+		<p>Some of them them are not on the bus yet ...</p>
+		<p class="loading-subtitle">So this may take a while ...</p>
+		<div class="wave"></div>
+		<div class="wave"></div>
+		<div class="wave"></div>
+
+	</div>
+
+{:else}
+	<div class="row">
+
+		<button
+			class="btn-icon blue with-text"
+			onclick={() => {
+				sortState = [];
+				applySort();
+			}}><MIcon name="no-sort" size="24px" /> Clear Sort</button
+		>
+		<button
+			class="btn-icon blue with-text"
+			onclick={() => {
+				handleShowModal('');
+			}}><MIcon name="no-filter" size="24px" />Filters</button
+		>
+	</div>
+
+	<div class="catalog">
+		{#if people}
+			{#each people as person}
+				{#if person.first_name != 'No'}
+					<PersonCard {person} onclick={() => handlePersonClick(person.id)} />
+				{/if}
+			{/each}
+		{/if}
+		<div class="wave"></div>
+		<div class="wave"></div>
+		<div class="wave"></div>
+	</div>
+{/if}
 
 
 <style>
+	h1 {
+		font-size: 2rem;
+		font-weight: 600;
+		color: white;
+	}
 	.row {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
+		padding-block-start: 5rem;
+
+		padding-block-end: 1rem;
 	}
-	.catalog{
+	.catalog {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
@@ -192,5 +247,67 @@
 		width: 90vw;
 		margin: 0 auto;
 	}
-	
+	.nav-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 2rem;
+		position: absolute;
+		top: 0;
+		left: 0;
+		color: white;
+
+	}
+	.btn-add-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.btn-add-new-person {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: 5rem;
+		padding: 0.5rem;
+		background-color: dodgerblue;
+		border-radius: 5rem;
+
+	}
+
+	.loading-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		width: 100%;
+		height: 40vh;
+		color: white;
+
+	}
+	.loading-icon-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		width: 64px;
+		height: 64px;
+
+	}
+	.loading-subtitle {
+		color: #666;
+		font-size: 0.9rem;
+
+	}
+    a:hover {
+        color: #ff00f2;
+    }
+
+
 </style>
