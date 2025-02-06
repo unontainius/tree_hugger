@@ -6,6 +6,7 @@
 	import { isLoggedIn } from '$lib/utils/authUtils';
 	import Modal from './Modal.svelte';
 	import { toasts } from '$lib/stores/toastStore';
+	import Window from './Window.svelte';
 
 	const { personId, onComplete } = $props<{
 		personId: string;
@@ -86,14 +87,15 @@
         try {
             await imageService.deleteImage(selectedImage.path);
             await loadImages(); // Refresh the image list
+            toasts.success('Image deleted successfully');
         } catch (error) {
             console.error('Delete failed:', error);
         }
     }
     // svelte-ignore non_reactive_update
-        function handleDeleteConfirmation(reason: string) {
+        function handleDeleteConfirmation(deleteTheImage: boolean) {
         showConfirmation = false;
-        if (reason === 'accept') {
+        if (deleteTheImage) {
             deleteImage();
         } else {
             toasts.info('Delete cancelled');
@@ -136,122 +138,162 @@
 </div>
 
 {#if selectedImage && showConfirmation}
-    <Modal visible={showConfirmation} 
-        title="Confirm Delete" bind:dialogReason={handleDeleteConfirmation} acceptBtnText="Delete" cancelBtnText="No!  Don't Delete" showOverlay={true} cancelOnOverlayClick={true} >
-        <div class="confirmation">
-            <p>Are you sure you want to delete this image?</p>
-         </div>
-    </Modal>
+
+    <div style="position: fixed; inset: 0; z-index: 9998;">
+		<Window
+			title="Delete Confirmation"
+			showMinimize={false}
+			showMaximize={false}
+			onClose={() => {showConfirmation = false}}
+			showFooter={true}
+			acceptButtonText={`Yes, remove this Image'}`}
+			cancelButtonText="Cancel"
+			preset="small"
+			initialSize={{ width: window.innerWidth > 520 ? 520 : window.innerWidth, height: 660 }}
+			initialPosition={{ x: (window.innerWidth / 2) - (window.innerWidth > 520 ? 520 : window.innerWidth / 2), y: (window.innerHeight / 2) - (660 / 2) }}
+			onDialogResponse={handleDeleteConfirmation}
+		>
+			<div class="item-to-delete-container">
+				<MIcon name="exclamation" size="128px" />
+				<p>Are you sure you want to Remove this Image from the database permanently?</p>
+			</div>
+
+
+
+		</Window>
+	</div>
 {/if}
 
 <style>
-    .confirmation p {
-        text-align: center;
-        padding: 4rem;
+    .selector {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        background: rgb(32, 32, 32);
+        padding: 1rem;
+        box-sizing: border-box;
     }
-	.selector {
-		width: 100%;
-		height: calc(100vh - 237px);
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-		padding: 0.1rem;
-	}
 
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        flex: 1;
+        width: 100%;
+        overflow-y: auto;
+        padding: 1rem;
+        background: rgb(22, 22, 22);
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
 
-	.image-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-		gap: 1rem;
-		width: 100%;
-		height: calc(80vh - 100px); /* Leave space for controls */
-		overflow-y: auto;
-		padding: 1rem;
-		align-content: start; /* Prevent bunching */
-	}
+    .image-item {
+        aspect-ratio: 1;
+        height: 120px; /* Fixed height */
+        width: 120px; /* Fixed width */
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 0.25rem;
+        overflow: hidden;
+        transition: all 0.2s;
+        background: rgb(32, 32, 32);
+        justify-self: center; /* Center in grid cell */
+        padding: 0;
+        margin: 0;
+    }
 
-	.image-item {
-		aspect-ratio: 1;
-		cursor: pointer;
-		border: 2px solid transparent;
-		border-radius: 0.25rem;
-		overflow: hidden;
-		transition: all 0.2s;
-		background: white;
-		height: 150px; /* Fixed height */
-	}
+    .image-item:hover {
+        transform: scale(1.1);
+        z-index: 1;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
 
-	.image-item:hover {
-		transform: scale(1.4);
-		z-index: 1000;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-	}
+    .image-item.selected {
+        border-color: #2196f3;
+    }
 
-	.image-item.selected {
-		border-color: #2196f3;
-	}
+    .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
 
-	.image-item img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
+    .controls {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgb(22, 22, 22);
+        border-radius: 0.5rem;
+    }
 
-	.controls {
-		display: flex;
-		justify-content: flex-end;
-		gap: 1rem;
-		padding: 1rem;
-		width: 100%;
-		background: white;
-		border-top: 1px solid #eee;
-		position: relative;
-		bottom: 0;
-		border-bottom-right-radius: 0.5rem;
-		border-bottom-left-radius: 0.5rem;
-	}
+    .btn-select, .btn-cancel, .btn-delete {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
+    .btn-select {
+        background: #4CAF50;
+        color: white;
+    }
 
-	.btn-select {
-		background: #4caf50;
-		color: white;
-	}
-
-	.btn-cancel {
-		background: #292929a6;
-		color: white;
-	}
+    .btn-cancel {
+        background: #292929;
+        color: white;
+    }
 
     .btn-delete {
         background: #f44336;
         color: white;
     }
 
-	.loading,
-	.error,
-	.empty {
-		text-align: center;
-		padding: 2rem;
-		color: #666;
-	}
+    .btn-select:hover, .btn-cancel:hover, .btn-delete:hover {
+        transform: scale(1.05);
+    }
 
-	.error {
-		color: #f44336;
-	}
+    .loading, .error, .empty {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
 
-	.image-grid button {
-		padding: 0rem;
-		margin: 0rem;
-	}
+    .error {
+        color: #f44336;
+    }
 
-	@media (max-width: 600px) {
-		.image-grid {
-			grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-		}
+    /* Add responsive breakpoints */
+    @media (max-width: 768px) {
+        .image-item {
+            height: 100px;
+            width: 100px;
+        }
+        
+        .image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+    }
 
-		.image-item {
-			height: 100px;
-		}
-	}
+    @media (max-width: 480px) {
+        .image-item {
+            height: 80px;
+            width: 80px;
+        }
+        
+        .image-grid {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.25rem;
+            padding: 0.25rem;
+        }
+    }
 </style>

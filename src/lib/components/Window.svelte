@@ -31,12 +31,14 @@
         minWidth = 300,
         minHeight = 150,
         preset = 'custom',
-
-
         showFooter = true,
+        acceptButtonText = 'Accept',
+        cancelButtonText = 'Cancel',
         showMinimize = true,
         showMaximize = true,
-        showClose = true
+        showClose = true,
+        onDialogResponse
+
 
     } = $props<{
         title: string;
@@ -52,16 +54,24 @@
         minHeight?: number;
         preset?: WindowSize;
         showFooter?: boolean;
+        acceptButtonText?: string;
+        cancelButtonText?: string;
         showMinimize?: boolean;
         showMaximize?: boolean;
         showClose?: boolean;
+        onDialogResponse?: (response: boolean) => void;
 
     }>();
 
     function getPresetSize(preset: WindowSize): { width: number; height: number } {
+        const isBrowser = typeof window !== 'undefined';
+        const defaultSize = { width: 400, height: 300 };
+        
+        if (!isBrowser) return defaultSize;
+
         switch (preset) {
             case 'small':
-                return { width: 400, height: 200 };
+                return { width: 400, height: 250 };
             case 'medium':
                 return { 
                     width: Math.floor(window.innerWidth * 0.5), 
@@ -69,18 +79,29 @@
                 };
             case 'large':
                 return { 
-                    width: Math.floor(window.innerWidth * 0.9), 
-                    height: Math.floor(window.innerHeight * 0.8) 
+                    width: Math.floor(window.innerWidth * 0.95), 
+                    height: Math.floor(window.innerHeight * 0.9) 
                 };
             default:
-                return { width: 400, height: 300 };
+                return initialSize || defaultSize;
         }
+    }
+
+    function getCenteredPosition(windowSize: { width: number; height: number }) {
+        const isBrowser = typeof window !== 'undefined';
+        if (!isBrowser) return { x: 0, y: 0 };
+
+        return {
+            x: Math.floor((window.innerWidth - windowSize.width) / 2),
+            y: Math.floor((window.innerHeight - windowSize.height) / 2)
+        };
     }
 
     const id = crypto.randomUUID();
     let shell: HTMLDivElement;
-    let position = $state(initialPosition || { x: 100, y: 100 });
-    let size = $state(initialSize || getPresetSize(preset));
+    let presetSize = preset !== 'custom' ? getPresetSize(preset) : (initialSize || { width: 400, height: 300 });
+    let position = $state(preset !== 'custom' ? getCenteredPosition(presetSize) : (initialPosition || { x: 100, y: 100 }));
+    let size = $state(presetSize);
     let isDragging = $state(false);
     let isResizing = $state(false);
     let dragTimer: ReturnType<typeof setTimeout> | null = null;
@@ -502,9 +523,18 @@
     {#if showFooter}
         <div class="footer">
             <div class="footer-buttons">
-                {#each footerButtons as button}
-                    <button onclick={button.onClick}>{button.text}</button>
-                {/each}
+                {#if footerButtons.length > 0}
+                    {#each footerButtons as button}
+                        <button onclick={button.onClick}>{button.text}</button>
+                    {/each}
+                {:else}
+                    {#if acceptButtonText && cancelButtonText}
+                        <button class="accept-button" onclick={() => onDialogResponse?.(true)}>{acceptButtonText}</button>
+                        <button class="cancel-button" onclick={() => onDialogResponse?.(false)}>{cancelButtonText}</button>
+                    {/if}
+                {/if}
+
+
             </div>
         </div>
     {/if}
@@ -539,6 +569,8 @@
 
     .header {
         height: 60px;
+        min-height: 60px;
+        flex: 0 0 60px;
         padding: 0 20px;
         display: flex;
         align-items: center;
@@ -555,13 +587,13 @@
     .body {
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         overflow-y: auto;
         overflow-x: hidden;
         min-height: 120px;
         position: relative;
-
+        flex: 1;
     }
 
 
@@ -616,7 +648,9 @@
         position: relative;
         top: 11px;
         right: 0px;
-
+        height: 42px;
+        display: flex;
+        align-items: center;
     }
 
 
@@ -659,4 +693,15 @@
             height: 40px;
         }
     }
+    .accept-button {
+        background-color:green;
+        color: white;
+    }
+    .cancel-button {
+        background-color: #888888;
+        color: white;
+    }
+    
+    
+
 </style> 

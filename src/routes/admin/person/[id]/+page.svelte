@@ -5,7 +5,7 @@
 	import { isLoggedIn } from '$lib/utils/authUtils';
 	import { toasts } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
-	import { authService } from '$lib/services/authService.js';
+	import { authService } from '$lib/services/authService';
 	import MIcon from '$lib/components/MIcon.svelte';
 	import db from '$lib/services/treeDb';
 	import PersonCard from '$lib/components/PersonCard.svelte';
@@ -13,13 +13,13 @@
 	import ImageSelector from '$lib/components/ImageSelector.svelte';
 	import RelationshipForm from '$lib/components/RelationshipForm.svelte';
 	import Window from '$lib/components/Window.svelte';
+	import { user } from '$lib/stores/authStore';
 
 	let { data } = $props();
 	let person = $state<PersonRow | null>(data.data as PersonRow);
 	let parents = $state<{ parent_b: PersonRow[]; parent_c: PersonRow[] } | null>(null);
 	let siblings = $state<PersonRow[] | null>(null);
 	let children = $state<{ partners: { partner: PersonRow; children: PersonRow[] }[] } | null>(null);
-	let user = authService.getCurrentUser();
 
 	let relationshipType = $state<
 		| string
@@ -44,23 +44,29 @@
 
 	let showCropper = $state(false);
 	let showImageSelector = $state(false);
-	let imageSelectorWidth = $state(window.innerWidth * 0.8);
-	let imageSelectorHeight = $state(window.innerHeight * 0.8);
-	let showDeleteConfirmation = $state(false);
-	let showRemoveImageConfirmation = $state(false);
+	let imageSelectorWidth = $state(0);
+	let imageSelectorHeight = $state(0);
+	let showDeletePersonConfirmation = $state(false);
+	let showDeleteImageConfirmation = $state(false);
+	let itemToDelete = $state<'Person' | 'Image' | null>(null);
 	let showRelationshipForm = $state(false);
 	let addingNewUser = $state(false);
 
-
 	let formIsDirty = $state(false);
 	let fileToUpload: File | null = $state(null);
-	// let debugMessage = $state(''); // For tracking state changes
 
-	// let debugState = $state({
-	// 	showImageSelector: false,
-	// 	personId: null as string | null,
-	// 	windowMounted: false
-	// });
+	let LoggedIn = $state(false);
+
+	$effect(() => {
+		// This will run whenever $user changes
+		LoggedIn = $user !== null;
+	});
+
+	onMount(() => {
+		// Set dimensions only after component is mounted (client-side)
+		imageSelectorWidth = window.innerWidth * 0.8;
+		imageSelectorHeight = window.innerHeight * 0.8;
+	});
 
 	onMount(async () => {
 		await loadPageData();
@@ -83,7 +89,7 @@
 				middle_name: null,
 				phone_number: null,
 				sex: 'Female',
-				last_edited_by: (await user)?.email || ''
+				last_edited_by: (await authService.getCurrentUser())?.email || ''
 			};
 		}
 		67;
@@ -152,9 +158,14 @@
 		if (!(await isLoggedIn())) return;
 		console.log('remove image');
 	}
-	async function handleDeletePerson() {
+	async function handleDeleteConfirmation(item: 'Person' | 'Image') {
 		if (!(await isLoggedIn())) return;
-		console.log('delete person');
+		itemToDelete = item;
+		if (item === 'Person') {
+			showDeletePersonConfirmation = true;
+		} else if (item === 'Image') {
+			showDeleteImageConfirmation = true;
+		}
 	}
 	async function handleDeleteImage() {
 		if (!(await isLoggedIn())) return;
@@ -263,10 +274,9 @@
 			const data = await db.Person.create(person).then(async (newPerson) => {
 				if (newPerson) {
 					addingNewUser = false;
-					await changePerson(newPerson);
+					goto(`/admin/person/${newPerson.id}`, { replaceState: true });
 				}
 			});
-
 		} else {
 			await db.Person.update(person.id, {
 				first_name: person.first_name,
@@ -285,15 +295,6 @@
 		}
 		formIsDirty = false;
 	}
-
-	// 	// Refresh the person data
-	// 	if (person) {
-	// 		const updatedPerson = await db.Person.single(person.id);
-	// 		if (updatedPerson) {
-	// 			person = updatedPerson;
-	// 		}
-	// 	}
-	// }
 
 	// Clean up on component unmount
 	onDestroy(async () => {
@@ -338,11 +339,9 @@
 		showRelationshipForm = true;
 	}
 
-	async function handleRelationshipFormResponse(reason: string) {
-		showRelationshipForm = false;
-	}
 	async function handleCloseRelationshipForm() {
 		if (!person) return;
+		showRelationshipForm = false;
 		changePerson(person);
 	}
 
@@ -358,16 +357,32 @@
 		showImageSelector = false;
 	}
 
-	// Add this to track window mounting
-	$effect(() => {
-		// debugState.windowMounted = showImageSelector;
-	});
+	function handleDeleteConfirmationResponce(response: boolean) {
+		if (response) {
+			handleDeleteItem();
+		}
+	}
+	async function handleDeleteItem() {
+		if (itemToDelete === 'Person') {
+			if (!person) return;
+			await db.delete('person', person.id);
+			showDeletePersonConfirmation = false;
+			await goto('/admin/person', { replaceState: true });
+		} else if (itemToDelete === 'Image') {
+			if (!person) return;
+			person.image_url = null;
+			await db.Person.update(person.id, { image_url: null });
+			showDeleteImageConfirmation = false;
+		}
+
+		itemToDelete = null;
+		toasts.success(`Item successfully removed from the database.`);
+	}
 </script>
 
 <div class="nav-container">
 	<a class="back-btn" href="/admin/person"><MIcon name="back" size="5rem" /></a>
 	{#if !addingNewUser}
-
 		<div class="btn-add-container">
 			<button class="btn-add-new-person" onclick={() => changePerson(null)}>
 				<MIcon name="plus" size="52px" />
@@ -375,28 +390,6 @@
 		</div>
 	{/if}
 </div>
-
-
-{#if showRelationshipForm}
-	<Window
-		title={`Add ${relationshipType}`}
-		onClose={() => {
-			showRelationshipForm = false;
-		}}
-		showMinimize={false}
-		showMaximize={false}
-		showFooter={false}
-		initialSize = {{width: 320, height: 500}}
-		>
-		<RelationshipForm
-			person_a={relationshipFormPersonA}
-			person_b={relationshipFormPersonB}
-			person_c={relationshipFormPersonC}
-			onclose={() => handleCloseRelationshipForm()}
-
-		/>
-	</Window>
-{/if}
 
 <div class="page-container">
 	<div class="content-container">
@@ -451,7 +444,11 @@
 			{#if !addingNewUser}
 				{#if person}
 					<div class="image-container-column">
-						<h1>{person.first_name} {person.last_name}</h1>
+						<div class="redacted-container">
+							<h1 class = { LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
+								{person.first_name} {person.last_name}
+							</h1>
+						</div>
 
 						<div class="image-header-row">
 							<div class="image-container-column">
@@ -464,7 +461,6 @@
 									{/if}
 								</div>
 								<!-- Image buttons -->
-
 							</div>
 							<div class="image-buttons-column">
 								<button
@@ -493,11 +489,14 @@
 						<div class="image-delete-row">
 							<button
 								class="btn-delete"
-								onclick={handleDeletePerson}
+								onclick={() => handleDeleteConfirmation('Person')}
 								title="Permanently Delete this Person from the database"
 							>
 								<MIcon name="bomb" size="64px" />
-								Erase this Person from Existance. Forever! No backsies. The end. Finito
+								<div class="column-container">
+									<p>Forever! No backsies.</p>
+									<p>The end. Finito</p>
+								</div>
 							</button>
 						</div>
 					</div>
@@ -508,131 +507,163 @@
 				</div>
 			{/if}
 			{#if person}
-
-					<!-- Person info (2 columns)-->
+				<!-- Person info (2 columns)-->
 
 				<div class="info-column">
 					<div class="info-row">
 						<div class="info-content-column">
 							<div class="field">
 								<h2>First</h2>
-								<input
-									type="text"
-									bind:value={person.first_name}
-									onchange={() => (formIsDirty = true)}
-								/>
+
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.first_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+
+									/>
 							</div>
 							<div class="field">
 								<h2>Middle</h2>
-								<input
-									type="text"
-									bind:value={person.middle_name}
-									onchange={() => (formIsDirty = true)}
-								/>
+								<div class="redacted-container">
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.middle_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+								</div>
 							</div>
 							<div class="field">
+
 								<h2>Last Name</h2>
-								<input
-									type="text"
-									bind:value={person.last_name}
-									onchange={() => (formIsDirty = true)}
-								/>
+								<div class="redacted-container">
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.last_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+								</div>
 							</div>
 							<div class="field">
 								<h2>Maiden</h2>
-								<input
-									type="text"
-									bind:value={person.maiden_name}
-									onchange={() => (formIsDirty = true)}
-								/>
+								<div class="redacted-container">
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.maiden_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+								</div>
 							</div>
 							<div class="field">
 								<h2>Alias</h2>
-								<input
-									type="text"
-									bind:value={person.alias}
-									onchange={() => (formIsDirty = true)}
-								/>
+								<div class="redacted-container">
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.alias}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+								</div>
 							</div>
 						</div>
 						<div class="info-content-column">
 							<div class="field">
 								<h2>Gender</h2>
-								<select bind:value={person.sex}>
-									<option value="Male">Male</option>
-									<option value="Female">Female</option>
-									<option value="Other">Other</option>
-								</select>
+								<div class={LoggedIn ? '' : 'blurred'}>
+									<select bind:value={person.sex} disabled={LoggedIn === false}>
+										<option value="Male">Male</option>
+										<option value="Female">Female</option>
+										<option value="Other">Other</option>
+									</select>
+								</div>
 							</div>
 							<div class="field">
 								<h2>Born</h2>
 								<div class="row-content-container-text">
-									<input
-										type="date"
-										bind:value={person.born}
-										onchange={() => (formIsDirty = true)}
-									/>
-									{#if person.born}
-										<button
-											class="btn-clear"
-											onclick={() => {
-												if (person) {
-													person.born = null;
-												}
-											}}
-										>
-											<MIcon name="x" size="1.5rem" />
-										</button>
-									{/if}
+									<div class="redacted-container">
+										<input class={LoggedIn ? '' : 'blurred'}
+											type="date"
+											bind:value={person.born}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+										{#if person.born}
+											<button
+												class="btn-clear"
+												onclick={() => {
+													if (person) {
+														person.born = null;
+													}
+												}}
+												disabled={LoggedIn === false}
+											>
+												<MIcon name="x" size="1.5rem" />
+											</button>
+										{/if}
+									</div>
 								</div>
 							</div>
 
 							<div class="field">
 								<h2>Phone</h2>
-								<input
-									type="text"
-									bind:value={person.phone_number}
-									onchange={() => (formIsDirty = true)}
-								/>
+								<div class="redacted-container">
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.phone_number}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+								</div>
 							</div>
 							<div class="field">
 								<h2>Email</h2>
-								<input
-									type="email"
-									bind:value={person.email}
-									onchange={() => (formIsDirty = true)}
-								/>
+								<div class="redacted-container">
+									<input class={LoggedIn ? '' : 'blurred'}
+										type="email"
+										bind:value={person.email}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+
+								</div>
 							</div>
 
 							<div class="field">
 								<h2>Died</h2>
 								<div class="row-content-container-text">
-									<input
-										type="date"
-										bind:value={person.died}
-										onchange={() => (formIsDirty = true)}
-									/>
-									{#if person.died}
-										<button
-											class="btn-clear"
-											onclick={() => {
-												if (person) {
-													person.died = null;
-												}
-											}}
-										>
-											<MIcon name="x" size="1.5rem" />
-										</button>
-									{/if}
+									<div class="redacted-container">
+										<input class={LoggedIn ? '' : 'blurred'}
+											type="date"
+											bind:value={person.died}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+										{#if person.died}
+											<button
+												class="btn-clear"
+												onclick={() => {
+													if (person) {
+														person.died = null;
+													}
+												}}
+												disabled={LoggedIn === false}
+											>
+												<MIcon name="x" size="1.5rem" />
+											</button>
+										{/if}
+
+									</div>
 								</div>
 							</div>
+							<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
+								<MIcon name={LoggedIn ? 'tick-2' : 'locked'} size="42px" /> Save Changes
+							</button>
 						</div>
 					</div>
-					<div class="flex flex-row gap-2 self-end">
-						<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
-							<MIcon name="tick-2" size="42px" /> Save Changes
-						</button>
-					</div>
+					<div class="flex flex-row gap-2 self-end"></div>
 				</div>
 			{/if}
 		</div>
@@ -669,11 +700,16 @@
 										</button>
 									</div>
 									<div class="row-content-container">
-										{#each partnerGroup.children as child}
-											{#if child.first_name !== 'No'}
-												<PersonCard person={child} onclick={() => changePerson(child)} />
+										{#if partnerGroup.children.length > 0}
+											{#if partnerGroup.children[0].first_name !== 'No'}
+												<MIcon name="chevron-right" size="42px" />
 											{/if}
-										{/each}
+											{#each partnerGroup.children as child}
+												{#if child.first_name !== 'No'}
+													<PersonCard person={child} onclick={() => changePerson(child)} />
+												{/if}
+											{/each}
+										{/if}
 									</div>
 								</div>
 							</div>
@@ -703,11 +739,7 @@
 			{/if}
 		{/if}
 	</div>
-	<div class="wave"></div>
-	<div class="wave"></div>
-	<div class="wave"></div>
 </div>
-
 
 {#if person && showImageSelector}
 	<div style="position: fixed; inset: 0; z-index: 9998;">
@@ -717,12 +749,9 @@
 			showMinimize={false}
 			showMaximize={true}
 			showFooter={false}
-			initialSize={{ width: imageSelectorWidth, height: imageSelectorHeight }}
+			preset="large"
 		>
-			<ImageSelector 
-				personId={person.id} 
-				onComplete={handleImageSelectorComplete} 
-			/>
+			<ImageSelector personId={person.id} onComplete={handleImageSelectorComplete} />
 		</Window>
 	</div>
 {/if}
@@ -736,16 +765,13 @@
 			showMaximize={false}
 			showFooter={false}
 			initialSize={{ width: window.innerWidth > 520 ? 520 : window.innerWidth, height: 660 }}
-			initialPosition={{ x: (window.innerWidth / 2) - (window.innerWidth > 520 ? 520 : window.innerWidth / 2), y: (window.innerHeight / 2) - (660 / 2) }}
+			initialPosition={{
+				x: window.innerWidth / 2 - (window.innerWidth > 520 ? 520 : window.innerWidth / 2),
+				y: window.innerHeight / 2 - 660 / 2
+			}}
 		>
 			<ImageCropper
-
-
 				personId={person.id}
-
-
-
-
 				imageUrl={tempImageUrl || person.image_url}
 				{showCropper}
 				onComplete={handleImageCropComplete}
@@ -755,21 +781,69 @@
 	</div>
 {/if}
 
-<!-- Add debug display here, outside of script -->
-<!-- {#if debugState.showImageSelector}
-	<div style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; z-index: 10000;">
-		ImageSelector Debug:
-		<pre>{JSON.stringify(debugState, null, 2)}</pre>
+{#if (person && showDeletePersonConfirmation) || showDeleteImageConfirmation}
+	<div style="position: fixed; inset: 0; z-index: 9998;">
+		<Window
+			title="Delete Confirmation"
+			showMinimize={false}
+			showMaximize={false}
+			onClose={() => {
+				itemToDelete === 'Person'
+					? (showDeletePersonConfirmation = false)
+					: (showDeleteImageConfirmation = false);
+			}}
+			showFooter={true}
+			acceptButtonText={`Yes, remove ${itemToDelete === 'Person' ? person?.first_name : ' this Image'}`}
+			cancelButtonText="Cancel"
+			preset="small"
+			initialSize={{ width: window.innerWidth > 520 ? 520 : window.innerWidth, height: 660 }}
+			initialPosition={{
+				x: window.innerWidth / 2 - (window.innerWidth > 520 ? 520 : window.innerWidth / 2),
+				y: window.innerHeight / 2 - 660 / 2
+			}}
+			onDialogResponse={handleDeleteConfirmationResponce}
+		>
+			<div class="item-to-delete-container">
+				<MIcon name="exclamation" size="128px" />
+				<p>
+					Are you sure you want to Remove this {itemToDelete === 'Person' ? 'person' : 'image'}?
+				</p>
+			</div>
+		</Window>
 	</div>
-{/if} -->
+{/if}
+
+{#if person && showRelationshipForm}
+	<div style="position: fixed; inset: 0; z-index: 9998;">
+		<Window
+			title={`Add ${relationshipType}`}
+			onClose={() => {
+				showRelationshipForm = false;
+			}}
+			showMinimize={false}
+			showMaximize={false}
+			showFooter={false}
+			initialSize={{ width: 320, height: 500 }}
+		>
+			<RelationshipForm
+				person_a={relationshipFormPersonA}
+				person_b={relationshipFormPersonB}
+				person_c={relationshipFormPersonC}
+				onclose={() => handleCloseRelationshipForm()}
+			/>
+		</Window>
+	</div>
+{/if}
 
 <style>
+
 	.page-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		padding: 0;
+
 		margin: 0;
 		padding-block: 1rem;
 		width: 100%;
@@ -842,8 +916,6 @@
 		z-index: 10000;
 		transform: rotate(0deg) scale(1.5);
 	}
-
-
 	.image img {
 		width: 100%;
 		height: 100%;
@@ -865,6 +937,7 @@
 	}
 	.image-container-column {
 		display: flex;
+
 		flex-direction: column;
 		align-items: center;
 		justify-content: flex-start;
@@ -872,12 +945,21 @@
 		max-width: 420px;
 		flex: 1;
 	}
+	.image-header-title {
+		width: 100%;
+		justify-self: flex-start;
+		font-size: 2.5rem;
+		margin: 0;
+		margin-block-end: 2rem;
+		padding-inline-start: 1rem;
+	}
 	.image-header-row {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
+
 		width: 100%;
 	}
 	.image-buttons-column {
@@ -895,12 +977,19 @@
 		justify-content: start;
 		width: 100%;
 	}
+	.image-btn {
+		margin: 8px;
+		padding: 1rem;
+		transform: scale(0.9);
+		border-radius: 2rem;
+	}
 	.info-column {
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
 		justify-content: flex-start;
 		padding: 1rem;
+		padding-block-start: 2rem;
 		min-width: 320px;
 		max-width: 520px;
 		flex: 1;
@@ -908,9 +997,10 @@
 	.info-row {
 		display: flex;
 		flex-direction: row;
-		align-items: center;
+		align-items: start;
 		justify-content: center;
 		width: 100%;
+		padding-block-start: 2rem;
 	}
 	.info-content-column {
 		display: flex;
@@ -950,7 +1040,21 @@
 		box-shadow: 0 0 0.25rem 0 rgba(0, 0, 0, 0.5);
 		color: black;
 	}
-
+	.blurred {
+		filter: blur(3px);
+	}
+	.blurredx2 {
+		filter: blur(6px);
+	}
+	input:disabled,
+	select:disabled {
+		background-color: #bbbbbb;
+		color: #222222;
+	}
+	.field button:disabled {
+		background-color: #bbbbbb;
+		color: #222222;
+	}
 	.field {
 		display: flex;
 		flex-direction: column;
@@ -991,7 +1095,8 @@
 		padding-block: 0;
 		background-color: green;
 		margin-block-start: 2rem;
-		margin-inline-end: 4rem;
+		border-top-left-radius: 2rem;
+		border-bottom-left-radius: 2rem;
 	}
 	button:disabled {
 		opacity: 0.5;
@@ -1007,7 +1112,6 @@
 		top: 0;
 		left: 0;
 		color: white;
-
 	}
 	.btn-add-container {
 		display: flex;
@@ -1027,7 +1131,6 @@
 		padding: 0.5rem;
 		background-color: dodgerblue;
 		border-radius: 5rem;
-
 	}
 
 	.left {
@@ -1051,7 +1154,6 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-
 	}
 	.btn-add-new-person {
 		display: flex;
@@ -1061,9 +1163,38 @@
 		gap: 0.5rem;
 		border-radius: 5rem;
 		padding: 0.5rem;
-
+	}
+	.item-to-delete-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		height: 100%;
+		width: 100%;
+		background-color: rgba(255, 0, 0, 0.5);
+		color: white;
+		padding: 1rem;
+		padding-block: 0;
+		font-size: 1.5rem;
+		font-weight: medium;
+		text-align: center;
 	}
 
+	.lock-icon {
+		position: absolute;
+		right: 35%;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 14px;
+	}
+	.censor-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: 0.25rem;
+	}
 	@media (max-width: 768px) {
 		.image-controls-row {
 			flex-direction: column;
@@ -1076,10 +1207,15 @@
 			max-width: 600px;
 			padding: 0.5rem;
 		}
-
+		.image-header-title {
+			padding-inline-start: 0rem;
+			justify-self: center;
+			text-align: center;
+		}
 		.info-row {
 			gap: 0;
 			justify-content: space-between;
+			padding: 0;
 		}
 
 		.info-content-column {
@@ -1088,7 +1224,7 @@
 		}
 
 		.field {
-			padding: 0.25rem;
+			padding-block-start: 1rem;
 		}
 
 		.image {
@@ -1101,11 +1237,11 @@
 
 	@media (max-width: 480px) {
 		.info-row {
-			flex-direction: column;
+			flex-direction: row;
 		}
 
 		.info-content-column {
-			width: 100%;
+			width: 180px;
 		}
 
 		input,
@@ -1125,12 +1261,6 @@
 			min-width: unset;
 			width: 100%;
 			justify-content: center;
-		}
-
-		.image-btn {
-			margin: 8px;
-			padding-inline: 0.5rem;
-			transform: scale(0.9);
 		}
 	}
 </style>

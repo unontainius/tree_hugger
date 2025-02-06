@@ -9,6 +9,14 @@
 	import LoginForm from '$lib/components/LoginForm.svelte';
 	import Window from '$lib/components/Window.svelte';
 
+
+	let LoggedIn = $state(false);
+
+	$effect(() => {
+		// This will run whenever $user changes
+		LoggedIn = $user !== null;
+	});
+
 	let { children } = $props();
 	let ShowLoginForm = $state(false);
 
@@ -38,7 +46,7 @@
 	<Toast message="message not required other than to stop the compiler complaining" />
 
 	<nav>
-		{#if $user}
+		{#if LoggedIn}
 			<button onclick={handleLogout}>Logout</button>
 		{:else}
 			<button onclick={toggleLogin}>

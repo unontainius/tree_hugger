@@ -71,10 +71,11 @@
             {/each}
         </select>
     </div>
-    <div class="flex flex-row gap-2 justify-between">
+    <div class="flex flex-row gap-2 justify-between my-2">
+        <button class="submit-btn" onclick={handleSubmit} disabled={!savable}>Apply</button>
         <button class="cancel-btn" onclick={onclose}>Cancel</button>
-        <button class="submit-btn" onclick={handleSubmit} disabled={!savable}>Submit</button>
     </div>
+
 
 </div>
 

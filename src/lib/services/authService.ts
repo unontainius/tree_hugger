@@ -1,8 +1,10 @@
 import supabase from '$lib/supabaseClient';
 import { loginRequestedState, user } from '$lib/stores/authStore';
 import { toasts } from '$lib/stores/toastStore';
+
 // import type { User, AuthError } from '@supabase/supabase-js';
 // import { writable } from 'svelte/store';
+
 
 // export function loginStateSet(state: boolean) {
 //     loginState.update(state => state = state);
@@ -51,10 +53,13 @@ export const authService = {
             return null;
         }
     },
+
     loginRequestedStateSet(state: boolean) {
         loginRequestedState.set(state);
     },
+
     getLoginRequestedState() {
         return loginRequestedState;
-    }
+    },
+
 }; 

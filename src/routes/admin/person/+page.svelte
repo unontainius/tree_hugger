@@ -6,34 +6,12 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
+
 	let people = $state<PersonRow[] | null>(null);
-	let selectedPerson = $state<PersonRow | null>(null);
 	let filters = $state<{ [key: string]: string }>({});
-	let personFields: string[] = $state([]);
 	let sortState = $state<{ field: string; ascending: boolean }[]>([]);
-	let enabledRow = $state<string | null>(null);
-	let showEditor = $state(false);
-	let editModalResponse = $state<string | null>(null);
-	let showFilter = $state(false);
 	let isLoading = $state(false);
 
-	// Array of field names to exclude from filter and sorting selection
-	const excludedFields = ['id', `created_at`, `last_edited_by`];
-	// Array of field names requiring special attention, formatting etc
-	const specialFields = ['born', 'sex', 'image_url'];
-
-	// Function to modify a field name to keep only the first word (use for captions only)
-	function modifyFieldname(fieldname: string) {
-		return fieldname.split('_')[0].replace(/\b\w/g, (char) => char.toUpperCase());
-	}
-	function enableRow(id: string) {
-		enabledRow = enabledRow === id ? null : id;
-	}
-	function handleShowModal(id: string) {
-		selectedPerson = pluckPerson(id);
-		editModalResponse = 'edit';
-	}
-	// enabledRow = '189f1ddd-41b6-480b-b269-d34687704956';
 
 	async function loadData() {
 		console.log('Loading data, isLoading:', isLoading);
@@ -46,9 +24,6 @@
 			
 			if (data) {
 				people = data;
-				if (people.length > 0) {
-					personFields = Object.keys(people[0]).filter((field) => !excludedFields.includes(field));
-				}
 				applySort();
 			} else {
 				people = [];
@@ -72,37 +47,14 @@
 		}
 	});
 
-	function formatDateToLocal(date: string) {
-		if (date.length > 8) {
-			return new Date(date).toLocaleDateString();
-		}
-		return date;
-	}
-	function updateFilter(fieldname: string, value: string) {
-		filters = { ...filters, [fieldname]: value };
-	}
-	function toggleSort(fieldname: string, event: MouseEvent) {
-		const isCtrlPressed = event.ctrlKey;
-		const existingSortIndex = sortState.findIndex((sort) => sort.field === fieldname);
 
-		if (existingSortIndex !== -1) {
-			const existingSort = sortState[existingSortIndex];
-			if (existingSort.ascending) {
-				// Change to descending
-				sortState[existingSortIndex].ascending = false;
-			} else {
-				// Remove from sortState (not sorted)
-				sortState.splice(existingSortIndex, 1);
-			}
-		} else {
-			if (!isCtrlPressed) {
-				sortState = [];
-			}
-			sortState = [...sortState, { field: fieldname, ascending: true }];
-		}
 
-		applySort();
+	function updateFilter(value: string) {
+		filters = { ...filters, 'first_name': value, 'last_name': value, 'email': value, 'alias': value, 'born': value, 'died': value,  'sex': value };
 	}
+
+
+
 	function applySort() {
 		if (people) {
 			people = [...people].sort((a, b) => {
@@ -121,39 +73,7 @@
 			});
 		}
 	}
-	function getSortIcon(fieldname: string): string {
-		const sort = sortState.find((s) => s.field === fieldname);
-		if (sort) {
-			return sort.ascending ? '▲' : '▼'; // Use appropriate icons or characters
-		}
-		return ''; // No icon for not sorted
-	}
-	function handleDelete(id: string) {
-		db.delete('person', id);
-	}
-	function pluckPerson(id: string): PersonRow | null {
-		enabledRow = null;
-		applySort();
-		// return the person from people array
-		const pluckedPerson = people?.find((p) => p.id === id) ?? null;
-		return pluckedPerson;
-	}
-	function handleSave(id: string) {
-		const person = pluckPerson(id);
-		if (person && isValidPerson(person)) {
-			db.Person.update(id, person);
-		} else {
-			console.error('Invalid person data or person not found');
-		}
-	}
-	function handleSelectChange(fieldname: string, value: string) {
-		console.log(`Selected value for ${fieldname}:`, value);
-		const person = pluckPerson(enabledRow ?? '');
-		if (person) {
-			person[fieldname as keyof PersonRow] = value as 'Male' | 'Female' | 'Other';
-			// handleSave(person.id);
-		}
-	}
+	
 	function isValidPerson(person: any): person is PersonRow {
 		return (
 			typeof person.id === 'string' &&
@@ -193,29 +113,34 @@
 		<h1>Loading People onto the bus...</h1>
 		<p>Some of them them are not on the bus yet ...</p>
 		<p class="loading-subtitle">So this may take a while ...</p>
-		<div class="wave"></div>
-		<div class="wave"></div>
-		<div class="wave"></div>
-
 	</div>
 
 {:else}
 	<div class="row">
+		<div class="btn-group">
+			<p>Sort by:</p>
+			<button class="btn-icon blue with-text"
+				onclick={() => {
+					sortState = [];
+					applySort();
+				}}>First Name
+			</button>
 
-		<button
-			class="btn-icon blue with-text"
-			onclick={() => {
-				sortState = [];
-				applySort();
-			}}><MIcon name="no-sort" size="24px" /> Clear Sort</button
-		>
-		<button
-			class="btn-icon blue with-text"
-			onclick={() => {
-				handleShowModal('');
-			}}><MIcon name="no-filter" size="24px" />Filters</button
-		>
+			<button class="btn-icon blue with-text"
+				onclick={() => {
+					sortState = [];
+					applySort();
+				}}>Last Name
+			</button>
+		</div>
 	</div>
+	<button
+		class="btn-icon blue with-text"
+		onclick={() => {
+			filters = {};
+			loadData();
+		}}><MIcon name="no-filter" size="24px" />Filters</button
+	>
 
 	<div class="catalog">
 		{#if people}
@@ -225,9 +150,9 @@
 				{/if}
 			{/each}
 		{/if}
+		<!-- <div class="wave"></div>
 		<div class="wave"></div>
-		<div class="wave"></div>
-		<div class="wave"></div>
+		<div class="wave"></div> -->
 	</div>
 {/if}
 
@@ -246,6 +171,16 @@
 		padding-block-start: 5rem;
 
 		padding-block-end: 1rem;
+	}
+	.btn-group {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 0;
+		background-color: #ffffff2a;
+		border-radius: 0.5rem;
+		padding: 0.5rem;
 	}
 	.catalog {
 		display: flex;
