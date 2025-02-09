@@ -242,12 +242,6 @@
     }
 }
 
-main {
-	width: 100%;
-	min-height: 100vh;
-}
-
-
 @media (max-width: 768px) {
 	nav {
 		gap:0.25rem

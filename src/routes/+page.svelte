@@ -38,17 +38,6 @@
 </div>
 
 <style>
-	button {
-		background: none;
-		border: none;
-		color: white;
-		cursor: pointer;
-		box-shadow: none;
-		margin: 0;
-		padding: 0;
-		font-size: 1rem;
-		font-weight: 100;
-	}
 	
 	.row {
 		display: flex;
