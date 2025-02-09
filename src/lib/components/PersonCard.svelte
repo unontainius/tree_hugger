@@ -27,8 +27,6 @@
 		<img src="/images/noimage3.png" alt="no avatar" />
 	{/if}
 
-
-
 	<div class="person-info">
 		<div class={LoggedIn ? '' : 'blurred'}>
 			<h1>{person.first_name} {person.last_name}</h1>
@@ -40,12 +38,9 @@
 			<div class={LoggedIn ? '' : 'blurred'}>
 				<p>{person.alias}</p>
 			</div>
-            <div class={LoggedIn ? 'hidden' : 'locked'}>
-                <MIcon name="locked" size="16px" />
-            </div>
+
 		</div>
 	</div>
-
 </button>
 
 <style>
@@ -53,6 +48,7 @@
 		color: #222222;
 		font-size: 1rem;
 		font-weight: 800;
+        text-align: left;
 	}
 	p {
 		color: #222222;
@@ -83,6 +79,7 @@
 		min-width: 260px;
 		max-width: 95vw;
 		box-shadow: 4px 4px 5px 0 rgba(0, 0, 0, 0.4);
+        width: 80px;
 	}
 	button:hover {
 		background-color: rgb(30, 255, 41);
@@ -108,15 +105,33 @@
 		filter: blur(3px);
 	}
 
-	.locked {
-		position: absolute;
-		left: 140px;
-		top: 60px;
-		transform: translateY(-50%);
-		font-size: 14px;
-        width: 200px;
-	}
-    .hidden {
-        display: none;
+    @media (max-width: 468px) {
+        .person-card {
+            flex-direction: row;
+            width: 95%;
+            height: 120px;
+        }
+        img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .person-info {
+            height: 120px;
+            gap: 0.5rem;
+        }
+        h1 {
+            font-size: 1.1rem;
+        }
+        p {
+            font-size: 1rem;
+            text-align: left;
+            width: 100%;
+        }
+
     }
+
 </style>
+
+

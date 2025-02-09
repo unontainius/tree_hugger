@@ -8,6 +8,9 @@
 	import { loginRequestedState } from '$lib/stores/authStore';
 	import LoginForm from '$lib/components/LoginForm.svelte';
 	import Window from '$lib/components/Window.svelte';
+	import MIcon from '$lib/components/MIcon.svelte';
+	import { browser } from '$app/environment';
+	import PageTransition from '$lib/components/PageTransition.svelte';
 
 
 	let LoggedIn = $state(false);
@@ -17,12 +20,14 @@
 		LoggedIn = $user !== null;
 	});
 
-	let { children } = $props();
+	let {data, children } = $props();
 	let ShowLoginForm = $state(false);
+	let navIconSize = $state(browser ? (window.innerWidth > 768 ? 48 : 24) : 24);
 
 	onMount(() => {
 		authService.getCurrentUser();
 	});
+
 
 	async function handleLogout() {
 		if ($user) {
@@ -35,23 +40,59 @@
 		ShowLoginForm = !ShowLoginForm;
 	}
 
-	function processdialogResult(result: string) {
-		if (result !== '') {
-			loginRequestedState.update((state: boolean) => false);
-		}
-	}
+
+
+
+
 </script>
+
 
 
 	<Toast message="message not required other than to stop the compiler complaining" />
 
 	<nav>
+		<a class="nav-item" href="/">
+			<MIcon name="home" size={navIconSize} />
+			<p>Home</p>
+		</a>
+
 		{#if LoggedIn}
-			<button onclick={handleLogout}>Logout</button>
-		{:else}
-			<button onclick={toggleLogin}>
-				{$user ? 'Logout' : ShowLoginForm ? 'Cancel Login' : 'Login'}
+			<a class="nav-item" href="/admin/person/0">
+				<MIcon name="add" size={navIconSize} />
+				<p>Add New</p>
+			</a>
+
+		{/if}
+		<a class="nav-item" href="/admin/person">
+			<MIcon name="search" size={navIconSize} />
+			<p>Search</p>
+
+		</a>
+
+		<a class="nav-item" href="/contact">
+			<MIcon name="notify" size={navIconSize} />
+			<p>Contact</p>
+		</a>
+
+		<a class="nav-item" href="/about">
+			<MIcon name="info" size={navIconSize} />
+			<p>About</p>
+		</a>
+
+
+
+		{#if LoggedIn}
+			<button class="nav-item" onclick={handleLogout}>
+				<MIcon name="logout" size={navIconSize} />
+				<p>Logout</p>
 			</button>
+
+		{:else}
+			<button class="nav-item" onclick={toggleLogin}>
+				<MIcon name="login" size={navIconSize} />
+				<p>Login</p>
+			</button>
+
 		{/if}
 	</nav>
 
@@ -76,14 +117,15 @@
 		</Window>
 	{/if}
 
-	{@render children()}
+	<PageTransition data={data}>
+		{@render children()}
+	</PageTransition>
+
 	<div class="wave-container">
-		<div class="wave">
-		</div>
-		<div class="wave">
-		</div>
-		<div class="wave">
-		</div>
+		<div class="wave"></div>
+
+		<div class="wave"></div>
+		<div class="wave"></div>
 	</div>
 
 
@@ -97,30 +139,47 @@
 		overflow-x: hidden;
 		background-color: #013d55;
 		color: white;
+		width: 100vw;
 	}
 	:global(input), :global(select) {
 		color: black;
 	}
 
-
 	nav {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		justify-content: flex-end;
-
-		position: fixed;
+		position: absolute;
 		top: 0;
-		right: 0;
-		height: 5rem;
-	}
+		width: 100vw;
 
-	:global(.spinner) {
-		animation: spin 1s linear infinite;
+		padding: 2rem;
+		padding-inline: 1rem;
+		height: 4rem;
+		z-index: 1000;
+		background-color: #ffffff34;
+
 	}
-	@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+	.nav-item {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		gap:0.5rem;
+		flex-wrap: wrap;
+		padding: 0.5rem;
+		width:100%;
+		box-shadow: none;
+		border-radius: 0;
+		border: none;
+		background-color: transparent;	
+
+
+	}
+	.nav-item p {
+		color: rgba(255, 255, 255, 0.377);
+		font-size: 0.75rem;
+		font-weight: thin;
 	}
 
 @keyframes gradient {
@@ -181,4 +240,25 @@
     100% {
         transform: translateX(1);
     }
-}</style>
+}
+
+main {
+	width: 100%;
+	min-height: 100vh;
+}
+
+
+@media (max-width: 768px) {
+	nav {
+		gap:0.25rem
+	}
+	.nav-item p {
+		display: none;
+	}
+	button {
+		margin-inline:0.05rem;
+	}
+}
+
+
+</style>

@@ -43,18 +43,18 @@ export default {
         },
 
         // Read all persons
-        async all(filters: { fieldname: string, fieldvalue: string }[] | null, order: string = 'first_name', ascending: boolean = true): Promise<PersonRow[] | null> {
-            let query = supabase.from('person').select('*').order(order, { ascending: ascending });
-            
-            // Apply each filter
-            if (filters) {
-                filters.forEach(filter => {
-                    if (filter.fieldvalue) {
-                        query = query.ilike(filter.fieldname, `%${filter.fieldvalue}%`);
-                    }
-                });
-            }
-        
+        async all(filterCriteria: string, orderby: string = 'first_name', isAscending: boolean = true): Promise<PersonRow[] | null> {
+            let filter =`first_name.ilike.%${filterCriteria}%,middle_name.ilike.%${filterCriteria}%,last_name.ilike.%${filterCriteria}%,maiden_name.ilike.%${filterCriteria}%,alias.ilike.%${filterCriteria}%`
+
+            let query = supabase.from('person')
+                .select('*')
+                .or(filter)
+                .order(orderby, { ascending: isAscending })
+
+
+     
+
+
             const { data, error } = await query;
         
             if (error) {

@@ -35,7 +35,7 @@
     }
 
     async function loadPeople() {
-        return await db.Person.all(null, 'first_name', true);
+        return await db.Person.all('%', 'first_name', true);
     }
 </script>
 

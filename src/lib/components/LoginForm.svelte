@@ -25,6 +25,17 @@
         loginRequestedState.set(false);
         onclose();
     }
+
+    // TODO: focus on username input 100ms after page loads
+    $effect(() => {
+        setTimeout(() => {
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                usernameInput.focus();
+            }
+        }, 100);
+    });
+
 </script>
 
 <div class="login-form">
@@ -90,9 +101,11 @@
         margin:0;
         margin-left: 1rem;
     }
+
     input {
         padding: 0.5rem;
         border: 1px solid #b6b6b6;
         border-radius: 0.25rem;
     }
+
 </style> 

@@ -129,6 +129,7 @@
 	}
 
 	async function changePerson(newPerson: PersonRow | null) {
+		// if (!(await isLoggedIn())) return;
 		if (formIsDirty) {
 			await handleSaveForm();
 		}
@@ -358,8 +359,12 @@
 	}
 
 	function handleDeleteConfirmationResponce(response: boolean) {
+		// console.log('handleDeleteConfirmationResponce', response);
 		if (response) {
 			handleDeleteItem();
+		} else {
+			showDeletePersonConfirmation = false;
+			showDeleteImageConfirmation = false;
 		}
 	}
 	async function handleDeleteItem() {
@@ -380,23 +385,12 @@
 	}
 </script>
 
-<div class="nav-container">
-	<a class="back-btn" href="/admin/person"><MIcon name="back" size="5rem" /></a>
-	{#if !addingNewUser}
-		<div class="btn-add-container">
-			<button class="btn-add-new-person" onclick={() => changePerson(null)}>
-				<MIcon name="plus" size="52px" />
-			</button>
-		</div>
-	{/if}
-</div>
-
 <div class="page-container">
 	<div class="content-container">
 		{#if !addingNewUser}
 			{#if person}
 				<!-- Parents -->
-				<div class="row-container">
+				<div class="row-container left">
 					<div class="column-container">
 						<div class="header">
 							Parents
@@ -404,7 +398,8 @@
 								<MIcon name="plus" size="42px" />
 							</button>
 						</div>
-
+					</div>
+					<div class="column-container">
 						<div class="row-content-container">
 							{#if parents}
 								<!-- Parent B -->
@@ -420,14 +415,16 @@
 					</div>
 				</div>
 				<!-- Immediate Family -->
-				<div class="row-container">
+				<div class="row-container left">
 					<div class="column-container">
-						<div class="header">
-							Imediate Family
-							<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
-								<MIcon name="plus" size="42px" />
-							</button>
-						</div>
+					<div class="header">
+						Siblings
+						<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
+							<MIcon name="plus" size="42px" />
+						</button>
+					</div>
+					</div>
+					<div class="column-container">
 						<div class="row-content-container">
 							{#if siblings}
 								{#each siblings as sibling}
@@ -445,8 +442,9 @@
 				{#if person}
 					<div class="image-container-column">
 						<div class="redacted-container">
-							<h1 class = { LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
-								{person.first_name} {person.last_name}
+							<h1 class={LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
+								{person.first_name}
+								{person.last_name}
 							</h1>
 						</div>
 
@@ -515,18 +513,19 @@
 							<div class="field">
 								<h2>First</h2>
 
-									<input class={LoggedIn ? '' : 'blurred'}
-										type="text"
-										bind:value={person.first_name}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-
-									/>
+								<input
+									class={LoggedIn ? '' : 'blurred'}
+									type="text"
+									bind:value={person.first_name}
+									onchange={() => (formIsDirty = true)}
+									disabled={LoggedIn === false}
+								/>
 							</div>
 							<div class="field">
 								<h2>Middle</h2>
 								<div class="redacted-container">
-									<input class={LoggedIn ? '' : 'blurred'}
+									<input
+										class={LoggedIn ? '' : 'blurred'}
 										type="text"
 										bind:value={person.middle_name}
 										onchange={() => (formIsDirty = true)}
@@ -535,10 +534,10 @@
 								</div>
 							</div>
 							<div class="field">
-
 								<h2>Last Name</h2>
 								<div class="redacted-container">
-									<input class={LoggedIn ? '' : 'blurred'}
+									<input
+										class={LoggedIn ? '' : 'blurred'}
 										type="text"
 										bind:value={person.last_name}
 										onchange={() => (formIsDirty = true)}
@@ -549,7 +548,8 @@
 							<div class="field">
 								<h2>Maiden</h2>
 								<div class="redacted-container">
-									<input class={LoggedIn ? '' : 'blurred'}
+									<input
+										class={LoggedIn ? '' : 'blurred'}
 										type="text"
 										bind:value={person.maiden_name}
 										onchange={() => (formIsDirty = true)}
@@ -560,7 +560,8 @@
 							<div class="field">
 								<h2>Alias</h2>
 								<div class="redacted-container">
-									<input class={LoggedIn ? '' : 'blurred'}
+									<input
+										class={LoggedIn ? '' : 'blurred'}
 										type="text"
 										bind:value={person.alias}
 										onchange={() => (formIsDirty = true)}
@@ -584,7 +585,8 @@
 								<h2>Born</h2>
 								<div class="row-content-container-text">
 									<div class="redacted-container">
-										<input class={LoggedIn ? '' : 'blurred'}
+										<input
+											class={LoggedIn ? '' : 'blurred'}
 											type="date"
 											bind:value={person.born}
 											onchange={() => (formIsDirty = true)}
@@ -610,7 +612,8 @@
 							<div class="field">
 								<h2>Phone</h2>
 								<div class="redacted-container">
-									<input class={LoggedIn ? '' : 'blurred'}
+									<input
+										class={LoggedIn ? '' : 'blurred'}
 										type="text"
 										bind:value={person.phone_number}
 										onchange={() => (formIsDirty = true)}
@@ -621,13 +624,13 @@
 							<div class="field">
 								<h2>Email</h2>
 								<div class="redacted-container">
-									<input class={LoggedIn ? '' : 'blurred'}
+									<input
+										class={LoggedIn ? '' : 'blurred'}
 										type="email"
 										bind:value={person.email}
 										onchange={() => (formIsDirty = true)}
 										disabled={LoggedIn === false}
 									/>
-
 								</div>
 							</div>
 
@@ -635,7 +638,8 @@
 								<h2>Died</h2>
 								<div class="row-content-container-text">
 									<div class="redacted-container">
-										<input class={LoggedIn ? '' : 'blurred'}
+										<input
+											class={LoggedIn ? '' : 'blurred'}
 											type="date"
 											bind:value={person.died}
 											onchange={() => (formIsDirty = true)}
@@ -654,12 +658,17 @@
 												<MIcon name="x" size="1.5rem" />
 											</button>
 										{/if}
-
 									</div>
 								</div>
 							</div>
 							<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
-								<MIcon name={LoggedIn ? 'tick-2' : 'locked'} size="42px" /> Save Changes
+								{#if LoggedIn}
+									<MIcon name="tick-2" size="42px" /> Save Changes
+								{:else}
+									<div style="padding: 0.5rem;">
+										<MIcon name="locked" size="24px" /> Save Changes
+									</div>
+								{/if}
 							</button>
 						</div>
 					</div>
@@ -673,22 +682,25 @@
 			{#if isLoading}
 				<p>Loading ...</p>
 			{:else}
-				<div class="row-content-container">
+				<div class="row-content-container left">
 					{#if children && children.partners.length > 0}
 						{#each children.partners as partnerGroup}
 							<div class="row-container left">
 								<div class="column-container">
 									<div class="header">
-										Partnership
+										Partner
 										<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
 											<MIcon name="plus" size="42px" />
 										</button>
 									</div>
+								</div>
+								<div class="column-container">
 									<PersonCard
 										person={partnerGroup.partner}
 										onclick={() => changePerson(partnerGroup.partner)}
 									/>
 								</div>
+
 								<div class="column-container left">
 									<div class="header left">
 										Children
@@ -699,11 +711,10 @@
 											<MIcon name="plus" size="42px" />
 										</button>
 									</div>
-									<div class="row-content-container">
+								</div>
+								<div class="column-container">
+									<div class="row-content-container center">
 										{#if partnerGroup.children.length > 0}
-											{#if partnerGroup.children[0].first_name !== 'No'}
-												<MIcon name="chevron-right" size="42px" />
-											{/if}
 											{#each partnerGroup.children as child}
 												{#if child.first_name !== 'No'}
 													<PersonCard person={child} onclick={() => changePerson(child)} />
@@ -836,9 +847,9 @@
 {/if}
 
 <style>
-
 	.page-container {
 		display: flex;
+
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
@@ -846,6 +857,7 @@
 
 		margin: 0;
 		padding-block: 1rem;
+		padding-block-start: 5rem;
 		width: 100%;
 		box-sizing: border-box;
 	}
@@ -860,13 +872,16 @@
 		padding: 0.5rem;
 		border-radius: 0.5rem;
 		box-sizing: border-box;
+		flex-wrap: wrap;
 	}
 	.column-container {
 		display: flex;
+
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		padding: 0.5rem;
+		flex-wrap: wrap;
 	}
 	.row-container {
 		display: flex;
@@ -876,7 +891,6 @@
 		flex-wrap: wrap;
 		background-color: rgba(255, 255, 255, 0.205);
 		width: 100%;
-		min-height: 200px;
 		padding: 0.5rem;
 		padding-block-start: 0;
 		border-radius: 0.25rem;
@@ -1020,18 +1034,20 @@
 	}
 	.header {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		font-size: 1.5rem;
 		font-weight: medium;
 		margin: 0;
 		padding: 0;
+
 		color: white;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 		letter-spacing: 0.1rem;
 		margin-block-end: 0.5rem;
-		width: 100%;
+		width: 120px;
+		text-align: center;
 	}
 	input,
 	select {
@@ -1102,37 +1118,6 @@
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
-	.nav-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-start;
-		gap: 2rem;
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: white;
-	}
-	.btn-add-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-	}
-
-	.btn-add-new-person {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		border-radius: 5rem;
-		padding: 0.5rem;
-		background-color: dodgerblue;
-		border-radius: 5rem;
-	}
-
 	.left {
 		justify-content: flex-start;
 		align-items: center;
@@ -1147,22 +1132,6 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-	}
-	.btn-add-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-	}
-	.btn-add-new-person {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		border-radius: 5rem;
-		padding: 0.5rem;
 	}
 	.item-to-delete-container {
 		display: flex;
@@ -1181,20 +1150,6 @@
 		text-align: center;
 	}
 
-	.lock-icon {
-		position: absolute;
-		right: 35%;
-		top: 50%;
-		transform: translateY(-50%);
-		font-size: 14px;
-	}
-	.censor-container {
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		align-items: flex-start;
-		gap: 0.25rem;
-	}
 	@media (max-width: 768px) {
 		.image-controls-row {
 			flex-direction: column;
@@ -1204,6 +1159,7 @@
 		.image-container-column,
 		.info-column {
 			width: 100%;
+
 			max-width: 600px;
 			padding: 0.5rem;
 		}
