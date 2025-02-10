@@ -34,7 +34,7 @@
 </script>
 
 <div class="welcome-container">
-
+	<div class="gold-border">
 		<div class="card">
 			<button onclick={setFamilyTreeMenu} >
 				<div class="row">
@@ -57,7 +57,9 @@
 				</div>
 			</button>
 		</div>
+	</div>
 
+	<div class="gold-border">
 		<div class="card">
 			<button onclick={setFamilyPhotosMenu} >
 				<div class="row">
@@ -80,7 +82,9 @@
 				</div>
 			</button>
 		</div>
+	</div>
 
+	<div class="gold-border">
 		<div class="card">
 			<button onclick={setAnniversariesMenu} >
 				<div class="row">
@@ -103,6 +107,7 @@
 				</div>
 			</button>
 		</div>
+	</div>
 
 </div>
 
@@ -110,7 +115,11 @@
 	button {
 		cursor: pointer;
 		pointer-events: auto;
-		background: transparent;
+		background: rgb(26,114,180);
+		background: -moz-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
+		background: -webkit-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
+		background: linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1a72b4",endColorstr="#1e293b",GradientType=1);
 		border: none;
 		border-radius: 1rem;
 		padding: 0;
@@ -135,7 +144,7 @@
 		height: 100%;
 	}
 	.row:hover {
-		transform: translateY(-5px);
+		/* transform: translateY(-5px); */
 		background: rgba(0, 0, 0, 0.568);
 	}
 	.column {
@@ -150,8 +159,8 @@
 		text-align: center;
 	}
 	.card {
+		margin: 2px;
 		width: 340px;
-		max-width: 95%;
 	}
 	.column img {
 		width: 200px;
@@ -169,10 +178,11 @@
 		align-items: center;
 		justify-content: center;
 		z-index: 1;
-		min-height: 90vh;
+		min-height: 70vh;
 		width: 100vw;
 		gap: 2rem;
 		flex-wrap: wrap;
+		margin-block: 6rem;
 	}
 
 	h2 {
@@ -215,7 +225,13 @@
 		border-radius: 50%;
 
 	}
-
+	.gold-border {
+		padding:0;
+		margin:0;
+		border-radius: 1rem;
+		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+	}
 	@media (max-width: 768px) {
 	}
 </style>

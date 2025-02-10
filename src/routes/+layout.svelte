@@ -54,36 +54,36 @@
 
 	<Toast message="message not required other than to stop the compiler complaining" />
 
-	<nav>
 
-		{#each menuConfigs[$menuName].menuItems as item}
-			{#if !item.requiresAuth || LoggedIn}
-				<a class="nav-item" 
-				   href={item.path} 
-				   onclick={(e) => {
-					   e.preventDefault();
-					   handleMenuClick(item);
-				   }}>
-					<MIcon name={item.icon} size={navIconSize} />
-					<p>{item.name}</p>
-				</a>
+		<nav>
+			{#each menuConfigs[$menuName].menuItems as item}
+				{#if !item.requiresAuth || LoggedIn}
+					<a class="nav-item" 
+					href={item.path} 
+					onclick={(e) => {
+						e.preventDefault();
+						handleMenuClick(item);
+					}}>
+						<MIcon name={item.icon} size={navIconSize} />
+						<p>{item.name}</p>
+					</a>
+				{/if}
+			{/each}
+
+			<!-- Login/Logout always shown -->
+			{#if LoggedIn}
+				<button class="nav-item" onclick={handleLogout}>
+					<MIcon name="logout" size={navIconSize} />
+					<p>Logout</p>
+				</button>
+			{:else}
+				<button class="nav-item" onclick={toggleLogin}>
+					<MIcon name="login" size={navIconSize} />
+					<p>Login</p>
+				</button>
 			{/if}
-		{/each}
-
-		<!-- Login/Logout always shown -->
-		{#if LoggedIn}
-			<button class="nav-item" onclick={handleLogout}>
-				<MIcon name="logout" size={navIconSize} />
-				<p>Logout</p>
-			</button>
-		{:else}
-			<button class="nav-item" onclick={toggleLogin}>
-				<MIcon name="login" size={navIconSize} />
-				<p>Login</p>
-			</button>
-		{/if}
-	</nav>
-
+		</nav>
+	
 	{#if ShowLoginForm}
 		<!-- showMinimize={false} showMaximize={false}  -->
 		<Window
@@ -139,12 +139,20 @@
 		align-items: center;
 		position: absolute;
 		top: 0;
-		width: 100vw;
+		width: calc(100vw - 1rem);
 		padding: 2rem;
 		padding-inline: 1rem;
 		height: 4rem;
 		z-index: 1000;
 		background-color: #ffffff34;
+		margin: 0.5rem;
+		margin-block-start:0;
+		border-radius: 1rem;
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+		/* outline: 1px solid rgba(255, 255, 255, 0.51);
+		outline-offset: -4px; */
+
 
 	}
 	.nav-item {
@@ -175,7 +183,6 @@
 	.nav-item:hover {
 		color: rgba(251, 255, 0, 0.93);
 	}
-
 
 @keyframes gradient {
     0% {
