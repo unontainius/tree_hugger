@@ -172,6 +172,7 @@
 		min-height: 90vh;
 		width: 100vw;
 		gap: 2rem;
+		flex-wrap: wrap;
 	}
 
 	h2 {
