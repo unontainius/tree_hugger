@@ -32,6 +32,7 @@
 		| 'partners'
 		| 'unknown'
 	>('all');
+
 	let relationshipFormPersonA = $state<PersonRow | null>(null);
 	let relationshipFormPersonB = $state<PersonRow | null>(null);
 	let relationshipFormPersonC = $state<PersonRow | null>(null);
@@ -392,15 +393,14 @@
 				<!-- Parents -->
 				<div class="row-container left">
 					<div class="column-container">
-						<div class="header">
-							Parents
-							<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
-								<MIcon name="plus" size="42px" />
-							</button>
-						</div>
-					</div>
-					<div class="column-container">
+
 						<div class="row-content-container">
+							<div class="header">
+								Parents
+								<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
+									<MIcon name="plus" size="42px" />
+								</button>
+							</div>
 							{#if parents}
 								<!-- Parent B -->
 								{#each parents.parent_b as parent}
@@ -416,16 +416,15 @@
 				</div>
 				<!-- Immediate Family -->
 				<div class="row-container left">
-					<div class="column-container">
-					<div class="header">
-						Siblings
-						<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
-							<MIcon name="plus" size="42px" />
-						</button>
-					</div>
-					</div>
+
 					<div class="column-container">
 						<div class="row-content-container">
+							<div class="header">
+								Siblings
+								<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
+									<MIcon name="plus" size="42px" />
+								</button>
+							</div>
 							{#if siblings}
 								{#each siblings as sibling}
 									<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
@@ -668,12 +667,11 @@
 					<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
 						{#if LoggedIn}
 								<span><MIcon name="tick-2" size="24px" /></span>
-								<p>Save Changes</p>
+								<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
 						{:else}
 							<div style="padding: 0.5rem;">
-
 								<MIcon name="locked" size="24px" /> 
-								<p>Save Changes</p>
+
 							</div>
 						{/if}
 					</button>
@@ -688,33 +686,32 @@
 				<p>Loading ...</p>
 			{:else}
 				<div class="row-content-container left">
+					
 					{#if children && children.partners.length > 0}
 						{#each children.partners as partnerGroup}
-							<div class="row-container left">
-								<div class="partner-buttons">
-									<div class="header">
-										Partner
-										<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-
-											<MIcon name="plus" size="42px" />
-										</button>
-										Children
-										<button
-											class="btn-add"
-											onclick={() => handleAddRelationship('Child', partnerGroup.partner)}
-										>
-											<MIcon name="plus" size="42px" />
-										</button>
-									</div>
-								</div> 
-								<div class="column-container left">
+							<div class="row-container">
+								<div class="column-container">
 									<div class="row-content-container">
+										<div class="header">
+											Partner
+											<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
+												<MIcon name="plus" size="42px" />
+											</button>
+										</div>
 										<PersonCard
 											person={partnerGroup.partner}
 											onclick={() => changePerson(partnerGroup.partner)}
 										/>
 									</div>
+
 									<div class="row-content-container">
+										<div class="header">
+											Children
+											<button class="btn-add" onclick={() => handleAddRelationship('Child', partnerGroup.partner)}>
+												<MIcon name="plus" size="42px" />
+											</button>
+
+										</div>
 										{#if partnerGroup.children.length > 0}
 											{#each partnerGroup.children as child}
 												{#if child.first_name !== 'No'}
@@ -906,7 +903,7 @@
 	.row-content-container-text {
 		display: flex;
 		flex-direction: row;
-		align-items: center;
+		align-items: flex-start;
 		justify-content: flex-start;
 		gap: 0.5rem;
 		flex-wrap: wrap;
@@ -1108,16 +1105,15 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
-		width: 80%;
+
 		background-color: green;
 		margin-block-start: 1rem;
-
+		text-align: center;
 		border-radius: 2rem;
-
+		cursor: pointer;
+		pointer-events: auto;
 	}
-	.btn-save p {
 
-	}
 
 	button:disabled {
 		opacity: 0.5;
