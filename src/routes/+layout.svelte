@@ -11,7 +11,9 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import { browser } from '$app/environment';
 	import PageTransition from '$lib/components/PageTransition.svelte';
-
+	import { menuName, menuConfigs } from '$lib/stores/menuStore';
+	import { goto } from '$app/navigation';
+	import { tick } from 'svelte';
 
 	let LoggedIn = $state(false);
 
@@ -24,11 +26,10 @@
 	let ShowLoginForm = $state(false);
 	// let navIconSize = $state(browser ? (window.innerWidth > 768 ? 48 : 24) : 24);
 	let navIconSize = 48;
+
 	onMount(() => {
 		authService.getCurrentUser();
 	});
-
-
 
 	async function handleLogout() {
 		if ($user) {
@@ -41,59 +42,45 @@
 		ShowLoginForm = !ShowLoginForm;
 	}
 
-
-
-
+	async function handleMenuClick(item: MenuItem) {
+		if (item.path === '/') {
+			$menuName = 'home';
+			await tick();
+		}
+		goto(item.path);
+	}
 
 </script>
-
-
 
 	<Toast message="message not required other than to stop the compiler complaining" />
 
 	<nav>
-		<a class="nav-item" href="/">
-			<MIcon name="home" size={64} />
-			<p>Home</p>
-		</a>
 
-		{#if LoggedIn}
-			<a class="nav-item" href="/admin/person/0">
-				<MIcon name="add" size={navIconSize} />
-				<p>Add New</p>
-			</a>
+		{#each menuConfigs[$menuName].menuItems as item}
+			{#if !item.requiresAuth || LoggedIn}
+				<a class="nav-item" 
+				   href={item.path} 
+				   onclick={(e) => {
+					   e.preventDefault();
+					   handleMenuClick(item);
+				   }}>
+					<MIcon name={item.icon} size={navIconSize} />
+					<p>{item.name}</p>
+				</a>
+			{/if}
+		{/each}
 
-		{/if}
-		<a class="nav-item" href="/admin/person">
-			<MIcon name="search" size={navIconSize} />
-			<p>Search</p>
-
-		</a>
-
-		<a class="nav-item" href="/contact">
-			<MIcon name="notify" size={navIconSize} />
-			<p>Contact</p>
-		</a>
-
-		<a class="nav-item" href="/about">
-			<MIcon name="info" size={navIconSize} />
-			<p>About</p>
-		</a>
-
-
-
+		<!-- Login/Logout always shown -->
 		{#if LoggedIn}
 			<button class="nav-item" onclick={handleLogout}>
 				<MIcon name="logout" size={navIconSize} />
 				<p>Logout</p>
 			</button>
-
 		{:else}
 			<button class="nav-item" onclick={toggleLogin}>
 				<MIcon name="login" size={navIconSize} />
 				<p>Login</p>
 			</button>
-
 		{/if}
 	</nav>
 
@@ -153,7 +140,6 @@
 		position: absolute;
 		top: 0;
 		width: 100vw;
-
 		padding: 2rem;
 		padding-inline: 1rem;
 		height: 4rem;

@@ -96,7 +96,7 @@
 		67;
 		if (!addingNewUser) {
 			try {
-				toasts.info(`Loading data for ${person.first_name} ${person.last_name}`, 1000);
+				// toasts.info(`Loading data for ${person.first_name} ${person.last_name}`, 1000);
 
 				if (loadWhat === 'all') {
 					// Get fresh person data

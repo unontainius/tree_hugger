@@ -4,6 +4,7 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import PeopleCatalog from '$lib/components/PeopleCatalog.svelte';
 	import RadioButtons from '$lib/components/RadioButtons.svelte';
+	import { onMount } from 'svelte';
 
 	let people = $state<PersonRow[] | null>(null);
 	let initialLoading = $state(true); // For initial load only
@@ -11,12 +12,17 @@
 	let sortAscending = $state(true);
 	let sortField = $state<string | 'first_name' | 'last_name' | 'born'>('first_name');
 
+
+
+
 	async function loadData() {
 		const filterCriteria = searchInput?.value.toLowerCase() || '%';
 
 		try {
 			const data = await db.Person.all(filterCriteria, sortField, sortAscending);
 			people = data || [];
+			// Scroll to top after loading
+			window.scrollTo({ top: 0, behavior: 'smooth' });
 		} catch (error) {
 			console.log('Error loading people:', error);
 			people = [];
@@ -25,8 +31,11 @@
 		}
 	}
 
-	// Initial load
-	loadData();
+	onMount(() => {
+		loadData();
+		// Ensure we start at the top
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	});
 
 	$effect(() => {
 		setTimeout(() => {

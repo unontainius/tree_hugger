@@ -2,21 +2,44 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
 	import { loginRequestedState } from '$lib/stores/authStore';
+	import { menuName } from '$lib/stores/menuStore';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { tick } from 'svelte';
 
 	let LoggedIn = $state(false);
 
 	$effect(() => {
 		LoggedIn = $user !== null;
 	});
+
+	async function setFamilyTreeMenu() {
+		$menuName = 'family-tree';
+		await tick();
+		goto('/admin/person');
+	}
+
+	async function setFamilyPhotosMenu() {
+		$menuName = 'photos';
+		await tick();
+		goto('/photos');
+	}
+
+	async function setAnniversariesMenu() {
+		$menuName = 'anniversaries';
+		await tick();
+		goto('/anniversaries');
+	}
+
 </script>
 
 <div class="welcome-container">
-	<div class="content">
+
 		<div class="card">
-			<a href="/admin/person" class="">
+			<button onclick={setFamilyTreeMenu} >
 				<div class="row">
 					<div class="column center">
-						<div class="blob">	
+						<div class="gold">	
 							<img src="/images/familytree.png" alt="Tree Hugger" />
 						</div>
 					</div>
@@ -32,12 +55,70 @@
 						{/if}
 					</div>
 				</div>
-			</a>
+			</button>
 		</div>
-	</div>
+
+		<div class="card">
+			<button onclick={setFamilyPhotosMenu} >
+				<div class="row">
+					<div class="column center">
+						<div class="gold">	
+							<img src="/images/leaves.jpg" alt="Tree Hugger" />
+						</div>
+					</div>
+					<div class="column center">
+						<h2>photos</h2>
+						<p>Browse family photos</p>
+						{#if !LoggedIn}
+							<div class="login-hint">
+								Hint: 
+								<MIcon name="login" size="24px" />
+								<span>Login to edit</span>
+							</div>
+						{/if}
+					</div>
+				</div>
+			</button>
+		</div>
+
+		<div class="card">
+			<button onclick={setAnniversariesMenu} >
+				<div class="row">
+					<div class="column center">
+						<div class="gold">	
+							<img src="/images/celebration.jpg" alt="Tree Hugger" />
+						</div>
+					</div>
+					<div class="column center">
+						<h2>Anniversaries</h2>
+						<p>Browse family anniversaries</p>
+						{#if !LoggedIn}
+							<div class="login-hint">
+								Hint: 
+								<MIcon name="login" size="24px" />
+								<span>Login to edit</span>
+							</div>
+						{/if}
+					</div>
+				</div>
+			</button>
+		</div>
+
 </div>
 
 <style>
+	button {
+		cursor: pointer;
+		pointer-events: auto;
+		background: transparent;
+		border: none;
+		border-radius: 1rem;
+		padding: 0;
+		margin: 0;
+		font: inherit;
+		color: inherit;
+		box-shadow: none;
+	}
 	
 	.row {
 		display: flex;
@@ -83,21 +164,14 @@
 		justify-content: center;
 	}
 	.welcome-container {
-		min-height: 100vh;
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		align-items: center;
-		justify-content: flex-start;
-		position: relative;
+		justify-content: center;
 		z-index: 1;
-		padding-block-start: 7rem;
-	}
-
-	.content {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2rem;
-		text-align: center;
+		min-height: 90vh;
+		width: 100vw;
+		gap: 2rem;
 	}
 
 	h2 {
@@ -123,25 +197,22 @@
 		font-size: 0.9rem;
 		margin-block-end: 2rem;
 	}
-	.blob {
-		position: relative;
-		top: 10px;
-		left: -17px;
+	.gold {
+		margin-block-start: 1rem;
+		width: 220px;
+		height:220px;
 		border-radius: 50%;
-		width: 320px;
-		height: 320px;
+		padding: 0.5rem;
+		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
 	}
-
-	.blob img {
+	.gold img {
 		position: relative;
-		top: -5px;
-		left: 1.05rem;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		outline: 8px solid #013d55;
 		border-radius: 50%;
-		outline-offset: -6px;
+
 	}
 
 	@media (max-width: 768px) {

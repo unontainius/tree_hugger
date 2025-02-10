@@ -9,15 +9,18 @@
 <div class="content">
 
 		<div class="header">
-			<div class="blob">
+			<div class="gold">
 				<img src="/images/familytree.png" alt="logo" />
 			</div>
 			
-			<div class="col-start">
+			<div class="col-center">
 				<h1 class="">Contact</h1>
-				<span><MIcon name="email" size="2rem" /> marcus@v-sys.co.nz</span>
-				<span><MIcon name="logout" size="2rem" /> 64 27 2212 880</span>
-				<span><MIcon name="web" size="2rem" /> https://v-sys.co.nz</span>
+				<div class="col-start">
+					<span><MIcon name="email" size="2rem" /> marcus@v-sys.co.nz</span>
+					<span><MIcon name="logout" size="2rem" /> 64 27 2212 880</span>
+					<span><MIcon name="web" size="2rem" /> <a href="https://v-sys.co.nz" target="_blank"> https://v-sys.co.nz</a></span>
+				</div>
+
 			</div>
 		</div>
 
@@ -28,12 +31,16 @@
         font-size: 4rem;
         color: rgba(255, 255, 255, 0.308);
     }
+	a:hover {
+		color:rgb(241, 4, 241);
+	}
 	.content {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		height: 70vh;
+
 	}
 	.header {
 		padding:0;
@@ -47,34 +54,38 @@
 		margin-block-start: 3.5rem;
 	}
 
-
+	.col-center {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
     .col-start {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        justify-content: start;
+        align-items: start;
+
 
         gap: 1rem;
 
     }
 
-	.blob {
-		position: relative;
-		top: 20px;
-		border-radius: 50%;
+	.gold {
+		margin-block-start: 1rem;
 		width: 220px;
-		height: 220px;
+		height:220px;
+		border-radius: 50%;
+		padding: 0.5rem;
+		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
 	}
-
-	.blob img {
+	.gold img {
 		position: relative;
-		top: -5px;
-		/* left: 1.05rem; */
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		outline: 6px solid #013d55;
 		border-radius: 50%;
-		outline-offset: -6px;
+
 	}
 </style>

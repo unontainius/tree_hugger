@@ -6,11 +6,11 @@
 	let { data }: { data: PageData } = $props();
 </script>
 
-<!-- <div class="col pt-40"> -->
+<div class="content">
 
-	<div class="col">
+	<div class="row">
 		<div class="header">
-			<div class="blob">
+			<div class="gold">
 				<img src="/images/familytree.png" alt="logo" />
 			</div>
 			<h1>About</h1>
@@ -33,7 +33,7 @@
             </div>
 		</div>
 	</div>
-<!-- </div> -->
+</div>
 
 <style>
 	h1 {
@@ -51,16 +51,26 @@
 		margin-block-start: 2rem;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 	}
-
-	.header {
-		padding:0;
-		margin:0;
+	.content {
+		width: 100vw;
+		height: 100vh;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		flex-wrap: wrap;
 
+	}
+
+
+	.header {
+		padding:0;
+		margin: 0;
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: flex-end;
+		flex-wrap: wrap;
+		gap: 1rem;
 	}
 	.col-start p {
 		font-size: 1.5rem;
@@ -71,7 +81,7 @@
 		border-left: 8px solid rgba(255, 255, 255, 0.623);
 		padding-left: 1rem;
 		margin-inline: 2rem;
-		margin-block-start: 2rem;
+
 
 	}
 	.col {
@@ -79,10 +89,11 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-
+		margin-block-start: 2rem;
 	}
 	.signed {
 		font-size: 1.5rem;
+
 		color: rgba(255, 255, 255, 0.608);
 		max-width: 50ch;
 		width: 100%;
@@ -96,8 +107,7 @@
 		justify-content: center;
 		align-items: center;
 		gap: 1rem;
-		height: 100%;
-		margin-block-end: 2rem;
+
 	}
 	.col-start {
 		display: flex;
@@ -107,24 +117,21 @@
 		height: 100%;
 		gap: 1.5rem;
 	}
-	.blob {
-		margin-block-start: 5rem;
-		position: relative;
-		top: 20px;
-		border-radius: 50%;
+	.gold {
+		margin-block-start: 1rem;
 		width: 220px;
-		eight: 220px;
-	}
-	.blob img {
-		position: relative;
-		top: -5px;
-		/* left: 1.05rem; */
-		min-width: 100%;
-		min-height: 100%;
-		object-fit: cover;
-		outline: 6px solid #013d55;
+		height:220px;
 		border-radius: 50%;
-		outline-offset: -6px;
+		padding: 0.5rem;
+		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+	}
+	.gold img {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 50%;
 
 	}
 
