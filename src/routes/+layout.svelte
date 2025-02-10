@@ -22,11 +22,12 @@
 
 	let {data, children } = $props();
 	let ShowLoginForm = $state(false);
-	let navIconSize = $state(browser ? (window.innerWidth > 768 ? 48 : 24) : 24);
-
+	// let navIconSize = $state(browser ? (window.innerWidth > 768 ? 48 : 24) : 24);
+	let navIconSize = 48;
 	onMount(() => {
 		authService.getCurrentUser();
 	});
+
 
 
 	async function handleLogout() {
@@ -52,7 +53,7 @@
 
 	<nav>
 		<a class="nav-item" href="/">
-			<MIcon name="home" size={navIconSize} />
+			<MIcon name="home" size={64} />
 			<p>Home</p>
 		</a>
 

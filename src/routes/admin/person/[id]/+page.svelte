@@ -661,18 +661,23 @@
 									</div>
 								</div>
 							</div>
-							<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
-								{#if LoggedIn}
-									<MIcon name="tick-2" size="42px" /> Save Changes
-								{:else}
-									<div style="padding: 0.5rem;">
-										<MIcon name="locked" size="24px" /> Save Changes
-									</div>
-								{/if}
-							</button>
+
 						</div>
 					</div>
 					<div class="flex flex-row gap-2 self-end"></div>
+					<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
+						{#if LoggedIn}
+								<span><MIcon name="tick-2" size="24px" /></span>
+								<p>Save Changes</p>
+						{:else}
+							<div style="padding: 0.5rem;">
+
+								<MIcon name="locked" size="24px" /> 
+								<p>Save Changes</p>
+							</div>
+						{/if}
+					</button>
+
 				</div>
 			{/if}
 		</div>
@@ -686,23 +691,13 @@
 					{#if children && children.partners.length > 0}
 						{#each children.partners as partnerGroup}
 							<div class="row-container left">
-								<div class="column-container">
+								<div class="partner-buttons">
 									<div class="header">
 										Partner
 										<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
+
 											<MIcon name="plus" size="42px" />
 										</button>
-									</div>
-								</div>
-								<div class="column-container">
-									<PersonCard
-										person={partnerGroup.partner}
-										onclick={() => changePerson(partnerGroup.partner)}
-									/>
-								</div>
-
-								<div class="column-container left">
-									<div class="header left">
 										Children
 										<button
 											class="btn-add"
@@ -711,9 +706,15 @@
 											<MIcon name="plus" size="42px" />
 										</button>
 									</div>
-								</div>
-								<div class="column-container">
-									<div class="row-content-container center">
+								</div> 
+								<div class="column-container left">
+									<div class="row-content-container">
+										<PersonCard
+											person={partnerGroup.partner}
+											onclick={() => changePerson(partnerGroup.partner)}
+										/>
+									</div>
+									<div class="row-content-container">
 										{#if partnerGroup.children.length > 0}
 											{#each partnerGroup.children as child}
 												{#if child.first_name !== 'No'}
@@ -726,18 +727,15 @@
 							</div>
 						{/each}
 					{:else}
+
 						<!-- Show empty state with add buttons -->
 						<div class="row-container left">
 							<div class="column-container">
 								<div class="header">
-									Partnership
+									Partner
 									<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
 										<MIcon name="plus" size="42px" />
 									</button>
-								</div>
-							</div>
-							<div class="column-container left">
-								<div class="header left">
 									Children
 									<button class="btn-add" onclick={() => handleAddRelationship('Child')}>
 										<MIcon name="plus" size="42px" />
@@ -1106,14 +1104,21 @@
 		margin-block-start: 1.5rem;
 	}
 	.btn-save {
-		padding-inline: 0;
-		padding-inline-end: 1rem;
-		padding-block: 0;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		width: 80%;
 		background-color: green;
-		margin-block-start: 2rem;
-		border-top-left-radius: 2rem;
-		border-bottom-left-radius: 2rem;
+		margin-block-start: 1rem;
+
+		border-radius: 2rem;
+
 	}
+	.btn-save p {
+
+	}
+
 	button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
@@ -1151,9 +1156,15 @@
 	}
 
 	@media (max-width: 768px) {
+		.header {
+			flex-direction: row;
+			align-items: center;
+			width: 100%;
+		}
 		.image-controls-row {
 			flex-direction: column;
 			align-items: center;
+
 		}
 
 		.image-container-column,
