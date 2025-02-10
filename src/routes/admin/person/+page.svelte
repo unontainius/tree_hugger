@@ -12,9 +12,6 @@
 	let sortAscending = $state(true);
 	let sortField = $state<string | 'first_name' | 'last_name' | 'born'>('first_name');
 
-
-
-
 	async function loadData() {
 		const filterCriteria = searchInput?.value.toLowerCase() || '%';
 
@@ -46,6 +43,7 @@
 			}
 		}, 100);
 	});
+
 </script>
 
 <div class="row">
@@ -125,11 +123,14 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		background-color: #ffffff2a;
-		border-radius: 0.5rem;
-		padding: 0.5rem;
+        background-color: #eeeeee56;
+		border-radius: 2rem;
+		padding: 0.5rem 1.5rem;
 		margin-inline: 0.5rem;
+		outline: 1px solid #ffffff2a;
+		outline-offset: -5px;
 	}
+
 
 	.sort-group {
 		display: flex;

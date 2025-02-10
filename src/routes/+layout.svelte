@@ -159,15 +159,23 @@
 		box-shadow: none;
 		border-radius: 0;
 		border: none;
-		background-color: transparent;	
-
-
+		background-color: transparent;
+		color: rgba(255, 255, 255, 0.85);
 	}
 	.nav-item p {
 		color: rgba(255, 255, 255, 0.377);
 		font-size: 0.75rem;
 		font-weight: thin;
 	}
+	.nav-item p:hover {
+		color: rgba(251, 255, 0, 0.93);
+
+	}
+
+	.nav-item:hover {
+		color: rgba(251, 255, 0, 0.93);
+	}
+
 
 @keyframes gradient {
     0% {

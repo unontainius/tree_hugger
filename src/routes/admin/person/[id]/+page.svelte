@@ -63,14 +63,11 @@
 		LoggedIn = $user !== null;
 	});
 
-	onMount(() => {
+	onMount(async () => {
 		// Set dimensions only after component is mounted (client-side)
 		imageSelectorWidth = window.innerWidth * 0.8;
 		imageSelectorHeight = window.innerHeight * 0.8;
-	});
-
-	onMount(async () => {
-		await loadPageData();
+		await loadPageData();		
 	});
 
 	async function loadPageData(loadWhat: string = 'all') {
@@ -128,7 +125,6 @@
 			}
 		}
 	}
-
 	async function changePerson(newPerson: PersonRow | null) {
 		// if (!(await isLoggedIn())) return;
 		if (formIsDirty) {
@@ -151,11 +147,9 @@
 		// Load the new data
 		await loadPageData();
 	}
-
 	function handleConfirmationRecived(reason: string) {
 		showImageSelector = false;
 	}
-
 	async function handleRemoveImage() {
 		if (!(await isLoggedIn())) return;
 		console.log('remove image');
@@ -221,7 +215,6 @@
 		// debugState.personId = person?.id || null;
 		showImageSelector = true;
 	}
-
 	async function handleImageSelectorComplete() {
 		showImageSelector = false;
 		// Refresh the person data to show the new image
@@ -232,7 +225,6 @@
 			}
 		}
 	}
-
 	async function handleImageCropComplete(croppedBlob: Blob) {
 		try {
 			// Upload to Supabase Storage
@@ -258,7 +250,6 @@
 			showCropper = false;
 		}
 	}
-
 	function handleCropCancel() {
 		if (tempImageUrl) {
 			URL.revokeObjectURL(tempImageUrl);
@@ -297,7 +288,6 @@
 		}
 		formIsDirty = false;
 	}
-
 	// Clean up on component unmount
 	onDestroy(async () => {
 		if (tempImageUrl) {
@@ -311,7 +301,6 @@
 		}
 		formIsDirty = false;
 	});
-
 	async function handleAddRelationship(
 		relationship: string = 'unknown',
 		otherPerson: PersonRow | null = null
@@ -340,25 +329,21 @@
 		}
 		showRelationshipForm = true;
 	}
-
 	async function handleCloseRelationshipForm() {
 		if (!person) return;
 		showRelationshipForm = false;
 		changePerson(person);
 	}
-
 	// Update the state with both the boolean and a message
 	function openImageSelector() {
 		showImageSelector = true;
 		// debugMessage = 'Image selector opened';
 	}
-
 	function closeImageSelector() {
 		// debugState.showImageSelector = false;
 		// debugState.personId = null;
 		showImageSelector = false;
 	}
-
 	function handleDeleteConfirmationResponce(response: boolean) {
 		// console.log('handleDeleteConfirmationResponce', response);
 		if (response) {
