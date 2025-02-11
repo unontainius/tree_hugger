@@ -277,10 +277,7 @@ Hours of Support
         margin-block: 0.5rem;
         transition: all 0.2s ease-in-out;
     }
-    .sidebar a.narrow {
-        margin: 0;
-        padding: 0;
-    }
+
     .sidebar a:hover {
         background-color: rgba(255,255,255,0.1);
         transform: translateX(5px);
