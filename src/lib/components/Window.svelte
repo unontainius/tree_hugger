@@ -23,9 +23,9 @@
         componentProps = {},
         initialPosition = { 
             x: Math.min((window.innerWidth - 400) / 2, window.innerWidth - 400), 
-            y: Math.min((window.innerHeight - 290) / 3.5, window.innerHeight - 290) 
+            y: Math.min((window.innerHeight - 400) / 3.5, window.innerHeight - 290) 
         },
-        initialSize = { width: 400, height: 270 },
+        initialSize = { width: 400, height: 300 },
         onPositionChange,
         onSizeChange,
         minWidth = 300,
@@ -484,61 +484,62 @@
     "
     onmousedown={handleMouseDown}
 >
-    <div class="header" ondblclick={handleHeaderDoubleClick} aria-label="Window Header" aria-roledescription="Window Header">
-        <span class="title">{title}</span>
-        <div class="window-controls">
-            <Tab>
-                {#if showMinimize}
-                    <button class="control-btn minimize" onclick={handleMinimize}>
-                        <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
+    <div class="gold-border">
+        <div class="header" ondblclick={handleHeaderDoubleClick} aria-label="Window Header" aria-roledescription="Window Header">
+            <span class="title">{title}</span>
+            <div class="window-controls">
+                <Tab>
+                    {#if showMinimize}
+                        <button class="control-btn minimize" onclick={handleMinimize}>
+                            <MIcon name={isMinimized ? "maximize" : "minimize"} size="24px" />
 
-                    </button>
-                {/if}
-                {#if showMaximize}
-                    <button class="control-btn maximize" onclick={handleMaximize}>
-                        <MIcon name={isMaximized ? "minimize" : "maximize-x"} size="24px" />
+                        </button>
+                    {/if}
+                    {#if showMaximize}
+                        <button class="control-btn maximize" onclick={handleMaximize}>
+                            <MIcon name={isMaximized ? "minimize" : "maximize-x"} size="24px" />
 
-                    </button>
-                {/if}
-                {#if showClose}
-                    <button class="control-btn close" onclick={onClose}>
-                        <MIcon name="x" size="24px" />
+                        </button>
+                    {/if}
+                    {#if showClose}
+                        <button class="control-btn close" onclick={onClose}>
+                            <MIcon name="close" size="24px" />
 
-                    </button>
-                {/if}
-            </Tab>
+                        </button>
+                    {/if}
+                </Tab>
+            </div>
         </div>
-    </div>
-    
-    <div class="body">
-        {#if children}
-            {@render children(componentProps)}
-        {:else}
-            <div class="body-content">
-                <p>No component provided</p>
+
+        <div class="body">
+            {#if children}
+                <div class="body-content">
+                    {@render children(componentProps)}
+                </div>
+            {:else}
+                <div class="body-content">
+                    <p>No component provided</p>
+                </div>
+            {/if}
+        </div>
+        
+        {#if showFooter}
+            <div class="footer">
+                <div class="footer-buttons">
+                    {#if footerButtons.length > 0}
+                        {#each footerButtons as button}
+                            <button onclick={button.onClick}>{button.text}</button>
+                        {/each}
+                    {:else}
+                        {#if acceptButtonText && cancelButtonText}
+                            <button class="accept-button" onclick={() => onDialogResponse?.(true)}>{acceptButtonText}</button>
+                            <button class="cancel-button" onclick={() => onDialogResponse?.(false)}>{cancelButtonText}</button>
+                        {/if}
+                    {/if}
+                </div>
             </div>
         {/if}
     </div>
-    
-    {#if showFooter}
-        <div class="footer">
-            <div class="footer-buttons">
-                {#if footerButtons.length > 0}
-                    {#each footerButtons as button}
-                        <button onclick={button.onClick}>{button.text}</button>
-                    {/each}
-                {:else}
-                    {#if acceptButtonText && cancelButtonText}
-                        <button class="accept-button" onclick={() => onDialogResponse?.(true)}>{acceptButtonText}</button>
-                        <button class="cancel-button" onclick={() => onDialogResponse?.(false)}>{cancelButtonText}</button>
-                    {/if}
-                {/if}
-
-
-            </div>
-        </div>
-    {/if}
-
     <!-- All resize handles -->
     <div class="resize-handle e" 
         onmousedown={(e) => handleResizeStart(e, 'e')}
@@ -563,10 +564,19 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        border: 1px solid #ccc;
         color: white;
     }
-
+	.gold-border {
+		padding:3px;
+		margin:0;
+		border-radius: 0.5rem;
+		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+	}
     .header {
         height: 60px;
         min-height: 60px;
@@ -579,29 +589,29 @@
         cursor: grab;
         user-select: none;
         color: white;
+        border-top-left-radius: 0.4rem;
+        border-top-right-radius: 0.4rem;
     }
     .title {
         font-size: 1.2rem;
         font-weight: 600;
     }
     .body {
+        flex: 1;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        overflow-y: auto;
-        overflow-x: hidden;
-        min-height: 120px;
+        min-height: 0;
         position: relative;
-        flex: 1;
+        overflow: hidden;
     }
 
-
     .body-content {
-        padding: 20px;
+        flex: 1;
+        padding: 0;
         width: 100%;
         height: 100%;
         box-sizing: border-box;
+        overflow: auto;
     }
 
     .footer {

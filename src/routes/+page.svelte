@@ -2,7 +2,7 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
 	import { loginRequestedState } from '$lib/stores/authStore';
-	import { menuName } from '$lib/stores/menuStore';
+	import { menuName, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { tick } from 'svelte';
@@ -14,21 +14,17 @@
 	});
 
 	async function setFamilyTreeMenu() {
+		$menuRequired = true;
 		$menuName = 'family-tree';
 		await tick();
-		goto('/admin/person');
+		goto('/admin');
 	}
 
-	async function setFamilyPhotosMenu() {
-		$menuName = 'photos';
+	async function setResumeMenu() {
+		$menuRequired = false;
+		$menuName = 'resume';
 		await tick();
-		goto('/photos');
-	}
-
-	async function setAnniversariesMenu() {
-		$menuName = 'anniversaries';
-		await tick();
-		goto('/anniversaries');
+		goto('/resume');
 	}
 
 </script>
@@ -61,57 +57,48 @@
 
 	<div class="gold-border">
 		<div class="card">
-			<button onclick={setFamilyPhotosMenu} >
+			<button class="resume-button" onclick={setResumeMenu} >
 				<div class="row">
 					<div class="column center">
 						<div class="gold">	
-							<img src="/images/leaves.jpg" alt="Tree Hugger" />
+							<img src="/images/familytree.png" alt="Tree Hugger" />
 						</div>
 					</div>
 					<div class="column center">
-						<h2>photos</h2>
-						<p>Browse family photos</p>
-						{#if !LoggedIn}
-							<div class="login-hint">
-								Hint: 
-								<MIcon name="login" size="24px" />
-								<span>Login to edit</span>
-							</div>
-						{/if}
+						<h2 class="resume-title">Resume</h2>
+						<p>My professional journey</p>
 					</div>
+					{#if !LoggedIn}
+						<div class="resume-spacer">
+							Hint: 
+							<span>Login to edit</span>
+						</div>
+					{/if}
 				</div>
 			</button>
 		</div>
 	</div>
-
-	<div class="gold-border">
-		<div class="card">
-			<button onclick={setAnniversariesMenu} >
-				<div class="row">
-					<div class="column center">
-						<div class="gold">	
-							<img src="/images/celebration.jpg" alt="Tree Hugger" />
-						</div>
-					</div>
-					<div class="column center">
-						<h2>Anniversaries</h2>
-						<p>Browse family anniversaries</p>
-						{#if !LoggedIn}
-							<div class="login-hint">
-								Hint: 
-								<MIcon name="login" size="24px" />
-								<span>Login to edit</span>
-							</div>
-						{/if}
-					</div>
-				</div>
-			</button>
-		</div>
-	</div>
-
 </div>
 
 <style>
+	.resume-title {
+		font-size: 2rem;
+		margin-block-start: 1rem;
+		background: linear-gradient(0deg, #064e09, #88ff00);
+		background-clip: text;
+		-webkit-background-clip: text;	
+	}
+	.resume-spacer {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		color: transparent;
+		font-size: 0.9rem;
+		margin-block-end: 2rem;
+	}	
+	
 	button {
 		cursor: pointer;
 		pointer-events: auto;
@@ -128,7 +115,13 @@
 		color: inherit;
 		box-shadow: none;
 	}
-	
+	.resume-button {
+		background: rgb(26,114,180);
+		background: -moz-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgb(0, 0, 0) 54%);
+		background: -webkit-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
+		background: linear-gradient(180deg, rgb(255, 169, 39) 0%, rgba(30,41,59,1) 54%);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1a72b4",endColorstr="#1e293b",GradientType=1);
+	}
 	.row {
 		display: flex;
 		flex-direction: row;

@@ -13,7 +13,7 @@
 			<div class="gold">
 				<img src="/images/familytree.png" alt="logo" />
 			</div>
-			<h1>About</h1>
+			<h1 class="gold-text">About</h1>
 		</div>
 	</div>
 
@@ -28,14 +28,24 @@
 				&#x201F;I'd like to add the ability to add pictures and stories to individuals.  A quick "show me birthdays" or "show me anniversaries" could be a nice features too.&#x201D;
 			</p>
             <div class="signed">
-                Marcus
-
+                Marcus 😉
             </div>
 		</div>
 	</div>
 </div>
 
 <style>
+	    .gold-text {
+        background: linear-gradient(to right, #462523 0, #cb9b51 22%, #f6e27a 45%, #f6f2c0 50%, #f6e27a 55%, #cb9b51 78%, #462523 100%);
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        font-weight: bold;
+        text-shadow: 1px 1px 1px rgba(203, 155, 81, 0.7);
+    }
+
+    /* Alternative simpler version */
+
 	h1 {
 		font-size: 4rem;
 		color: rgba(255, 255, 255, 0.63);
@@ -83,13 +93,6 @@
 		margin-inline: 2rem;
 
 
-	}
-	.col {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		margin-block-start: 2rem;
 	}
 	.signed {
 		font-size: 1.5rem;

@@ -383,7 +383,7 @@
 							<div class="header">
 								Parents
 								<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
-									<MIcon name="plus" size="42px" />
+									<MIcon name="add" size="42px" />
 								</button>
 							</div>
 							{#if parents}
@@ -407,7 +407,7 @@
 							<div class="header">
 								Siblings
 								<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
-									<MIcon name="plus" size="42px" />
+									<MIcon name="add" size="42px" />
 								</button>
 							</div>
 							{#if siblings}
@@ -450,7 +450,7 @@
 									onclick={handleAddImageFromLocal}
 									title="Load Image from your Device"
 								>
-									<MIcon name="open-file" size="32px" />
+									<MIcon name="upload" size="32px" />
 								</button>
 								<button
 									class="image-btn"
@@ -464,7 +464,7 @@
 									onclick={handleRemoveImage}
 									title="Remove this Image from this Person"
 								>
-									<MIcon name="no-image" size="32px" />
+									<MIcon name="remove-image" size="32px" />
 								</button>
 							</div>
 						</div>
@@ -651,7 +651,7 @@
 					<div class="flex flex-row gap-2 self-end"></div>
 					<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
 						{#if LoggedIn}
-								<span><MIcon name="tick-2" size="24px" /></span>
+								<span><MIcon name="save" size="24px" /></span>
 								<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
 						{:else}
 							<div style="padding: 0.5rem;">
@@ -680,7 +680,7 @@
 										<div class="header">
 											Partner
 											<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-												<MIcon name="plus" size="42px" />
+												<MIcon name="add" size="42px" />
 											</button>
 										</div>
 										<PersonCard
@@ -693,7 +693,7 @@
 										<div class="header">
 											Children
 											<button class="btn-add" onclick={() => handleAddRelationship('Child', partnerGroup.partner)}>
-												<MIcon name="plus" size="42px" />
+												<MIcon name="add" size="42px" />
 											</button>
 
 										</div>
@@ -716,11 +716,11 @@
 								<div class="header">
 									Partner
 									<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-										<MIcon name="plus" size="42px" />
+										<MIcon name="add" size="42px" />
 									</button>
 									Children
 									<button class="btn-add" onclick={() => handleAddRelationship('Child')}>
-										<MIcon name="plus" size="42px" />
+										<MIcon name="add" size="42px" />
 									</button>
 								</div>
 							</div>

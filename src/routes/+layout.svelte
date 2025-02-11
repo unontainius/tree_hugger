@@ -11,7 +11,7 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import { browser } from '$app/environment';
 	import PageTransition from '$lib/components/PageTransition.svelte';
-	import { menuName, menuConfigs } from '$lib/stores/menuStore';
+	import { menuName, menuConfigs, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
 
@@ -54,7 +54,7 @@
 
 	<Toast message="message not required other than to stop the compiler complaining" />
 
-
+{#if $menuRequired}
 		<nav>
 			{#each menuConfigs[$menuName].menuItems as item}
 				{#if !item.requiresAuth || LoggedIn}
@@ -64,8 +64,8 @@
 						e.preventDefault();
 						handleMenuClick(item);
 					}}>
-						<MIcon name={item.icon} size={navIconSize} />
-						<p>{item.name}</p>
+						<MIcon name={item.icon} size={`${navIconSize}px`} />
+						<p>{item.name.includes('blank') ? '' : item.name}</p>
 					</a>
 				{/if}
 			{/each}
@@ -73,16 +73,17 @@
 			<!-- Login/Logout always shown -->
 			{#if LoggedIn}
 				<button class="nav-item" onclick={handleLogout}>
-					<MIcon name="logout" size={navIconSize} />
+					<MIcon name="logout" size={`${navIconSize}px`} />
 					<p>Logout</p>
 				</button>
 			{:else}
 				<button class="nav-item" onclick={toggleLogin}>
-					<MIcon name="login" size={navIconSize} />
+					<MIcon name="login" size={`${navIconSize}px`} />
 					<p>Login</p>
 				</button>
 			{/if}
 		</nav>
+	{/if}
 	
 	{#if ShowLoginForm}
 		<!-- showMinimize={false} showMaximize={false}  -->
@@ -95,8 +96,6 @@
 			showMaximize={false}
 			showFooter={false}
 		>
-
-
 			<LoginForm
 				onclose={() => {
 					ShowLoginForm = false;
@@ -116,9 +115,6 @@
 		<div class="wave"></div>
 	</div>
 
-
-
-
 <style>
 
 	:global(body) {
@@ -128,11 +124,11 @@
 		background-color: #013d55;
 		color: white;
 		width: 100vw;
+		font-family: 'Assistant', sans-serif;
 	}
 	:global(input), :global(select) {
 		color: black;
 	}
-
 	nav {
 		display: flex;
 		flex-direction: row;

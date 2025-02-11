@@ -5,24 +5,23 @@
         onChange: (value: string) => void;
     }>();
 
-
+    // Use event delegation for better performance
     function handleSelectedValueChanged(value: string) {
         currentValue = value;
         onChange(value);
     }
-    
 </script>
 
 <div class="radio-inputs">
     {#each options as option}
-        <button class={"radio-btn" + (currentValue === option.value ? " selected" : "")}
-            onclick={() => handleSelectedValueChanged(option.value)}>
+        <button 
+            class={"radio-btn" + (currentValue === option.value ? " selected" : "")}
+            onclick={() => handleSelectedValueChanged(option.value)}
+        >
             {option.label}
         </button>
-
-
     {/each}
-  </div>
+</div>
 
 <style>
     /* From Uiverse.io by Yaya12085 */ 
@@ -36,7 +35,9 @@
         padding: 0.25rem;
         margin: 0.5rem;
         font-size: 1rem;
+        contain: content; /* Keep the performance optimization */
     }
+
     .radio-btn {
         box-shadow: none;
         background-color: transparent;
@@ -57,14 +58,11 @@
         transform:none;
     }
 
-
-
     .radio-btn:first-of-type {
         border-top-left-radius: 1.8rem;
         border-bottom-left-radius: 1.8rem;
         border-right:none;   
     }
-
 
     .radio-btn:last-of-type {
         border-top-right-radius: 1.8rem;
@@ -72,13 +70,8 @@
         border-left:none;
     }
 
-
     .radio-btn.selected {
         background-color: #eb7d00;
         font-weight: 600;
     }
-
-
- 
-
 </style>

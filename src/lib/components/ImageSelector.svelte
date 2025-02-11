@@ -173,6 +173,9 @@
         background: rgb(32, 32, 32);
         padding: 1rem;
         box-sizing: border-box;
+        overflow: hidden;
+        border-bottom-left-radius: 0.4rem;
+        border-bottom-right-radius: 0.4rem;
     }
 
     .image-grid {
@@ -181,11 +184,30 @@
         gap: 1rem;
         flex: 1;
         width: 100%;
-        overflow-y: auto;
+        overflow-y: scroll;
         padding: 1rem;
         background: rgb(22, 22, 22);
         border-radius: 0.5rem;
         margin-bottom: 1rem;
+        min-height: 0;
+    }
+
+    .image-grid::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .image-grid::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+
+    .image-grid::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+
+    .image-grid::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
 
     .image-item {

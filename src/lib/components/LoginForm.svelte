@@ -73,11 +73,16 @@
     </form>
 </div>
 
+
 <style>
     .login-form {
         width: 100%;
-        padding: 2rem;
-        padding-block-end: 1rem;
+        height: 235px;
+        padding: 1rem;
+        padding-block-end: 3rem;
+        background: linear-gradient(0deg,rgba(20, 33, 51, 0.96),rgba(85, 139, 189, 0.96));
+        border-bottom-left-radius: 0.4rem;
+        border-bottom-right-radius: 0.4rem;
     }
 
     .form-group {
@@ -87,7 +92,6 @@
         justify-content: space-between;
         margin-bottom: 1rem;
     }
-
 
     .error {
         color: red;

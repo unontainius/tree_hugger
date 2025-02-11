@@ -39,7 +39,7 @@
     }
 </script>
 
-<div class="flex flex-col gap-2 p-4">
+<div class="content">
     <div class="flex flex-col gap-2">
         <label for="person_a">This person</label>
         <select bind:value={tie.person_a}>
@@ -95,6 +95,17 @@
     .submit-btn {
         background-color:green;
         color: #ffffff;
+    }
+    .content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background-color:rgb(96, 136, 160);
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        width: 100%;
+        height: 433px;
     }
 </style>
 

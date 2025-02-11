@@ -4,46 +4,42 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import PeopleCatalog from '$lib/components/PeopleCatalog.svelte';
 	import RadioButtons from '$lib/components/RadioButtons.svelte';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { debounce } from '$lib/utils/debounce';
 
 	let people = $state<PersonRow[] | null>(null);
-	let initialLoading = $state(true); // For initial load only
+	let initialLoading = $state(true);
 	let searchInput = $state<HTMLInputElement | null>(null);
 	let sortAscending = $state(true);
 	let sortField = $state<string | 'first_name' | 'last_name' | 'born'>('first_name');
 
+	// Simpler search function without caching for now
 	async function loadData() {
 		const filterCriteria = searchInput?.value.toLowerCase() || '%';
 
 		try {
 			const data = await db.Person.all(filterCriteria, sortField, sortAscending);
 			people = data || [];
-			// Scroll to top after loading
-			window.scrollTo({ top: 0, behavior: 'smooth' });
+			initialLoading = false;
 		} catch (error) {
-			console.log('Error loading people:', error);
+			console.error('Error loading people:', error);
 			people = [];
-		} finally {
-			initialLoading = false; // Only set this to false after initial load
+			initialLoading = false;
 		}
 	}
 
+	// Debounce the search with a shorter delay
+	const debouncedSearch = debounce(loadData, 200);
+
 	onMount(() => {
-		loadData();
-		// Ensure we start at the top
-		window.scrollTo({ top: 0, behavior: 'smooth' });
+		loadData(); // Initial load
 	});
 
 	$effect(() => {
-		setTimeout(() => {
-			const searchInput = document.getElementById('search-input');
-
-			if (searchInput) {
-				searchInput.focus();
-			}
-		}, 100);
+		if (searchInput) {
+			searchInput.focus();
+		}
 	});
-
 </script>
 
 <div class="row">
@@ -54,7 +50,7 @@
 			id="search-input"
 			type="text"
 			placeholder="Search"
-			onkeyup={loadData}
+			onkeyup={debouncedSearch}
 		/>
 	</div>
 
@@ -63,10 +59,9 @@
 	<div class="sort-group">
 		<button
 			class="sort-direction-btn"
-
 			onclick={() => {
 				sortAscending = !sortAscending;
-				loadData();
+				loadData(); // Direct call for immediate feedback
 			}}
 		>
 			{#if sortAscending}
@@ -77,11 +72,13 @@
 		</button>
 
 		<RadioButtons 
-			options={[{label: 'First Name', value: 'first_name'}, 
-					{label: 'Last Name', value: 'last_name'}, 
-					{label: 'Born', value: 'born'}]} 
+			options={[
+				{label: 'First Name', value: 'first_name'}, 
+				{label: 'Last Name', value: 'last_name'}, 
+				{label: 'Born', value: 'born'}
+			]} 
 			bind:currentValue={sortField} 
-			onChange={loadData} 
+			onChange={loadData}  
 		/>
 	</div>
 

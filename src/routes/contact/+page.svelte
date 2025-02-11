@@ -14,11 +14,11 @@
 			</div>
 			
 			<div class="col-center">
-				<h1 class="">Contact</h1>
+				<h1 class="gold-text">Contact</h1>
 				<div class="col-start">
-					<span><MIcon name="email" size="2rem" /> marcus@v-sys.co.nz</span>
-					<span><MIcon name="logout" size="2rem" /> 64 27 2212 880</span>
-					<span><MIcon name="web" size="2rem" /> <a href="https://v-sys.co.nz" target="_blank"> https://v-sys.co.nz</a></span>
+					<div class="flex flex-row gap-4"><MIcon name="email" size="2rem" /> marcus@v-sys.co.nz</div>
+					<div class="flex flex-row gap-4"><MIcon name="phone" size="2rem" /> 64 27 2212 880</div>
+					<div class="flex flex-row gap-4"><MIcon name="web" size="2rem" /> <a href="https://v-sys.co.nz" target="_blank"> https://v-sys.co.nz</a></div>
 				</div>
 
 			</div>
@@ -34,6 +34,14 @@
 	a:hover {
 		color:rgb(241, 4, 241);
 	}
+	.gold-text {
+        background: linear-gradient(to right, #462523 0, #cb9b51 22%, #f6e27a 45%, #f6f2c0 50%, #f6e27a 55%, #cb9b51 78%, #462523 100%);
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        font-weight: bold;
+        text-shadow: 1px 1px 1px rgba(203, 155, 81, 0.7);
+    }
 	.content {
 		display: flex;
 		flex-direction: column;
@@ -63,7 +71,7 @@
     .col-start {
         display: flex;
         flex-direction: column;
-        justify-content: start;
+        justify-content: center;
         align-items: start;
 
 

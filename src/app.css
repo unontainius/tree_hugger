@@ -1,6 +1,10 @@
+
+/* Rest of your global styles */
+
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+@import '$lib/styles/scrollbars.css';
 
 button {
     display: flex;
