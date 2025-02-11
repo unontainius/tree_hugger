@@ -69,12 +69,12 @@
 		isPageLoading = true;
 		// Keep menu but ensure it's properly configured
 		$menuRequired = true;
-		$menuName = 'family-tree';  // Set the correct menu for this page
-		
+		$menuName = 'family-tree'; // Set the correct menu for this page
+
 		// Set dimensions only after component is mounted (client-side)
 		imageSelectorWidth = window.innerWidth * 0.8;
 		imageSelectorHeight = window.innerHeight * 0.8;
-		await loadPageData();		
+		await loadPageData();
 		isPageLoading = false;
 	});
 
@@ -392,7 +392,6 @@
 					<!-- Parents -->
 					<div class="row-container left">
 						<div class="column-container">
-
 							<div class="row-content-container">
 								<div class="header">
 									Parents
@@ -415,7 +414,6 @@
 					</div>
 					<!-- Immediate Family -->
 					<div class="row-container left">
-
 						<div class="column-container">
 							<div class="row-content-container">
 								<div class="header">
@@ -659,22 +657,19 @@
 										</div>
 									</div>
 								</div>
-
 							</div>
 						</div>
 						<div class="flex flex-row gap-2 self-end"></div>
 						<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
 							{#if LoggedIn}
-									<span><MIcon name="save" size="24px" /></span>
-									<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
+								<span><MIcon name="save" size="24px" /></span>
+								<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
 							{:else}
 								<div style="padding: 0.5rem;">
-									<MIcon name="locked" size="24px" /> 
-
+									<MIcon name="locked" size="24px" />
 								</div>
 							{/if}
 						</button>
-
 					</div>
 				{/if}
 			</div>
@@ -685,7 +680,6 @@
 					<p>Loading ...</p>
 				{:else}
 					<div class="row-content-container left">
-						
 						{#if children && children.partners.length > 0}
 							{#each children.partners as partnerGroup}
 								<div class="row-container">
@@ -706,10 +700,12 @@
 										<div class="row-content-container">
 											<div class="header">
 												Children
-												<button class="btn-add" onclick={() => handleAddRelationship('Child', partnerGroup.partner)}>
+												<button
+													class="btn-add"
+													onclick={() => handleAddRelationship('Child', partnerGroup.partner)}
+												>
 													<MIcon name="add" size="42px" />
 												</button>
-
 											</div>
 											{#if partnerGroup.children.length > 0}
 												{#each partnerGroup.children as child}
@@ -723,7 +719,6 @@
 								</div>
 							{/each}
 						{:else}
-
 							<!-- Show empty state with add buttons -->
 							<div class="row-container left">
 								<div class="column-container">
@@ -1114,7 +1109,6 @@
 		pointer-events: auto;
 	}
 
-
 	button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
@@ -1160,7 +1154,6 @@
 		.image-controls-row {
 			flex-direction: column;
 			align-items: center;
-
 		}
 
 		.image-container-column,

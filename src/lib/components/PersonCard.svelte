@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PersonRow } from '$lib/types/database.types';
-	import MIcon from './MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
 
 	let LoggedIn = $state(false);
@@ -38,7 +37,6 @@
 			<div class={LoggedIn ? '' : 'blurred'}>
 				<p>{person.alias}</p>
 			</div>
-
 		</div>
 	</div>
 </button>
@@ -48,7 +46,7 @@
 		color: #222222;
 		font-size: 1rem;
 		font-weight: 800;
-        text-align: left;
+		text-align: left;
 	}
 	p {
 		color: #222222;
@@ -79,7 +77,7 @@
 		min-width: 260px;
 		max-width: 95vw;
 		box-shadow: 4px 4px 5px 0 rgba(0, 0, 0, 0.4);
-        width: 80px;
+		width: 80px;
 	}
 	button:hover {
 		background-color: rgb(30, 255, 41);
@@ -101,37 +99,33 @@
 		transition: all 0.3s ease;
 	}
 
-    .blurred {
+	.blurred {
 		filter: blur(3px);
 	}
 
-    @media (max-width: 468px) {
-        .person-card {
-            flex-direction: row;
-            width: 95%;
-            height: 120px;
-        }
-        img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-        }
+	@media (max-width: 468px) {
+		.person-card {
+			flex-direction: row;
+			width: 95%;
+			height: 120px;
+		}
+		img {
+			width: 120px;
+			height: 120px;
+			object-fit: cover;
+		}
 
-        .person-info {
-            height: 120px;
-            gap: 0.5rem;
-        }
-        h1 {
-            font-size: 1.1rem;
-        }
-        p {
-            font-size: 1rem;
-            text-align: left;
-            width: 100%;
-        }
-
-    }
-
+		.person-info {
+			height: 120px;
+			gap: 0.5rem;
+		}
+		h1 {
+			font-size: 1.1rem;
+		}
+		p {
+			font-size: 1rem;
+			text-align: left;
+			width: 100%;
+		}
+	}
 </style>
-
-

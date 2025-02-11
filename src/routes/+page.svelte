@@ -1,10 +1,8 @@
 <script lang="ts">
 	import MIcon from '$lib/components/MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
-	import { loginRequestedState } from '$lib/stores/authStore';
 	import { menuName, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
 	import { tick } from 'svelte';
 
 	let LoggedIn = $state(false);
@@ -26,16 +24,15 @@
 		await tick();
 		goto('/resume');
 	}
-
 </script>
 
 <div class="welcome-container">
 	<div class="gold-border">
 		<div class="card">
-			<button onclick={setFamilyTreeMenu} >
+			<button onclick={setFamilyTreeMenu}>
 				<div class="row">
 					<div class="column center">
-						<div class="gold">	
+						<div class="gold">
 							<img src="/images/familytree.png" alt="Tree Hugger" />
 						</div>
 					</div>
@@ -44,7 +41,7 @@
 						<p>Browse and search your family members</p>
 						{#if !LoggedIn}
 							<div class="login-hint">
-								Hint: 
+								Hint:
 								<MIcon name="login" size="24px" />
 								<span>Login to edit</span>
 							</div>
@@ -57,10 +54,10 @@
 
 	<div class="gold-border">
 		<div class="card">
-			<button class="resume-button" onclick={setResumeMenu} >
+			<button class="resume-button" onclick={setResumeMenu}>
 				<div class="row">
 					<div class="column center">
-						<div class="gold">	
+						<div class="gold">
 							<img src="/images/familytree.png" alt="Tree Hugger" />
 						</div>
 					</div>
@@ -70,7 +67,7 @@
 					</div>
 					{#if !LoggedIn}
 						<div class="resume-spacer">
-							Hint: 
+							Hint:
 							<span>Login to edit</span>
 						</div>
 					{/if}
@@ -86,7 +83,7 @@
 		margin-block-start: 1rem;
 		background: linear-gradient(0deg, #064e09, #88ff00);
 		background-clip: text;
-		-webkit-background-clip: text;	
+		-webkit-background-clip: text;
 	}
 	.resume-spacer {
 		display: flex;
@@ -97,15 +94,15 @@
 		color: transparent;
 		font-size: 0.9rem;
 		margin-block-end: 2rem;
-	}	
-	
+	}
+
 	button {
 		cursor: pointer;
 		pointer-events: auto;
-		background: rgb(26,114,180);
-		background: -moz-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
-		background: -webkit-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
-		background: linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
+		background: rgb(26, 114, 180);
+		background: -moz-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
+		background: -webkit-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
+		background: linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
 		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1a72b4",endColorstr="#1e293b",GradientType=1);
 		border: none;
 		border-radius: 1rem;
@@ -116,10 +113,10 @@
 		box-shadow: none;
 	}
 	.resume-button {
-		background: rgb(26,114,180);
-		background: -moz-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgb(0, 0, 0) 54%);
-		background: -webkit-linear-gradient(180deg, rgba(26,114,180,1) 0%, rgba(30,41,59,1) 54%);
-		background: linear-gradient(180deg, rgb(255, 169, 39) 0%, rgba(30,41,59,1) 54%);
+		background: rgb(26, 114, 180);
+		background: -moz-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgb(0, 0, 0) 54%);
+		background: -webkit-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
+		background: linear-gradient(180deg, rgb(255, 169, 39) 0%, rgba(30, 41, 59, 1) 54%);
 		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1a72b4",endColorstr="#1e293b",GradientType=1);
 	}
 	.row {
@@ -204,11 +201,25 @@
 	.gold {
 		margin-block-start: 1rem;
 		width: 220px;
-		height:220px;
+		height: 220px;
 		border-radius: 50%;
 		padding: 0.5rem;
-		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
-					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+		background: radial-gradient(
+				ellipse farthest-corner at right bottom,
+				#fedb37 0%,
+				#fdb931 8%,
+				#9f7928 30%,
+				#8a6e2f 40%,
+				transparent 80%
+			),
+			radial-gradient(
+				ellipse farthest-corner at left top,
+				#ffffff 0%,
+				#ffffac 8%,
+				#d1b464 25%,
+				#5d4a1f 62.5%,
+				#5d4a1f 100%
+			);
 	}
 	.gold img {
 		position: relative;
@@ -216,14 +227,27 @@
 		height: 100%;
 		object-fit: cover;
 		border-radius: 50%;
-
 	}
 	.gold-border {
-		padding:0;
-		margin:0;
+		padding: 0;
+		margin: 0;
 		border-radius: 1rem;
-		background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
-					radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+		background: radial-gradient(
+				ellipse farthest-corner at right bottom,
+				#fedb37 0%,
+				#fdb931 8%,
+				#9f7928 30%,
+				#8a6e2f 40%,
+				transparent 80%
+			),
+			radial-gradient(
+				ellipse farthest-corner at left top,
+				#ffffff 0%,
+				#ffffac 8%,
+				#d1b464 25%,
+				#5d4a1f 62.5%,
+				#5d4a1f 100%
+			);
 	}
 	@media (max-width: 768px) {
 	}

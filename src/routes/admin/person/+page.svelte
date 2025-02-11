@@ -4,7 +4,7 @@
 	import MIcon from '$lib/components/MIcon.svelte';
 	import PeopleCatalog from '$lib/components/PeopleCatalog.svelte';
 	import RadioButtons from '$lib/components/RadioButtons.svelte';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { debounce } from '$lib/utils/debounce';
 
 	let people = $state<PersonRow[] | null>(null);
@@ -71,19 +71,17 @@
 			{/if}
 		</button>
 
-		<RadioButtons 
+		<RadioButtons
 			options={[
-				{label: 'First Name', value: 'first_name'}, 
-				{label: 'Last Name', value: 'last_name'}, 
-				{label: 'Born', value: 'born'}
-			]} 
-			bind:currentValue={sortField} 
-			onChange={loadData}  
+				{ label: 'First Name', value: 'first_name' },
+				{ label: 'Last Name', value: 'last_name' },
+				{ label: 'Born', value: 'born' }
+			]}
+			bind:currentValue={sortField}
+			onChange={loadData}
 		/>
 	</div>
-
 </div>
-
 
 {#if initialLoading}
 	<div class="loading-container">
@@ -120,14 +118,13 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-        background-color: #eeeeee56;
+		background-color: #eeeeee56;
 		border-radius: 2rem;
 		padding: 0.5rem 1.5rem;
 		margin-inline: 0.5rem;
 		outline: 1px solid #ffffff2a;
 		outline-offset: -5px;
 	}
-
 
 	.sort-group {
 		display: flex;
@@ -137,15 +134,12 @@
 		gap: 0.5rem;
 	}
 	.sort-direction-btn {
-		padding:0;
-		margin:0;
+		padding: 0;
+		margin: 0;
 		padding-block: 0.5rem;
 		padding-inline: 0.5rem;
 		border-radius: 2rem;
-
-
 	}
-
 
 	.loading-container {
 		display: flex;

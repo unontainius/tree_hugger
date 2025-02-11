@@ -1,10 +1,7 @@
 <script lang="ts">
-	import MIcon from '$lib/components/MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
-	import { loginRequestedState } from '$lib/stores/authStore';
 	import { menuName } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
 	import { tick } from 'svelte';
 	import FamilyMenuItem from '$lib/components/FamilyMenuItem.svelte';
 
@@ -37,39 +34,40 @@
 		await tick();
 		goto('/stories');
 	}
-
 </script>
 
 <div class="welcome-container">
-
-	<FamilyMenuItem title="Family Tree&nbsp;Hugger" 
-		description="Show me the People" 
+	<FamilyMenuItem
+		title="Family Tree&nbsp;Hugger"
+		description="Show me the People"
 		image="/images/familytree.png"
 		loggedIn={LoggedIn}
-		onclick={setFamilyTreeMenu} 
+		onclick={setFamilyTreeMenu}
 	/>
 
-	<FamilyMenuItem title="Photos & Memories" 
-		description="HEAD SHOT!" 
-		image="/images/sniper.jpg" 
+	<FamilyMenuItem
+		title="Photos & Memories"
+		description="HEAD SHOT!"
+		image="/images/sniper.jpg"
 		loggedIn={LoggedIn}
-		onclick={setFamilyPhotosMenu} 
+		onclick={setFamilyPhotosMenu}
 	/>
 
-	<FamilyMenuItem title="Stories & Tall&nbsp;Tales" 
-		description="Once upon a time ..." 
-		image="/images/book.jpg" 
+	<FamilyMenuItem
+		title="Stories & Tall&nbsp;Tales"
+		description="Once upon a time ..."
+		image="/images/book.jpg"
 		loggedIn={LoggedIn}
-		onclick={setFamilyStoriesMenu} 
+		onclick={setFamilyStoriesMenu}
 	/>
 
-	<FamilyMenuItem title="Anniversaries & Birthdays" 
-		description="Oh!  Was that today?" 
-		image="/images/celebration.jpg" 
+	<FamilyMenuItem
+		title="Anniversaries & Birthdays"
+		description="Oh!  Was that today?"
+		image="/images/celebration.jpg"
 		loggedIn={LoggedIn}
-		onclick={setAnniversariesMenu} 
+		onclick={setAnniversariesMenu}
 	/>
-
 </div>
 
 <style>
@@ -85,5 +83,4 @@
 		flex-wrap: wrap;
 		margin-block: 6rem;
 	}
-
 </style>
