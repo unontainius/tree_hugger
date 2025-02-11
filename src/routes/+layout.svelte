@@ -135,17 +135,14 @@
 		align-items: center;
 		position: absolute;
 		top: 0;
-		width: calc(100vw - 1rem);
+		width: 100vw;
 		padding: 2rem;
 		padding-inline: 1rem;
 		height: 4rem;
 		z-index: 1000;
 		background-color: #ffffff34;
-		margin: 0.5rem;
-		margin-block-start: 0;
-		border-radius: 1rem;
-		border-top-left-radius: 0;
-		border-top-right-radius: 0;
+		margin: 0;
+
 		/* outline: 1px solid rgba(255, 255, 255, 0.51);
 		outline-offset: -4px; */
 	}
