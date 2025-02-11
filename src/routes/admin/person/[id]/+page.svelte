@@ -14,6 +14,7 @@
 	import RelationshipForm from '$lib/components/RelationshipForm.svelte';
 	import Window from '$lib/components/Window.svelte';
 	import { user } from '$lib/stores/authStore';
+	import { menuRequired, menuName } from '$lib/stores/menuStore';
 
 	let { data } = $props();
 	let person = $state<PersonRow | null>(data.data as PersonRow);
@@ -38,6 +39,7 @@
 	let relationshipFormPersonC = $state<PersonRow | null>(null);
 
 	let isLoading = $state(true);
+	let isPageLoading = $state(true);
 
 	// Add a hidden file input
 	let fileInput: HTMLInputElement;
@@ -64,10 +66,16 @@
 	});
 
 	onMount(async () => {
+		isPageLoading = true;
+		// Keep menu but ensure it's properly configured
+		$menuRequired = true;
+		$menuName = 'family-tree';  // Set the correct menu for this page
+		
 		// Set dimensions only after component is mounted (client-side)
 		imageSelectorWidth = window.innerWidth * 0.8;
 		imageSelectorHeight = window.innerHeight * 0.8;
 		await loadPageData();		
+		isPageLoading = false;
 	});
 
 	async function loadPageData(loadWhat: string = 'all') {
@@ -300,6 +308,9 @@
 			await handleSaveForm();
 		}
 		formIsDirty = false;
+
+		// Reset menu name when leaving
+		$menuName = 'home';
 	});
 	async function handleAddRelationship(
 		relationship: string = 'unknown',
@@ -371,366 +382,370 @@
 	}
 </script>
 
-<div class="page-container">
-	<div class="content-container">
-		{#if !addingNewUser}
-			{#if person}
-				<!-- Parents -->
-				<div class="row-container left">
-					<div class="column-container">
-
-						<div class="row-content-container">
-							<div class="header">
-								Parents
-								<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
-									<MIcon name="add" size="42px" />
-								</button>
-							</div>
-							{#if parents}
-								<!-- Parent B -->
-								{#each parents.parent_b as parent}
-									<PersonCard person={parent} onclick={() => changePerson(parent)} />
-								{/each}
-								<!-- Parent C -->
-								{#each parents.parent_c as parent}
-									<PersonCard person={parent} onclick={() => changePerson(parent)} />
-								{/each}
-							{/if}
-						</div>
-					</div>
-				</div>
-				<!-- Immediate Family -->
-				<div class="row-container left">
-
-					<div class="column-container">
-						<div class="row-content-container">
-							<div class="header">
-								Siblings
-								<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
-									<MIcon name="add" size="42px" />
-								</button>
-							</div>
-							{#if siblings}
-								{#each siblings as sibling}
-									<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
-								{/each}
-							{/if}
-						</div>
-					</div>
-				</div>
-			{/if}
-		{/if}
-		<!-- Main Character info -->
-		<div class="image-controls-row">
+{#if isPageLoading}
+	<div class="loading">Loading...</div>
+{:else}
+	<div class="page-container">
+		<div class="content-container">
 			{#if !addingNewUser}
 				{#if person}
-					<div class="image-container-column">
-						<div class="redacted-container">
-							<h1 class={LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
-								{person.first_name}
-								{person.last_name}
-							</h1>
-						</div>
+					<!-- Parents -->
+					<div class="row-container left">
+						<div class="column-container">
 
-						<div class="image-header-row">
-							<div class="image-container-column">
-								<!-- Image -->
-								<div class="image">
-									{#if person.image_url?.length && person.image_url.length > 10}
-										<img src={person.image_url} alt="Person Avatar" />
-									{:else}
-										<img src="/images/noimage3.png" alt=" no Personal Avatar yet" />
-									{/if}
+							<div class="row-content-container">
+								<div class="header">
+									Parents
+									<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
+										<MIcon name="add" size="42px" />
+									</button>
 								</div>
-								<!-- Image buttons -->
-							</div>
-							<div class="image-buttons-column">
-								<button
-									class="image-btn"
-									onclick={handleAddImageFromLocal}
-									title="Load Image from your Device"
-								>
-									<MIcon name="upload" size="32px" />
-								</button>
-								<button
-									class="image-btn"
-									onclick={handleAddImageFromDatabase}
-									title="Download Image from our database"
-								>
-									<MIcon name="download" size="32px" />
-								</button>
-								<button
-									class="image-btn"
-									onclick={handleRemoveImage}
-									title="Remove this Image from this Person"
-								>
-									<MIcon name="remove-image" size="32px" />
-								</button>
+								{#if parents}
+									<!-- Parent B -->
+									{#each parents.parent_b as parent}
+										<PersonCard person={parent} onclick={() => changePerson(parent)} />
+									{/each}
+									<!-- Parent C -->
+									{#each parents.parent_c as parent}
+										<PersonCard person={parent} onclick={() => changePerson(parent)} />
+									{/each}
+								{/if}
 							</div>
 						</div>
-						<div class="image-delete-row">
-							<button
-								class="btn-delete"
-								onclick={() => handleDeleteConfirmation('Person')}
-								title="Permanently Delete this Person from the database"
-							>
-								<MIcon name="bomb" size="64px" />
-								<div class="column-container">
-									<p>Forever! No backsies.</p>
-									<p>The end. Finito</p>
+					</div>
+					<!-- Immediate Family -->
+					<div class="row-container left">
+
+						<div class="column-container">
+							<div class="row-content-container">
+								<div class="header">
+									Siblings
+									<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
+										<MIcon name="add" size="42px" />
+									</button>
 								</div>
-							</button>
+								{#if siblings}
+									{#each siblings as sibling}
+										<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
+									{/each}
+								{/if}
+							</div>
 						</div>
 					</div>
 				{/if}
-			{:else}
-				<div class="new-person-col">
-					<h1>New Person</h1>
-				</div>
 			{/if}
-			{#if person}
-				<!-- Person info (2 columns)-->
+			<!-- Main Character info -->
+			<div class="image-controls-row">
+				{#if !addingNewUser}
+					{#if person}
+						<div class="image-container-column">
+							<div class="redacted-container">
+								<h1 class={LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
+									{person.first_name}
+									{person.last_name}
+								</h1>
+							</div>
 
-				<div class="info-column">
-					<div class="info-row">
-						<div class="info-content-column">
-							<div class="field">
-								<h2>First</h2>
-
-								<input
-									class={LoggedIn ? '' : 'blurred'}
-									type="text"
-									bind:value={person.first_name}
-									onchange={() => (formIsDirty = true)}
-									disabled={LoggedIn === false}
-								/>
-							</div>
-							<div class="field">
-								<h2>Middle</h2>
-								<div class="redacted-container">
-									<input
-										class={LoggedIn ? '' : 'blurred'}
-										type="text"
-										bind:value={person.middle_name}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-									/>
-								</div>
-							</div>
-							<div class="field">
-								<h2>Last Name</h2>
-								<div class="redacted-container">
-									<input
-										class={LoggedIn ? '' : 'blurred'}
-										type="text"
-										bind:value={person.last_name}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-									/>
-								</div>
-							</div>
-							<div class="field">
-								<h2>Maiden</h2>
-								<div class="redacted-container">
-									<input
-										class={LoggedIn ? '' : 'blurred'}
-										type="text"
-										bind:value={person.maiden_name}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-									/>
-								</div>
-							</div>
-							<div class="field">
-								<h2>Alias</h2>
-								<div class="redacted-container">
-									<input
-										class={LoggedIn ? '' : 'blurred'}
-										type="text"
-										bind:value={person.alias}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-									/>
-								</div>
-							</div>
-						</div>
-						<div class="info-content-column">
-							<div class="field">
-								<h2>Gender</h2>
-								<div class={LoggedIn ? '' : 'blurred'}>
-									<select bind:value={person.sex} disabled={LoggedIn === false}>
-										<option value="Male">Male</option>
-										<option value="Female">Female</option>
-										<option value="Other">Other</option>
-									</select>
-								</div>
-							</div>
-							<div class="field">
-								<h2>Born</h2>
-								<div class="row-content-container-text">
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="date"
-											bind:value={person.born}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-										{#if person.born}
-											<button
-												class="btn-clear"
-												onclick={() => {
-													if (person) {
-														person.born = null;
-													}
-												}}
-												disabled={LoggedIn === false}
-											>
-												<MIcon name="x" size="1.5rem" />
-											</button>
+							<div class="image-header-row">
+								<div class="image-container-column">
+									<!-- Image -->
+									<div class="image">
+										{#if person.image_url?.length && person.image_url.length > 10}
+											<img src={person.image_url} alt="Person Avatar" />
+										{:else}
+											<img src="/images/noimage3.png" alt=" no Personal Avatar yet" />
 										{/if}
 									</div>
+									<!-- Image buttons -->
 								</div>
-							</div>
-
-							<div class="field">
-								<h2>Phone</h2>
-								<div class="redacted-container">
-									<input
-										class={LoggedIn ? '' : 'blurred'}
-										type="text"
-										bind:value={person.phone_number}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-									/>
-								</div>
-							</div>
-							<div class="field">
-								<h2>Email</h2>
-								<div class="redacted-container">
-									<input
-										class={LoggedIn ? '' : 'blurred'}
-										type="email"
-										bind:value={person.email}
-										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
-									/>
-								</div>
-							</div>
-
-							<div class="field">
-								<h2>Died</h2>
-								<div class="row-content-container-text">
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="date"
-											bind:value={person.died}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-										{#if person.died}
-											<button
-												class="btn-clear"
-												onclick={() => {
-													if (person) {
-														person.died = null;
-													}
-												}}
-												disabled={LoggedIn === false}
-											>
-												<MIcon name="x" size="1.5rem" />
-											</button>
-										{/if}
-									</div>
-								</div>
-							</div>
-
-						</div>
-					</div>
-					<div class="flex flex-row gap-2 self-end"></div>
-					<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
-						{#if LoggedIn}
-								<span><MIcon name="save" size="24px" /></span>
-								<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
-						{:else}
-							<div style="padding: 0.5rem;">
-								<MIcon name="locked" size="24px" /> 
-
-							</div>
-						{/if}
-					</button>
-
-				</div>
-			{/if}
-		</div>
-
-		{#if !addingNewUser}
-			<!-- Relationships -->
-			{#if isLoading}
-				<p>Loading ...</p>
-			{:else}
-				<div class="row-content-container left">
-					
-					{#if children && children.partners.length > 0}
-						{#each children.partners as partnerGroup}
-							<div class="row-container">
-								<div class="column-container">
-									<div class="row-content-container">
-										<div class="header">
-											Partner
-											<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-												<MIcon name="add" size="42px" />
-											</button>
-										</div>
-										<PersonCard
-											person={partnerGroup.partner}
-											onclick={() => changePerson(partnerGroup.partner)}
-										/>
-									</div>
-
-									<div class="row-content-container">
-										<div class="header">
-											Children
-											<button class="btn-add" onclick={() => handleAddRelationship('Child', partnerGroup.partner)}>
-												<MIcon name="add" size="42px" />
-											</button>
-
-										</div>
-										{#if partnerGroup.children.length > 0}
-											{#each partnerGroup.children as child}
-												{#if child.first_name !== 'No'}
-													<PersonCard person={child} onclick={() => changePerson(child)} />
-												{/if}
-											{/each}
-										{/if}
-									</div>
-								</div>
-							</div>
-						{/each}
-					{:else}
-
-						<!-- Show empty state with add buttons -->
-						<div class="row-container left">
-							<div class="column-container">
-								<div class="header">
-									Partner
-									<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-										<MIcon name="add" size="42px" />
+								<div class="image-buttons-column">
+									<button
+										class="image-btn"
+										onclick={handleAddImageFromLocal}
+										title="Load Image from your Device"
+									>
+										<MIcon name="upload" size="32px" />
 									</button>
-									Children
-									<button class="btn-add" onclick={() => handleAddRelationship('Child')}>
-										<MIcon name="add" size="42px" />
+									<button
+										class="image-btn"
+										onclick={handleAddImageFromDatabase}
+										title="Download Image from our database"
+									>
+										<MIcon name="download" size="32px" />
+									</button>
+									<button
+										class="image-btn"
+										onclick={handleRemoveImage}
+										title="Remove this Image from this Person"
+									>
+										<MIcon name="remove-image" size="32px" />
 									</button>
 								</div>
+							</div>
+							<div class="image-delete-row">
+								<button
+									class="btn-delete"
+									onclick={() => handleDeleteConfirmation('Person')}
+									title="Permanently Delete this Person from the database"
+								>
+									<MIcon name="bomb" size="64px" />
+									<div class="column-container">
+										<p>Forever! No backsies.</p>
+										<p>The end. Finito</p>
+									</div>
+								</button>
 							</div>
 						</div>
 					{/if}
-				</div>
+				{:else}
+					<div class="new-person-col">
+						<h1>New Person</h1>
+					</div>
+				{/if}
+				{#if person}
+					<!-- Person info (2 columns)-->
+
+					<div class="info-column">
+						<div class="info-row">
+							<div class="info-content-column">
+								<div class="field">
+									<h2>First</h2>
+
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.first_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
+								</div>
+								<div class="field">
+									<h2>Middle</h2>
+									<div class="redacted-container">
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="text"
+											bind:value={person.middle_name}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+									</div>
+								</div>
+								<div class="field">
+									<h2>Last Name</h2>
+									<div class="redacted-container">
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="text"
+											bind:value={person.last_name}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+									</div>
+								</div>
+								<div class="field">
+									<h2>Maiden</h2>
+									<div class="redacted-container">
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="text"
+											bind:value={person.maiden_name}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+									</div>
+								</div>
+								<div class="field">
+									<h2>Alias</h2>
+									<div class="redacted-container">
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="text"
+											bind:value={person.alias}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+									</div>
+								</div>
+							</div>
+							<div class="info-content-column">
+								<div class="field">
+									<h2>Gender</h2>
+									<div class={LoggedIn ? '' : 'blurred'}>
+										<select bind:value={person.sex} disabled={LoggedIn === false}>
+											<option value="Male">Male</option>
+											<option value="Female">Female</option>
+											<option value="Other">Other</option>
+										</select>
+									</div>
+								</div>
+								<div class="field">
+									<h2>Born</h2>
+									<div class="row-content-container-text">
+										<div class="redacted-container">
+											<input
+												class={LoggedIn ? '' : 'blurred'}
+												type="date"
+												bind:value={person.born}
+												onchange={() => (formIsDirty = true)}
+												disabled={LoggedIn === false}
+											/>
+											{#if person.born}
+												<button
+													class="btn-clear"
+													onclick={() => {
+														if (person) {
+															person.born = null;
+														}
+													}}
+													disabled={LoggedIn === false}
+												>
+													<MIcon name="close" size="1.5rem" />
+												</button>
+											{/if}
+										</div>
+									</div>
+								</div>
+
+								<div class="field">
+									<h2>Phone</h2>
+									<div class="redacted-container">
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="text"
+											bind:value={person.phone_number}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+									</div>
+								</div>
+								<div class="field">
+									<h2>Email</h2>
+									<div class="redacted-container">
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="email"
+											bind:value={person.email}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+									</div>
+								</div>
+
+								<div class="field">
+									<h2>Died</h2>
+									<div class="row-content-container-text">
+										<div class="redacted-container">
+											<input
+												class={LoggedIn ? '' : 'blurred'}
+												type="date"
+												bind:value={person.died}
+												onchange={() => (formIsDirty = true)}
+												disabled={LoggedIn === false}
+											/>
+											{#if person.died}
+												<button
+													class="btn-clear"
+													onclick={() => {
+														if (person) {
+															person.died = null;
+														}
+													}}
+													disabled={LoggedIn === false}
+												>
+													<MIcon name="close" size="1.5rem" />
+												</button>
+											{/if}
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="flex flex-row gap-2 self-end"></div>
+						<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
+							{#if LoggedIn}
+									<span><MIcon name="save" size="24px" /></span>
+									<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
+							{:else}
+								<div style="padding: 0.5rem;">
+									<MIcon name="locked" size="24px" /> 
+
+								</div>
+							{/if}
+						</button>
+
+					</div>
+				{/if}
+			</div>
+
+			{#if !addingNewUser}
+				<!-- Relationships -->
+				{#if isLoading}
+					<p>Loading ...</p>
+				{:else}
+					<div class="row-content-container left">
+						
+						{#if children && children.partners.length > 0}
+							{#each children.partners as partnerGroup}
+								<div class="row-container">
+									<div class="column-container">
+										<div class="row-content-container">
+											<div class="header">
+												Partner
+												<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
+													<MIcon name="add" size="42px" />
+												</button>
+											</div>
+											<PersonCard
+												person={partnerGroup.partner}
+												onclick={() => changePerson(partnerGroup.partner)}
+											/>
+										</div>
+
+										<div class="row-content-container">
+											<div class="header">
+												Children
+												<button class="btn-add" onclick={() => handleAddRelationship('Child', partnerGroup.partner)}>
+													<MIcon name="add" size="42px" />
+												</button>
+
+											</div>
+											{#if partnerGroup.children.length > 0}
+												{#each partnerGroup.children as child}
+													{#if child.first_name !== 'No'}
+														<PersonCard person={child} onclick={() => changePerson(child)} />
+													{/if}
+												{/each}
+											{/if}
+										</div>
+									</div>
+								</div>
+							{/each}
+						{:else}
+
+							<!-- Show empty state with add buttons -->
+							<div class="row-container left">
+								<div class="column-container">
+									<div class="header">
+										Partner
+										<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
+											<MIcon name="add" size="42px" />
+										</button>
+										Children
+										<button class="btn-add" onclick={() => handleAddRelationship('Child')}>
+											<MIcon name="add" size="42px" />
+										</button>
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{/if}
 			{/if}
-		{/if}
+		</div>
 	</div>
-</div>
+{/if}
 
 {#if person && showImageSelector}
 	<div style="position: fixed; inset: 0; z-index: 9998;">
