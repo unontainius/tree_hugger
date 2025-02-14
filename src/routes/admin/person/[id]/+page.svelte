@@ -6,13 +6,13 @@
 	import { toasts } from '$lib/stores/toastStore';
 	import { goto } from '$app/navigation';
 	import { authService } from '$lib/services/authService';
-	import MIcon from '$lib/components/MIcon.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
 	import db from '$lib/services/treeDb';
-	import PersonCard from '$lib/components/PersonCard.svelte';
-	import ImageCropper from '$lib/components/ImageCropper.svelte';
-	import ImageSelector from '$lib/components/ImageSelector.svelte';
-	import RelationshipForm from '$lib/components/RelationshipForm.svelte';
-	import Window from '$lib/components/Window.svelte';
+	import PersonCard from '$lib/components/family-tree/PersonCard.svelte';
+	import ImageCropper from '$lib/components/common/ImageCropper.svelte';
+	import ImageSelector from '$lib/components/common/ImageSelector.svelte';
+	import RelationshipForm from '$lib/components/family-tree/RelationshipForm.svelte';
+	import Window from '$lib/components/common/Window.svelte';
 	import { user } from '$lib/stores/authStore';
 	import { menuRequired, menuName } from '$lib/stores/menuStore';
 
@@ -47,8 +47,8 @@
 
 	let showCropper = $state(false);
 	let showImageSelector = $state(false);
-	let imageSelectorWidth = $state(0);
-	let imageSelectorHeight = $state(0);
+	// let imageSelectorWidth = $state(0);
+	// let imageSelectorHeight = $state(0);
 	let showDeletePersonConfirmation = $state(false);
 	let showDeleteImageConfirmation = $state(false);
 	let itemToDelete = $state<'Person' | 'Image' | null>(null);
@@ -56,6 +56,7 @@
 	let addingNewUser = $state(false);
 
 	let formIsDirty = $state(false);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let fileToUpload: File | null = $state(null);
 
 	let LoggedIn = $state(false);
@@ -71,9 +72,6 @@
 		$menuRequired = true;
 		$menuName = 'family-tree'; // Set the correct menu for this page
 
-		// Set dimensions only after component is mounted (client-side)
-		imageSelectorWidth = window.innerWidth * 0.8;
-		imageSelectorHeight = window.innerHeight * 0.8;
 		await loadPageData();
 		isPageLoading = false;
 	});
@@ -98,11 +96,8 @@
 				last_edited_by: (await authService.getCurrentUser())?.email || ''
 			};
 		}
-		67;
 		if (!addingNewUser) {
 			try {
-				// toasts.info(`Loading data for ${person.first_name} ${person.last_name}`, 1000);
-
 				if (loadWhat === 'all') {
 					// Get fresh person data
 					const freshPerson = await db.Person.single(person.id);
@@ -155,9 +150,9 @@
 		// Load the new data
 		await loadPageData();
 	}
-	function handleConfirmationRecived(reason: string) {
-		showImageSelector = false;
-	}
+	// function handleConfirmationRecived(reason: string) {
+	// 	showImageSelector = false;
+	// }
 	async function handleRemoveImage() {
 		if (!(await isLoggedIn())) return;
 		console.log('remove image');
@@ -171,27 +166,27 @@
 			showDeleteImageConfirmation = true;
 		}
 	}
-	async function handleDeleteImage() {
-		if (!(await isLoggedIn())) return;
-		if (!person?.image_url) return;
+	// async function handleDeleteImage() {
+	// 	if (!(await isLoggedIn())) return;
+	// 	if (!person?.image_url) return;
 
-		try {
-			// Extract path from URL
-			const path = person.image_url.split('/').pop();
-			if (!path) throw new Error('Invalid image URL');
+	// 	try {
+	// 		// Extract path from URL
+	// 		const path = person.image_url.split('/').pop();
+	// 		if (!path) throw new Error('Invalid image URL');
 
-			await imageService.deleteImage(path);
+	// 		await imageService.deleteImage(path);
 
-			// Update person record
-			await db.Person.update(person.id, { image_url: null });
-			const updatedPerson = await db.Person.single(person.id);
-			if (updatedPerson) {
-				person = updatedPerson;
-			}
-		} catch (error) {
-			console.error('Error deleting image:', error);
-		}
-	}
+	// 		// Update person record
+	// 		await db.Person.update(person.id, { image_url: null });
+	// 		const updatedPerson = await db.Person.single(person.id);
+	// 		if (updatedPerson) {
+	// 			person = updatedPerson;
+	// 		}
+	// 	} catch (error) {
+	// 		console.error('Error deleting image:', error);
+	// 	}
+	// }
 	async function handleAddImageFromLocal() {
 		if (!(await isLoggedIn())) return;
 
@@ -272,7 +267,7 @@
 		console.log('handleSaveForm', person);
 		toasts.success(`saving changes for ${person.first_name} ${person.last_name}`);
 		if (addingNewUser) {
-			const data = await db.Person.create(person).then(async (newPerson) => {
+			await db.Person.create(person).then(async (newPerson) => {
 				if (newPerson) {
 					addingNewUser = false;
 					goto(`/admin/person/${newPerson.id}`, { replaceState: true });
@@ -346,10 +341,10 @@
 		changePerson(person);
 	}
 	// Update the state with both the boolean and a message
-	function openImageSelector() {
-		showImageSelector = true;
-		// debugMessage = 'Image selector opened';
-	}
+	// function openImageSelector() {
+	// 	showImageSelector = true;
+	// 	// debugMessage = 'Image selector opened';
+	// }
 	function closeImageSelector() {
 		// debugState.showImageSelector = false;
 		// debugState.personId = null;
@@ -383,7 +378,11 @@
 </script>
 
 {#if isPageLoading}
-	<div class="loading">Loading...</div>
+	<div class="loading">
+
+			<span class="loader"></span>
+
+	</div>
 {:else}
 	<div class="page-container">
 		<div class="content-container">
@@ -392,7 +391,12 @@
 					<!-- Parents -->
 					<div class="row-container left">
 						<div class="column-container">
-							<div class="section-header">Parents</div>
+							<div class="section-header">
+								Parents
+								<button class="section-header-icon" onclick={() => handleAddRelationship('Parent')}>
+									<MIcon name="add" size="24px" />
+								</button>
+							</div>
 							<div class="section-content">
 								{#if parents && (parents.parent_b.length > 0 || parents.parent_c.length > 0)}
 									<!-- Parent B -->
@@ -412,7 +416,12 @@
 					<!-- Immediate Family -->
 					<div class="row-container left">
 						<div class="column-container">
-							<div class="section-header">Siblings</div>
+							<div class="section-header">
+								Siblings
+								<button class="section-header-icon" onclick={() => handleAddRelationship('Sibling')}>
+									<MIcon name="add" size="24px" />
+								</button>
+							</div>
 							<div class="section-content">
 								{#if siblings}
 									{#each siblings as sibling}
@@ -679,7 +688,12 @@
 								<div class="partner-children-container">
 									<div class="partner-children-row">
 										<div class="partner-column">
-											<div class="section-header">Partner</div>
+											<div class="section-header">
+												Partner
+												<button class="section-header-icon" onclick={() => handleAddRelationship('Partner')}>
+													<MIcon name="add" size="24px" />
+												</button>
+											</div>
 											<div class="section-content">
 												<PersonCard
 													person={partnerGroup.partner}
@@ -687,9 +701,14 @@
 												/>
 											</div>
 										</div>
-										{#if partnerGroup.children.some(child => child.first_name !== 'No')}
+										{#if partnerGroup.children.some((child) => child.first_name !== 'No')}
 											<div class="children-column">
-												<div class="section-header">Children</div>
+												<div class="section-header">
+													Children
+													<button class="section-header-icon" onclick={() => handleAddRelationship('Child')}>
+														<MIcon name="add" size="24px" />
+													</button>
+												</div>
 												<div class="section-content children-content">
 													{#if partnerGroup.children.length > 0}
 														{#each partnerGroup.children as child}
@@ -710,16 +729,17 @@
 							<!-- Show empty state with add buttons -->
 							<div class="row-container left">
 								<div class="column-container">
-									<div class="section-header">Partner</div>
-									<div class="section-content">
-										<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-											<MIcon name="add" size="42px" />
+									<div class="section-header">
+										Partner
+										<button class="section-header-icon" onclick={() => handleAddRelationship('Partner')}>
+											<MIcon name="add" size="24px" />
 										</button>
 									</div>
-									<div class="section-header">Children</div>
-									<div class="section-content">
-										<button class="btn-add" onclick={() => handleAddRelationship('Child')}>
-											<MIcon name="add" size="42px" />
+
+									<div class="section-header">
+										Children
+										<button class="section-header-icon" onclick={() => handleAddRelationship('Child')}>
+											<MIcon name="add" size="24px" />
 										</button>
 									</div>
 								</div>
@@ -778,9 +798,11 @@
 			showMinimize={false}
 			showMaximize={false}
 			onClose={() => {
-				itemToDelete === 'Person'
-					? (showDeletePersonConfirmation = false)
-					: (showDeleteImageConfirmation = false);
+				if (itemToDelete === 'Person') {
+					showDeletePersonConfirmation = false;
+				} else {
+					showDeleteImageConfirmation = false;
+				}
 			}}
 			showFooter={true}
 			acceptButtonText={`Yes, remove ${itemToDelete === 'Person' ? person?.first_name : ' this Image'}`}
@@ -1116,11 +1138,6 @@
 	}
 
 	@media (max-width: 768px) {
-		.header {
-			flex-direction: row;
-			align-items: center;
-			width: 100%;
-		}
 		.image-controls-row {
 			flex-direction: column;
 			align-items: center;
@@ -1192,8 +1209,13 @@
 
 	/* Section Headers */
 	.section-header {
-		font-size: 1.2rem;
-		font-weight: 600;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 2rem;
+		font-size: 2.0rem;
+		font-weight: 300;
 		color: white;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 		margin: 0.5rem;
@@ -1201,7 +1223,15 @@
 		text-align: left;
 		width: 100%;
 	}
+	.section-header-icon {
+		background-color: dodgerblue;
+		border: none;
+		padding: 0.5rem;
+		margin: 0;
+		cursor: pointer;
+		border-radius: 2rem;
 
+	}
 	/* Section Content */
 	.section-content {
 		display: flex;
@@ -1214,15 +1244,6 @@
 		background-color: rgba(255, 255, 255, 0.1);
 		border-radius: 0.5rem;
 		width: 100%;
-	}
-
-	/* Section Text */
-	.section-text {
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 1rem;
-		line-height: 1.5;
-		margin: 0;
-		padding: 0.5rem;
 	}
 
 	/* Empty Section Message */
@@ -1272,4 +1293,85 @@
 		width: 100%;
 	}
 
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 70vh;
+	}
+
+	.loader {
+        transform: rotateZ(45deg);
+        perspective: 1000px;
+        border-radius: 50%;
+        width: 148px;
+        height: 148px;
+        color: #fff;
+      }
+        .loader:before,
+        .loader:after {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: inherit;
+          height: inherit;
+          border-radius: 50%;
+          transform: rotateX(70deg);
+          animation: 1s spin linear infinite;
+        }
+        .loader:after {
+          color: #FF3D00;
+          transform: rotateY(70deg);
+          animation-delay: .4s;
+        }
+
+      @keyframes rotate {
+        0% {
+          transform: translate(-50%, -50%) rotateZ(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotateZ(360deg);
+        }
+      }
+
+      @keyframes rotateccw {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(-360deg);
+        }
+      }
+
+      @keyframes spin {
+        0%,
+        100% {
+          box-shadow: .2em 0px 0 0px currentcolor;
+        }
+        12% {
+          box-shadow: .2em .2em 0 0 currentcolor;
+        }
+        25% {
+          box-shadow: 0 .2em 0 0px currentcolor;
+        }
+        37% {
+          box-shadow: -.2em .2em 0 0 currentcolor;
+        }
+        50% {
+          box-shadow: -.2em 0 0 0 currentcolor;
+        }
+        62% {
+          box-shadow: -.2em -.2em 0 0 currentcolor;
+        }
+        75% {
+          box-shadow: 0px -.2em 0 0 currentcolor;
+        }
+        87% {
+          box-shadow: .2em -.2em 0 0 currentcolor;
+        }
+      }
+   
 </style>

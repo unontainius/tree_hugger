@@ -9,7 +9,8 @@
 
 	const { onclose } = $props();
 
-	async function handleSubmit() {
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
 		try {
 			await authService.login(username, password);
 			loginRequestedState.set(false);
@@ -39,8 +40,7 @@
 <div class="login-form">
 	<form
 		onsubmit={(e) => {
-			e.preventDefault;
-			handleSubmit();
+			handleSubmit(e);
 		}}
 	>
 		<div class="form-group">

@@ -29,5 +29,6 @@
 		align-items: center;
 		width: 90vw;
 		margin: 0 auto;
+		gap: 1rem;
 	}
 </style>

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import db from '$lib/services/treeDb';
-	import MIcon from './MIcon.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
 	import { imageService } from '$lib/services/imageService';
 	import { isLoggedIn } from '$lib/utils/authUtils';
 	import { toasts } from '$lib/stores/toastStore';
-	import Window from './Window.svelte';
+	import Window from '$lib/components/common/Window.svelte';
 
 	const { personId, onComplete } = $props<{
 		personId: string;

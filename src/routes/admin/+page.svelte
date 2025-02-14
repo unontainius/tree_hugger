@@ -3,7 +3,7 @@
 	import { menuName } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
-	import FamilyMenuItem from '$lib/components/FamilyMenuItem.svelte';
+	import FamilyMenuItem from '$lib/components/family-tree/FamilyMenuItem.svelte';
 
 	let LoggedIn = $state(false);
 

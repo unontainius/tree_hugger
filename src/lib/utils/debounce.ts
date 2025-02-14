@@ -5,7 +5,7 @@
  * @param func The function to debounce
  * @param wait The number of milliseconds to delay
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
 	func: T,
 	wait: number
 ): (...args: Parameters<T>) => void {
@@ -15,7 +15,7 @@ export function debounce<T extends (...args: any[]) => any>(
 		clearTimeout(timeoutId);
 
 		timeoutId = setTimeout(() => {
-			func.apply(this, args);
+			func(...args);
 		}, wait);
 	};
 }

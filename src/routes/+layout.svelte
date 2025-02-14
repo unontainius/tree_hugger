@@ -1,15 +1,15 @@
 <script lang="ts">
 	import '../app.css';
-	import Toast from '$lib/components/Toast.svelte';
+	import type { MenuItem } from '$lib/types/menu.types';
+	import Toast from '$lib/components/common/Toast.svelte';
 	import { user } from '$lib/stores/authStore';
 	import { authService } from '$lib/services/authService';
 	import { onMount } from 'svelte';
-	import { toasts } from '$lib/stores/toastStore';
 	import { loginRequestedState } from '$lib/stores/authStore';
 	import LoginForm from '$lib/components/LoginForm.svelte';
-	import Window from '$lib/components/Window.svelte';
-	import MIcon from '$lib/components/MIcon.svelte';
-	import PageTransition from '$lib/components/PageTransition.svelte';
+	import Window from '$lib/components/common/Window.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
+	import PageTransition from '$lib/components/common/PageTransition.svelte';
 	import { menuName, menuConfigs, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
@@ -21,7 +21,7 @@
 		LoggedIn = $user !== null;
 	});
 
-	let { data, children } = $props();
+	let { children } = $props();
 	let ShowLoginForm = $state(false);
 	// let navIconSize = $state(browser ? (window.innerWidth > 768 ? 48 : 24) : 24);
 	let navIconSize = 48;
@@ -33,7 +33,7 @@
 	async function handleLogout() {
 		if ($user) {
 			await authService.logout();
-			loginRequestedState.update((state: boolean) => false);
+			loginRequestedState.set(false);
 		}
 	}
 
@@ -50,7 +50,7 @@
 	}
 </script>
 
-<Toast message="message not required other than to stop the compiler complaining" />
+<Toast />
 
 {#if $menuRequired}
 	<nav>
@@ -104,7 +104,7 @@
 	</Window>
 {/if}
 
-<PageTransition {data}>
+<PageTransition>
 	{@render children()}
 </PageTransition>
 

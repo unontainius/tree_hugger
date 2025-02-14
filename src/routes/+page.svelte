@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MIcon from '$lib/components/MIcon.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
 	import { menuName, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';

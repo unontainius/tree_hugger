@@ -1,5 +1,6 @@
 <script lang="ts">
-	let { children } = $props<{ children: any }>();
+	import type { Snippet } from 'svelte';
+	let { children } = $props<{ children: Snippet }>();
 </script>
 
 <div class="rounded-tab">

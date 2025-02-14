@@ -33,24 +33,18 @@
 			</p>
 		</div>
 	</div>
-    <div class="my-col">
-        <a href="/resume">
-            <div class="wee-block">
-                home
-            </div>
-        </a>
-        <a href="/resume">
-            <div class="wee-block">
-            </div>
-        </a>
-        <a href="/resume">
-            <div class="wee-block">
-            </div>
-        </a>
-        <div class="wee-block">
-        </div>
-        
-    </div>
+	<div class="my-col">
+		<a href="/resume">
+			<div class="wee-block">home</div>
+		</a>
+		<a href="/resume" aria-label="resume">
+			<div class="wee-block">resume</div>
+		</a>
+		<a href="/resume" aria-label="resume">
+			<div class="wee-block"></div>
+		</a>
+		<div class="wee-block"></div>
+	</div>
 </div>
 
 <div class="box"><b></b></div>
@@ -61,14 +55,14 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
-        flex-wrap: wrap;
+		flex-wrap: wrap;
 	}
 	.about-info-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-        max-width: 70ch;
+		max-width: 70ch;
 		min-width: 300px; /* Set a width for the container */
 		margin: 0 1rem; /* Center the container */
 	}

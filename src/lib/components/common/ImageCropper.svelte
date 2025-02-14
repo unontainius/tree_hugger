@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Cropper from 'cropperjs';
 	import 'cropperjs/dist/cropper.css';
-	import MIcon from './MIcon.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
 
 	let { imageUrl, showCropper, onComplete, onCancel } = $props<{
 		imageUrl: string | null;

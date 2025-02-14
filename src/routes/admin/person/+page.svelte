@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { PersonRow } from '$lib/types/database.types';
 	import db from '$lib/services/treeDb';
-	import MIcon from '$lib/components/MIcon.svelte';
-	import PeopleCatalog from '$lib/components/PeopleCatalog.svelte';
-	import RadioButtons from '$lib/components/RadioButtons.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
+	import PeopleCatalog from '$lib/components/family-tree/PeopleCatalog.svelte';
+	import RadioButtons from '$lib/components/common/RadioButtons.svelte';
 	import { onMount } from 'svelte';
 	import { debounce } from '$lib/utils/debounce';
 

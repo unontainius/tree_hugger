@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MIcon from '$lib/components/MIcon.svelte';
+	import MIcon from '$lib/components/common/MIcon.svelte';
 </script>
 
 <div class="content">

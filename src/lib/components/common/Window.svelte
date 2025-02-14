@@ -4,7 +4,8 @@
 	import { taskbarStore } from '$lib/stores/taskbarStore';
 	import MIcon from './MIcon.svelte';
 	import { cubicOut } from 'svelte/easing';
-	import Tab from './Tab.svelte';
+	import Tab from '../Tab.svelte';
+	import type { Snippet } from 'svelte';
 
 	interface WindowState {
 		position: { x: number; y: number };
@@ -20,7 +21,6 @@
 		onClose,
 		footerButtons = [],
 		children,
-		componentProps = {},
 		initialPosition = {
 			x: Math.min((window.innerWidth - 400) / 2, window.innerWidth - 400),
 			y: Math.min((window.innerHeight - 400) / 3.5, window.innerHeight - 290)
@@ -42,8 +42,7 @@
 		title: string;
 		onClose: () => void;
 		footerButtons?: { text: string; onClick: () => void }[];
-		children?: any;
-		componentProps?: Record<string, any>;
+		children?: Snippet;
 		initialPosition?: { x: number; y: number };
 		initialSize?: { width: number; height: number };
 		onPositionChange?: (position: { x: number; y: number }) => void;
@@ -127,10 +126,7 @@
 	let previousState: WindowState | null = null;
 
 	$effect(() => {
-		const window = $windows.find((w) => w.id === id);
-		// if (window) {
-		// 	zIndex = window.zIndex;
-		// }
+		$windows.find((w) => w.id === id);
 	});
 
 	$effect(() => {
@@ -213,8 +209,8 @@
 
 		const deltaX = e.clientX - resizeStart.x;
 		const deltaY = e.clientY - resizeStart.y;
-		let maxWidth = window.innerWidth - position.x;
-		let maxHeight = window.innerHeight - position.y;
+		// let maxWidth = window.innerWidth - position.x;
+		// let maxHeight = window.innerHeight - position.y;
 		let newSize = { ...size };
 		let newPosition = { ...position };
 
@@ -349,9 +345,9 @@
 		windows.register(id);
 		document.addEventListener('mousemove', handleMouseMove);
 		document.addEventListener('mouseup', handleMouseUp);
-		document.addEventListener('touchmove', handleTouchMove as EventListener, { capture: true });
-		document.addEventListener('touchend', handleMouseUp as EventListener, { capture: true });
-		shell?.addEventListener('touchstart', handleTouchStart as EventListener, { capture: true });
+		document.addEventListener('touchmove', handleTouchMove, { capture: true });
+		document.addEventListener('touchend', handleMouseUp, { capture: true });
+		shell?.addEventListener('touchstart', handleTouchStart, { capture: true });
 	});
 
 	onDestroy(() => {
@@ -359,9 +355,9 @@
 		taskbarStore.removeItem(id);
 		document.removeEventListener('mousemove', handleMouseMove);
 		document.removeEventListener('mouseup', handleMouseUp);
-		document.removeEventListener('touchmove', handleTouchMove as EventListener, { capture: true });
-		document.removeEventListener('touchend', handleMouseUp as EventListener, { capture: true });
-		shell?.removeEventListener('touchstart', handleTouchStart as EventListener, { capture: true });
+		document.removeEventListener('touchmove', handleTouchMove, { capture: true });
+		document.removeEventListener('touchend', handleMouseUp, { capture: true });
+		shell?.removeEventListener('touchstart', handleTouchStart, { capture: true });
 	});
 
 	// Animation utility
@@ -419,7 +415,7 @@
 			previousState = normalState;
 			const from = { x: position.x, y: position.y, ...size };
 			const to = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
-			const { duration, css } = getTransitionStyles(from, to);
+			const { duration } = getTransitionStyles(from, to);
 
 			shell.style.transition = `all ${duration}ms cubic-bezier(0.33, 1, 0.68, 1)`;
 			await new Promise((resolve) => {
@@ -437,7 +433,7 @@
 			taskbarStore.removeItem(id);
 			const from = { x: position.x, y: position.y, ...size };
 			const to = { ...previousState.position, ...previousState.size };
-			const { duration, css } = getTransitionStyles(from, to);
+			const { duration } = getTransitionStyles(from, to);
 
 			shell.style.transition = `all ${duration}ms cubic-bezier(0.33, 1, 0.68, 1)`;
 			await new Promise((resolve) => {
@@ -474,7 +470,7 @@
 			});
 			const from = { x: position.x, y: position.y, ...size };
 			const to = { x: 0, y: window.innerHeight, width: 200, height: 40 };
-			const { duration, css } = getTransitionStyles(from, to);
+			const { duration } = getTransitionStyles(from, to);
 
 			shell.style.transition = `all ${duration}ms cubic-bezier(0.33, 1, 0.68, 1)`;
 			await new Promise((resolve) => {
@@ -512,6 +508,8 @@
 		}
 	}
 </script>
+
+/// <reference lib="dom"></reference>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
@@ -559,7 +557,7 @@
 		<div class="body">
 			{#if children}
 				<div class="body-content">
-					{@render children(componentProps)}
+					{@render children()}
 				</div>
 			{:else}
 				<div class="body-content">
