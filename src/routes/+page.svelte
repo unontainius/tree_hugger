@@ -58,7 +58,7 @@
 				<div class="row">
 					<div class="column center">
 						<div class="gold">
-							<img src="/images/familytree.png" alt="Tree Hugger" />
+							<img src="/images/marcus.jpg" alt="Tree Hugger" />
 						</div>
 					</div>
 					<div class="column center">

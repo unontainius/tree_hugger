@@ -73,7 +73,7 @@
 		background-color: rgba(255, 255, 255, 0.445);
 		padding: 0;
 		border-radius: 0.5rem;
-		margin: 0.5rem auto;
+		margin: 0;
 		min-width: 260px;
 		max-width: 95vw;
 		box-shadow: 4px 4px 5px 0 rgba(0, 0, 0, 0.4);

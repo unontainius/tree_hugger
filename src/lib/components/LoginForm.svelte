@@ -77,10 +77,11 @@
 
 <style>
 	.login-form {
-		width: 100%;
-		height: 235px;
-		padding: 1rem;
-		padding-block-end: 3rem;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
 		background: linear-gradient(0deg, rgba(20, 33, 51, 0.96), rgba(85, 139, 189, 0.96));
 		border-bottom-left-radius: 0.4rem;
 		border-bottom-right-radius: 0.4rem;
@@ -90,6 +91,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		gap: 0.5rem;
 		justify-content: space-between;
 		margin-bottom: 1rem;
 	}

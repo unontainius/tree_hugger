@@ -392,14 +392,9 @@
 					<!-- Parents -->
 					<div class="row-container left">
 						<div class="column-container">
-							<div class="row-content-container">
-								<div class="header">
-									Parents
-									<button class="btn-add" onclick={() => handleAddRelationship('Parent')}>
-										<MIcon name="add" size="42px" />
-									</button>
-								</div>
-								{#if parents}
+							<div class="section-header">Parents</div>
+							<div class="section-content">
+								{#if parents && (parents.parent_b.length > 0 || parents.parent_c.length > 0)}
 									<!-- Parent B -->
 									{#each parents.parent_b as parent}
 										<PersonCard person={parent} onclick={() => changePerson(parent)} />
@@ -408,6 +403,8 @@
 									{#each parents.parent_c as parent}
 										<PersonCard person={parent} onclick={() => changePerson(parent)} />
 									{/each}
+								{:else}
+									<p class="empty-section">No parents recorded</p>
 								{/if}
 							</div>
 						</div>
@@ -415,17 +412,14 @@
 					<!-- Immediate Family -->
 					<div class="row-container left">
 						<div class="column-container">
-							<div class="row-content-container">
-								<div class="header">
-									Siblings
-									<button class="btn-add" onclick={() => handleAddRelationship('Sibling')}>
-										<MIcon name="add" size="42px" />
-									</button>
-								</div>
+							<div class="section-header">Siblings</div>
+							<div class="section-content">
 								{#if siblings}
 									{#each siblings as sibling}
 										<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
 									{/each}
+								{:else}
+									<p class="empty-section">No siblings recorded</p>
 								{/if}
 							</div>
 						</div>
@@ -682,39 +676,33 @@
 					<div class="row-content-container left">
 						{#if children && children.partners.length > 0}
 							{#each children.partners as partnerGroup}
-								<div class="row-container">
-									<div class="column-container">
-										<div class="row-content-container">
-											<div class="header">
-												Partner
-												<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
-													<MIcon name="add" size="42px" />
-												</button>
+								<div class="partner-children-container">
+									<div class="partner-children-row">
+										<div class="partner-column">
+											<div class="section-header">Partner</div>
+											<div class="section-content">
+												<PersonCard
+													person={partnerGroup.partner}
+													onclick={() => changePerson(partnerGroup.partner)}
+												/>
 											</div>
-											<PersonCard
-												person={partnerGroup.partner}
-												onclick={() => changePerson(partnerGroup.partner)}
-											/>
 										</div>
-
-										<div class="row-content-container">
-											<div class="header">
-												Children
-												<button
-													class="btn-add"
-													onclick={() => handleAddRelationship('Child', partnerGroup.partner)}
-												>
-													<MIcon name="add" size="42px" />
-												</button>
-											</div>
-											{#if partnerGroup.children.length > 0}
-												{#each partnerGroup.children as child}
-													{#if child.first_name !== 'No'}
-														<PersonCard person={child} onclick={() => changePerson(child)} />
+										{#if partnerGroup.children.some(child => child.first_name !== 'No')}
+											<div class="children-column">
+												<div class="section-header">Children</div>
+												<div class="section-content children-content">
+													{#if partnerGroup.children.length > 0}
+														{#each partnerGroup.children as child}
+															{#if child.first_name !== 'No'}
+																<PersonCard person={child} onclick={() => changePerson(child)} />
+															{/if}
+														{/each}
+													{:else}
+														<p class="empty-section">No children recorded</p>
 													{/if}
-												{/each}
-											{/if}
-										</div>
+												</div>
+											</div>
+										{/if}
 									</div>
 								</div>
 							{/each}
@@ -722,12 +710,14 @@
 							<!-- Show empty state with add buttons -->
 							<div class="row-container left">
 								<div class="column-container">
-									<div class="header">
-										Partner
+									<div class="section-header">Partner</div>
+									<div class="section-content">
 										<button class="btn-add" onclick={() => handleAddRelationship('Partner')}>
 											<MIcon name="add" size="42px" />
 										</button>
-										Children
+									</div>
+									<div class="section-header">Children</div>
+									<div class="section-content">
 										<button class="btn-add" onclick={() => handleAddRelationship('Child')}>
 											<MIcon name="add" size="42px" />
 										</button>
@@ -772,7 +762,6 @@
 			}}
 		>
 			<ImageCropper
-				personId={person.id}
 				imageUrl={tempImageUrl || person.image_url}
 				{showCropper}
 				onComplete={handleImageCropComplete}
@@ -870,7 +859,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 0.5rem;
+		/* padding: 0.5rem; */
 		flex-wrap: wrap;
 	}
 	.row-container {
@@ -879,10 +868,8 @@
 		align-items: center;
 		justify-content: center;
 		flex-wrap: wrap;
-		background-color: rgba(255, 255, 255, 0.205);
+		/* background-color: rgba(255, 255, 255, 0.205); */
 		width: 100%;
-		padding: 0.5rem;
-		padding-block-start: 0;
 		border-radius: 0.25rem;
 		border: none;
 	}
@@ -1021,23 +1008,6 @@
 		padding: 0;
 		color: white;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
-	}
-	.header {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.5rem;
-		font-weight: medium;
-		margin: 0;
-		padding: 0;
-
-		color: white;
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
-		letter-spacing: 0.1rem;
-		margin-block-end: 0.5rem;
-		width: 120px;
-		text-align: center;
 	}
 	input,
 	select {
@@ -1219,4 +1189,87 @@
 			justify-content: center;
 		}
 	}
+
+	/* Section Headers */
+	.section-header {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: white;
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+		margin: 0.5rem;
+		margin-block-start: 0;
+		text-align: left;
+		width: 100%;
+	}
+
+	/* Section Content */
+	.section-content {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: 1rem;
+		padding: 0.5rem;
+		background-color: rgba(255, 255, 255, 0.1);
+		border-radius: 0.5rem;
+		width: 100%;
+	}
+
+	/* Section Text */
+	.section-text {
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 1rem;
+		line-height: 1.5;
+		margin: 0;
+		padding: 0.5rem;
+	}
+
+	/* Empty Section Message */
+	.empty-section {
+		color: rgba(255, 255, 255, 0.5);
+		font-style: italic;
+		text-align: center;
+		padding: 1rem;
+	}
+
+	.partner-children-container {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0.5rem;
+		width: 100%;
+		min-width: 100%;
+		/* background-color: rgba(255, 255, 255, 0.05); */
+		border-radius: 0.5rem;
+		/* padding: 0.5rem; */
+		margin-bottom: 0.5rem;
+	}
+
+	.partner-children-row {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+		width: 100%;
+	}
+
+	.partner-column {
+		flex: 0 0 auto;
+	}
+
+	.children-column {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.children-content {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: 1rem;
+		width: 100%;
+	}
+
 </style>
