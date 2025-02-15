@@ -1,12 +1,26 @@
 <!-- src/lib/components/SkillItem.svelte -->
 <script lang="ts">
-	let { name, icon, percentage } = $props();
+	let { name, icon, percentage, showWindow = false, onShowWindow } = $props<{
+		name: string;
+		icon: string;
+		percentage: number;
+		showWindow?: boolean;
+		onShowWindow?: (show: boolean) => void;
+	}>();
+	
 </script>
 
 <div class="column item">
 	<div class="row">
+		
 		<div class="column">
-			<img src={icon} alt={name} />
+			{#if name === 'Svelte'}
+				<button class="icon-button" onclick={() => onShowWindow?.(!showWindow)}>
+					<img src={icon} alt={name} />
+				</button>
+			{:else}
+				<img src={icon} alt={name} />
+			{/if}
 		</div>
 		<div class="column text">
 			<span>{name}</span>
@@ -39,9 +53,18 @@
 	.column img {
 		width: 60px;
 	}
+	.icon-button {
+		background-color: transparent;
+		border: none;
+		padding: 0;
+		margin: 0;
+		width: 60px;
+		height: 60px;
+		box-shadow: none;
 
+	}
 	.item {
-		width: 200px;
+		width: 100%;
 		display: flex;
 		justify-content: space-between;
 		align-items: space-between;
@@ -76,4 +99,15 @@
 		margin-inline-start: 0.7rem;
 		text-shadow: none;
 	}
+
+	@media (max-width: 480px) {
+		.item {
+			border: none;
+		}
+		.text {
+			font-size: 1rem;
+			width: 170px;
+		}
+	}	
+	
 </style>

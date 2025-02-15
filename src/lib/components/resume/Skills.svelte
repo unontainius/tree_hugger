@@ -1,13 +1,17 @@
 <script lang="ts">
 	import RadioButtons from '$lib/components/common/RadioButtons.svelte';
 	import SkillItem from '$lib/components/resume/SkillItem.svelte';
-
+	import Window from '$lib/components/common/Window.svelte';
+	import { browser } from '$app/environment';
 	let currentSkill = $state('VB.NET');
 	let skillSortOptions = $state([
 		{ label: 'Name', value: 'name' },
 		{ label: 'Proficiency', value: 'percentage' },
 		{ label: 'Category', value: 'category' }
 	]);
+
+	let showSvelteWindow = $state(false);
+	let windowPosition = $state({ x: browser ? window.innerWidth / 2 - 200 : 0, y: browser ? window.innerHeight / 2 - 150 : 0 });
 
 	// const handleSkillChange = (value: string) => {
 	// 	currentSkill = value;
@@ -47,7 +51,35 @@
 			}
 		});
 	};
+
+	function handleShowWindow() {
+		windowPosition = {
+			x: Math.max(50, Math.min(window.innerWidth - 400, window.innerWidth / 2 - 200)),
+			y: Math.max(50, Math.min(window.innerHeight - 300, window.innerHeight / 2 - 150))
+		};
+		showSvelteWindow = true;
+	}
 </script>
+
+{#if showSvelteWindow}
+	<Window 
+		title="Skills" 
+		onClose={() => (showSvelteWindow = false)} 
+		showMinimize={true}
+		showMaximize={true}
+		showFooter={false}
+		preset="medium"
+	>
+		<div class="window-content">
+			<div style="padding: 2rem; color: white; text-align: center;">
+				<p style="font-size: 1.2rem;">You found the Svelte secret!</p>
+				<p style="font-size: 1.5rem;">Nice job!</p>
+				<p style="font-size: 1.7rem; color: #00ff00;">It's a Draggbale, Sizable Window!</p>
+			
+			</div>
+		</div>
+	</Window>
+{/if}
 
 <div class="section-content skills-section">
 	<h2>Skills & Expertise</h2>
@@ -97,7 +129,15 @@
 			</div>
 			<div class="tech-skills">
 				{#each skills as { name, icon, percentage }}
-					<SkillItem {name} {icon} {percentage} />
+					<SkillItem 
+						{name} 
+						{icon} 
+						{percentage} 
+						showWindow={name === 'Svelte' ? showSvelteWindow : false}
+						onShowWindow={(show) => {
+							if (name === 'Svelte') showSvelteWindow = show;
+						}}
+					/>
 				{/each}
 			</div>
 		</div>
@@ -105,111 +145,211 @@
 </div>
 
 <style>
-	h2 {
-		color: #1a1a1a;
-		font-size: 3rem;
-		font-weight: 600;
-		text-align: center;
-	}
 	.section-content {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
+		justify-content: flex-start;
 		align-items: center;
-		color: black;
-		padding: 1rem;
-		max-width: 1200px;
+		padding: 4rem 2rem;
+		max-width: 1400px;
 		margin: 0 auto;
-		width: 100%;
-		height: 100%;
+		width: 90%;
+		min-height: 100vh;
 	}
+
+	h2 {
+		margin: 0 0 4rem 0;
+		font-size: 3.5rem;
+		font-weight: 300;
+		text-align: center;
+		color: #1a1a1a;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		position: relative;
+	}
+
+	h2::after {
+		content: '';
+		position: absolute;
+		bottom: -1rem;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 3px;
+		background: linear-gradient(90deg, #50dcff, #133b54);
+	}
+
+	h3 {
+		color: white;
+		margin: 0;
+		padding: 1.2rem;
+		font-size: 1.4rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+	}
+
 	.skills-grid {
 		display: flex;
 		flex-direction: column;
-		flex-wrap: wrap;
-		gap: 2rem;
-		text-align: center;
-		justify-content: space-around;
-	}
-	.skill-bars {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		column-gap: 4rem;
-		row-gap: 1rem;
+		gap: 4rem;
 		width: 100%;
-		padding: 1rem;
-		flex-wrap: wrap;
-		border-bottom-left-radius: 1.5rem;
-		border-bottom-right-radius: 1.5rem;
-		border-bottom: 1px solid rgba(1, 61, 85, 0.1);
-		background-color: #828e9b;
-		color: rgb(238, 236, 236);
 	}
-	.skill-bar {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		min-width: 47%;
-	}
-	.skill-name {
-		min-width: 140px;
-	}
-	.bar {
-		flex: 3;
-		background-color: rgb(81, 214, 255);
-		border-radius: 0.25rem;
+
+	.skill-category {
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: 1rem;
 		overflow: hidden;
-		height: 1rem; /* Ensure the bar has a height */
-		min-width: 140px;
+		box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 	}
-	.fill {
-		height: 100%;
-		background-color: #04455f;
-	}
+
 	.skills-core {
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
-		padding-block-start: 1rem;
-	}
-	.skills-technical {
-		display: flex;
-		flex-direction: column;
-		flex-wrap: wrap;
 		width: 100%;
 	}
-	.tech-skills {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		flex-wrap: wrap;
-		row-gap: 2rem;
-		width: 100%;
-		border-left: 1px solid rgba(1, 61, 85, 0.1);
-		border-right: 1px solid rgba(1, 61, 85, 0.1);
-		border-bottom: 1px solid rgba(1, 61, 85, 0.1);
-		margin-block-start: 0;
-		color: rgb(238, 238, 238);
-		padding-block: 2rem;
-		border-bottom-left-radius: 1.5rem;
-		border-bottom-right-radius: 1.5rem;
-		background-color: #828e9b;
-	}
+
 	.sort-group {
 		display: flex;
-		background-color: #133b54;
-		margin: 0;
-		padding: 0;
-		width: 100%;
-		border-top-left-radius: 1.5rem;
-		border-top-right-radius: 1.5rem;
+		flex-wrap: wrap;
+		background: linear-gradient(90deg, #133b54, #1a4c6b);
+		justify-content: space-between;
+		align-items: center;
+		padding-right: 1rem;
 	}
-	.sort-group h3 {
+
+	.skill-bars {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+		gap: 2rem;
+		padding: 2rem;
+		background: rgba(130, 142, 155, 0.95);
+		backdrop-filter: blur(10px);
+	}
+
+	.skill-bar {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		padding: 0.5rem;
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 0.5rem;
+		transition: transform 0.3s ease;
+	}
+
+	.skill-bar:hover {
+		transform: translateX(5px);
+	}
+
+	.skill-name {
+		min-width: 140px;
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: #fff;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	}
+
+	.bar {
+		flex: 1;
+		background: rgba(81, 214, 255, 0.2);
+		border-radius: 0.25rem;
+		overflow: hidden;
+		height: 0.75rem;
+		position: relative;
+		min-width: 150px;
+	}
+
+	.fill {
+		height: 100%;
+		background: linear-gradient(90deg, #04455f, #0a6491);
+		transition: width 0.5s ease-out;
+	}
+
+	.skills-technical {
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: 1rem;
+		overflow: hidden;
+		box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+	}
+
+	.tech-skills {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 2rem;
+		padding: 2rem;
+		background: rgba(130, 142, 155, 0.95);
+		backdrop-filter: blur(10px);
+	}
+
+	.window-content {
+		background: linear-gradient(135deg, #1f1f1f, #2d2d2d);
 		color: white;
-		margin: 0;
-		padding-inline: 1rem;
-		padding-block: 1.2rem;
-		border: none;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		border-radius: 0 0 0.5rem 0.5rem;
+		padding: 2rem;
+		text-align: center;
+	}
+
+	@media (max-width: 1024px) {
+		.section-content {
+			padding: 3rem 1rem;
+		}
+
+		.skill-bars {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		h2 {
+			font-size: 2.5rem;
+		}
+
+		.skill-bars {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+			padding: 1rem;
+		}
+
+		.skill-bar {
+			display: grid;
+			grid-template-rows: auto auto;
+			padding: 1rem;
+			gap: 0.75rem;
+		}
+
+		.skill-name {
+			width: 100%;
+			text-align: left;
+		}
+
+		.bar {
+			width: 100%;
+			min-width: 0;
+			height: 0.75rem;
+		}
+
+		.tech-skills {
+			grid-template-columns: repeat(auto-fit, 1fr);
+			gap: 1rem;
+			padding: 1rem;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.section-content {
+			padding: 2rem 0.25rem;
+		}
+		.tech-skills {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			padding: 1rem;
+		}
 	}
 </style>

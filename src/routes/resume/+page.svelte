@@ -65,15 +65,20 @@
 		<div id="section1" class="section snap-child">
 			<div class="section-overlay">
 				<div class="box">
-					<b> </b>
-					<b2></b2>
+
 					<div id="section-content-1" class="section-content welcome-content">
 						<h1>Welcome</h1>
+						<div class="tooltip">
 						<p class="intro-text">
 							Scroll down to explore my journey, or use the navigation menu to jump to specific
 							sections.
 						</p>
+						</div>
 					</div>
+					<b> </b>
+					<b2></b2>
+					<b3></b3>
+					<b4></b4>
 				</div>
 			</div>
 		</div>
@@ -103,6 +108,9 @@
 	.section-content h1 {
 		margin: 0;
 		font-size: 3rem;
+		text-shadow: 2px 2px 4px 4px rgba(0, 0, 0, 1);
+		font-weight: 900;
+		font-family: 'poppins', Courier, monospace;
 		color: white;
 	}
 	.hidden {
@@ -235,7 +243,6 @@
 		background-repeat: no-repeat;
 		background-position: center;
 		background-attachment: fixed; /* This creates the parallax effect */
-		opacity: 0.75;
 		color: white;
 		/* border-radius: 0.5rem; */
 		margin: 0;
@@ -312,8 +319,8 @@
 	}
 
 	.intro-text {
-		font-size: 1.5rem;
-		color: rgba(255, 255, 255, 0.9);
+		font-size: 2.5rem;
+		color: rgb(244, 248, 1);
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 		margin-top: 1rem;
 	}
@@ -339,6 +346,7 @@
 
 	#section2 {
 		background-color: #3d3d3d;
+		/* background-color:linear-gradient(to bottom, rgba(203, 238, 7, 0.507), rgba(22, 22, 22, 0.836)); */
 	}
 	#section3 {
 		--s: 185px; /* control the size*/
@@ -366,6 +374,7 @@
 		overflow: hidden;
 	}
 
+	/* Globe */
 	.box b {
 		display: block;
 		width: 90px;
@@ -375,9 +384,10 @@
 		box-shadow:
 			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
 			15px 15px 2px rgba(0, 0, 0, 0.04);
-		background-image: url('/images/familytree.png');
+		background-image: url('/images/planets/globe.png');
 		background-size: cover;
 		background-position: center;
+		z-index: 1010;
 		position: absolute;
 		-webkit-animation:
 			moveX 2s linear 0s infinite alternate,
@@ -390,21 +400,24 @@
 			moveY 3.4s linear 0s infinite alternate;
 		animation:
 			moveX 12s linear 0s infinite alternate,
-			moveY 13.4s linear 0s infinite alternate;
+			moveY 13.4s linear 0s infinite alternate,
+			rotate 5s linear infinite;
 	}
 
+	/* Moon */
 	.box b2 {
 		display: block;
-		width: 90px;
-		height: 90px;
+		width: 40px;
+		height: 40px;
 		border-radius: 50%;
 		background-color: #999999;
 		box-shadow:
 			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
 			15px 15px 2px rgba(0, 0, 0, 0.04);
-		background-image: url('/images/familytree.png');
+		background-image: url('/images/planets/moon.jpg');
 		background-size: cover;
 		background-position: center;
+		z-index: 1010;
 		position: absolute;
 		-webkit-animation:
 			moveX 2s linear 0s infinite alternate,
@@ -420,6 +433,63 @@
 			moveY 6.4s linear 0s infinite alternate;
 	}
 
+	/* Jupiter */
+	.box b3 {
+		display: block;
+		width: 290px;
+		height: 290px;
+		border-radius: 50%;
+		background-color: #999999;
+		box-shadow:
+			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
+			15px 15px 2px rgba(0, 0, 0, 0.04);
+		background-image: url('/images/planets/jupiter.png');
+		background-size: cover;
+		background-position: center;
+		position: absolute;
+		-webkit-animation:
+			moveX 2s linear 0s infinite alternate,
+			moveY 3.4s linear 0s infinite alternate;
+		-moz-animation:
+			moveX 2s linear 0s infinite alternate,
+			moveY 3.4s linear 0s infinite alternate;
+		-o-animation:
+			moveX 2s linear 0s infinite alternate,
+			moveY 3.4s linear 0s infinite alternate;
+		animation:
+			moveX 4s linear 0s infinite alternate,
+			moveY 4.4s linear 0s infinite alternate;
+	}
+
+	/* Earth */
+	.box b4 {
+		display: block;
+		width: 90px;
+		height: 90px;
+		border-radius: 50%;
+		background-color: #999999;
+		box-shadow:
+			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
+			15px 15px 2px rgba(0, 0, 0, 0.04);
+		background-image: url('/images/planets/earth.png');
+		background-size: cover;
+		background-position: center;
+		z-index: 1010;
+		position: absolute;
+		-webkit-animation:
+			moveX 2s linear 0s infinite alternate,
+			moveY 3.4s linear 0s infinite alternate;
+		-moz-animation:
+			moveX 2s linear 0s infinite alternate,
+			moveY 3.4s linear 0s infinite alternate;
+		-o-animation:
+			moveX 2s linear 0s infinite alternate,
+			moveY 3.4s linear 0s infinite alternate;
+		animation:
+			moveX 9s linear 0s infinite alternate,
+			moveY 9.4s linear 0s infinite alternate,
+			rotate 20s linear infinite;
+	}
 	@-webkit-keyframes moveX {
 		from {
 			left: 0;
@@ -486,6 +556,15 @@
 		}
 	}
 
+	@keyframes rotate {
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
 	@media (max-width: 768px) {
 		.personal-info {
 			width: 100%;
@@ -516,5 +595,50 @@
 			width: 100px;
 			height: 100px;
 		}
+		.box b3 {
+			width: 90px;
+			height: 90px;
+		}	
+		.box b4 {
+			width: 140px;
+			height: 140px;
+		}
+		
 	}
+
+	/* HTML: <div class="tooltip">This is the same as #7 but with another shape for the tail </div> */
+.tooltip {
+  color: #fff;
+  font-size: 18px;
+  max-width: 78ch;
+  text-align: center;
+  z-index: 100;
+}
+.tooltip {
+	/* tail dimension */
+	--b: 3em;   /* base */
+	--h: 1.8em; /* height */
+	--t: .6;    /* thickness (from 0 to 1) */
+
+	--p: 50%;  /* main position (0%:top 100%:bottom) */
+	--r: 1.2em; /* the radius */
+
+
+	padding: 1em;
+	border-radius: var(--r)/min(var(--r),var(--p) - (1 - var(--t))*var(--b)/2) var(--r) var(--r) min(var(--r),100% - var(--p) - (1 - var(--t))*var(--b)/2);
+	background: #eb6841; /* the main color */
+	position: relative;
+}
+.tooltip:before {
+	content: "";
+	position: absolute;
+	right: 100%;
+	top: clamp(-1*var(--t)*var(--b),var(--p) - (var(--t) + 1)*var(--b)/2,100% - var(--b));
+	width: var(--h);
+	height: var(--b);
+	background: inherit;
+	border-bottom-left-radius: 100%;
+	mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
+	-webkit-mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
+}
 </style>

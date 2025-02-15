@@ -160,34 +160,6 @@
 		return unsubscribe;
 	});
 
-	$effect(() => {
-		console.log('Window props:', {
-			title,
-			position,
-			size,
-			isMaximized,
-			isMinimized,
-			showMinimize,
-			showMaximize,
-			showFooter
-		});
-	});
-
-	$effect(() => {
-		if (title) {
-			// Only log when title exists to avoid noise
-			console.log('Window mounted:', {
-				title,
-				position,
-				size,
-				children,
-				showMinimize,
-				showMaximize,
-				showFooter
-			});
-		}
-	});
-
 	function handleMouseDown(e: MouseEvent) {
 		if (e.target instanceof HTMLElement && e.target.closest('.header')) {
 			dragTimer = setTimeout(() => {
@@ -247,11 +219,8 @@
 
 	function handleMouseMove(e: MouseEvent) {
 		if (isDragging) {
-			const newX = Math.max(0, Math.min(window.innerWidth - size.width, position.x + e.movementX));
-			const newY = Math.max(
-				0,
-				Math.min(window.innerHeight - size.height, position.y + e.movementY)
-			);
+			const newX = Math.max(-10, Math.min(window.innerWidth - (size.width - 10), position.x + e.movementX));
+			const newY = Math.max(-10, Math.min(window.innerHeight - (size.height - 10), position.y + e.movementY));
 			onPositionChange?.({ x: newX, y: newY });
 			position = { x: newX, y: newY };
 		} else if (isResizing) {
@@ -509,14 +478,15 @@
 	}
 </script>
 
-/// <reference lib="dom"></reference>
-
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="shell {isMaximized ? 'maximized' : ''} {isMinimized ? 'minimized' : ''}"
 	bind:this={shell}
 	style="
+        position: fixed;
         z-index: 9999;
+        left: 0;
+        top: 0;
         transform: translate({position.x}px, {position.y}px);
         width: {size.width}px;
         height: {size.height}px;
@@ -542,7 +512,7 @@
 					{/if}
 					{#if showMaximize}
 						<button class="control-btn maximize" onclick={handleMaximize}>
-							<MIcon name={isMaximized ? 'minimize' : 'maximize-x'} size="24px" />
+							<MIcon name={isMaximized ? 'normalize' : 'maximize'} size="24px" />
 						</button>
 					{/if}
 					{#if showClose}

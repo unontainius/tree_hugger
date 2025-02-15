@@ -56,111 +56,193 @@
 </div>
 
 <style>
-	h2 {
-		margin: 0;
-		font-size: 3rem;
-		font-weight: 600;
-		text-align: center;
-		color: #f302f3;
-	}
-	p {
-		margin: 0;
-		padding: 0;
-		font-size: 0.9rem;
-	}
-	.experience-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		gap: 2rem;
-	}
 	.section-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		gap: 2rem;
+		justify-content: flex-start;
+		gap: 4rem;
+		color: #f5f5f5;
+		width: 90%;
+		max-width: 1400px;
+		margin: 0 auto;
+		padding: 4rem 2rem;
+	}
 
-		color: #cfcece;
-		width: 75%;
+	h2 {
+		margin: 0;
+		font-size: 3.5rem;
+		font-weight: 300;
+		text-align: center;
+		color: #fff;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		position: relative;
 	}
-	.image {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		min-width: 200px;
-		min-height: 200px;
-		object-fit: cover;
-		border-radius: 50%;
-		background-color: #525252;
-		padding: 0.5rem;
+
+	h2::after {
+		content: '';
+		position: absolute;
+		bottom: -1rem;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 60px;
+		height: 3px;
+		background: linear-gradient(90deg, #50dcff, #f302f3);
 	}
-	.image img {
-		width: 200px;
-		height: 200px;
-		object-fit: cover;
-		border-radius: 50%;
-	}
-	.intro-text {
-		flex: 1;
-		min-width: 300px;
-		max-width: 25%;
-		justify-content: flex-start;
-		color: #50dcff;
-	}
-	.info-cards {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: space-around;
-		padding: 1rem;
-		gap: 1rem;
-	}
-	.card {
-		flex: 1;
-		min-width: 300px;
-		max-width: 25%;
-		justify-content: flex-start;
-		background-color: #525252;
-		color: #cfcece;
+
+	.experience-container {
+		display: grid;
+		grid-template-columns: minmax(200px, 300px) 1fr 1fr;
+		gap: 3rem;
+		width: 100%;
+		align-items: start;
+		padding: 2rem;
+		background: rgba(255, 255, 255, 0.03);
 		border-radius: 1rem;
-		box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
-		gap: 0.25rem;
-		padding: 0;
-		margin: 0;
-		text-align: left;
+		backdrop-filter: blur(10px);
 	}
+
+	.image {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 1;
+		border-radius: 1rem;
+		overflow: hidden;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+	}
+
+	.image::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(45deg, rgba(80, 220, 255, 0.1), rgba(243, 2, 243, 0.1));
+		border-radius: inherit;
+	}
+
+	.image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: inherit;
+		transition: transform 0.3s ease;
+	}
+
+	.image:hover img {
+		transform: scale(1.05);
+	}
+
+	.intro-text {
+		padding: 1.5rem;
+		background: rgba(82, 82, 82, 0.1);
+		border-radius: 1rem;
+		backdrop-filter: blur(5px);
+		border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.intro-text p {
+		font-size: 1.1rem;
+		line-height: 1.8;
+		color: #b4e0f0;
+		margin: 0;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.info-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+		width: 100%;
+	}
+
+	.card {
+		background: rgba(82, 82, 82, 0.15);
+		border-radius: 1rem;
+		padding: 2rem;
+		transition: all 0.3s ease;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		backdrop-filter: blur(10px);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 4px;
+		background: linear-gradient(90deg, #50dcff, #f302f3);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.card:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+	}
+
+	.card:hover::before {
+		opacity: 1;
+	}
+
 	.title {
-		font-size: 1.2rem;
-		padding: 0;
-		margin: 0;
-		width: 100%;
-		border-bottom: 1px solid #cfcece;
-		padding-inline-start: 1rem;
-		padding-block-start: 0.5rem;
+		font-size: 1.4rem;
+		font-weight: 500;
 		color: #f3c702;
+		margin-bottom: 0.5rem;
+		letter-spacing: 0.05em;
 	}
+
 	.date {
-		font-size: 1.2rem;
+		font-size: 1rem;
 		color: #ff00f2;
-		line-height: 1.5;
-		padding: 0;
-		margin: 0;
-		width: 100%;
-		padding-inline-start: 1rem;
+		opacity: 0.9;
+		margin-bottom: 1.5rem;
+		font-weight: 500;
 	}
 
 	.description {
-		font-size: 1rem;
-		width: 100%;
-		padding-inline-start: 1rem;
 		color: #03a5ce;
+		line-height: 1.6;
+		margin-bottom: 1rem;
 	}
+
 	.card-text {
-		padding: 1rem;
-		padding-block-start: 0;
 		color: #50dcff;
+		line-height: 1.7;
+		font-size: 1rem;
+	}
+
+	@media (max-width: 1024px) {
+		.experience-container {
+			grid-template-columns: 1fr;
+			text-align: center;
+		}
+
+		.image {
+			max-width: 300px;
+			margin: 0 auto;
+		}
+
+		.intro-text {
+			max-width: 100%;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.section-container {
+			width: 95%;
+			padding: 2rem 1rem;
+		}
+
+		h2 {
+			font-size: 2.5rem;
+		}
+
+		.card {
+			padding: 1.5rem;
+		}
 	}
 </style>
