@@ -99,6 +99,8 @@
 		}
 		selectedImage = null;
 	}
+
+	
 </script>
 
 <div class="selector">

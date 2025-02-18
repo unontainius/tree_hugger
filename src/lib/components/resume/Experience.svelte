@@ -1,8 +1,10 @@
 <div class="section-container">
 	<h2>Experience</h2>
 	<div class="experience-container">
-		<div class="image">
-			<img src="/images/marcus.jpg" alt="Marcus" class="experience-image" />
+		<div class="photo-frame">
+			<div class="image">
+				<img src="/images/marcus.jpg" alt="Marcus" class="experience-image" />
+			</div>
 		</div>
 		<div class="intro-text">
 			<p>
@@ -62,7 +64,7 @@
 		align-items: center;
 		justify-content: flex-start;
 		gap: 4rem;
-		color: #f5f5f5;
+		color: #d8d6d6;
 		width: 90%;
 		max-width: 1400px;
 		margin: 0 auto;
@@ -107,7 +109,7 @@
 		position: relative;
 		width: 100%;
 		aspect-ratio: 1;
-		border-radius: 1rem;
+		border-radius: 0.25rem;
 		overflow: hidden;
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 	}
@@ -214,7 +216,23 @@
 		line-height: 1.7;
 		font-size: 1rem;
 	}
-
+	.photo-frame {
+		border: 1px solid #b3b3b3;
+		border-radius: 0.25rem;
+		overflow: hidden;
+		background: #ffffff;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+		padding: 0.5rem;
+		padding-block-end: 2.5rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		max-width: 300px;
+		justify-self: center;
+		transform: rotate(5deg);
+		margin-block-start: 1rem;
+	}
 	@media (max-width: 1024px) {
 		.experience-container {
 			grid-template-columns: 1fr;

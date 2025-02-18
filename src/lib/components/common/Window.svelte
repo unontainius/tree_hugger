@@ -75,8 +75,8 @@
 				};
 			case 'large':
 				return {
-					width: Math.floor(window.innerWidth * 0.95),
-					height: Math.floor(window.innerHeight * 0.9)
+					width: Math.floor(window.innerWidth * 0.85),
+					height: Math.floor(window.innerHeight * 0.95)
 				};
 			default:
 				return initialSize || defaultSize;

@@ -1,8 +1,74 @@
-<script>
+<script lang="ts">
+	import FlipCard from "$lib/components/common/FlipCard.svelte";
+	import RotatingJupiter from "$lib/components/RotatingEarth.svelte";
+	import SupabaseStorageFileUploader from "$lib/components/common/SupabaseStorageFileUploader.svelte";
+	import { toasts } from "$lib/stores/toastStore";
+	import { authService } from "$lib/services/authService";
+	import { onMount } from "svelte";
 	// JavaScript logic can be added here if needed
+	function imageSaved(path: string) {
+		console.log(path);
+		toasts.success("Image saved", 3000);
+	};
+
+	onMount(() => {
+		authService.login('marcus@v-sys.co.nz', 'abc1234');
+	});
+
+	//     background-image: url('https://www.solarsystemscope.com/textures/download/8k_earth_daymap.jpg');
 </script>
 
+{#snippet frontPage()}
+	<style>
+		.front-page {
+
+			padding: 1rem;
+			border: 1px solid #ccc;
+			border-radius: 0.5rem;
+		}
+	</style>
+	<div class="front-page">
+		<h1>Upload Image is on the back page</h1>
+		<p>
+			This is the front page of the card. It contains the main information about the card.
+		</p>
+	</div>
+{/snippet}
+
+{#snippet backPage()}
+
+	<div>
+		<div class="ribbon">Back</div>
+		<p>
+			This is the back page of the card. It contains more information about the card.
+		</p>
+
+	</div>
+	<SupabaseStorageFileUploader bucketName="images" {imageSaved} />
+{/snippet}
+
+{#snippet loginStatus()}
+	<style>
+		.login-status {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100%;
+			gap: 3rem;
+		}
+	</style>
+	<div class="login-status">
+		<p>Login Status: </p><h1> {!authService.getCurrentUser() ? 'Logged out' : 'Logged in'}</h1>
+	</div>
+{/snippet}
+
+{@render loginStatus()}
+
 <div class="text-container">
+	<div class="card-container">
+		<FlipCard frontPage={frontPage} backPage={backPage} />
+	</div>
+
 	<div class="about-info-container clearfix">
 		<div>
 			<p>
@@ -15,7 +81,8 @@
 			</p>
 			<div class="about-info-block">
 				This is a text block that floats within the main content. This is a text block that floats
-				within the main content.
+				within the main content.  so ithe there is more, does the box get bigger?
+				<div class="box"><b></b></div>
 			</div>
 			<p>
 				In rutrum eros interdum. Pellentesque habitant morbi tristique senectus et netus et
@@ -40,16 +107,38 @@
 		<a href="/resume" aria-label="resume">
 			<div class="wee-block">resume</div>
 		</a>
-		<a href="/resume" aria-label="resume">
-			<div class="wee-block"></div>
+		<a href="/star-trek" aria-label="Star Trek">
+			<div class="wee-block">Star Trek</div>
 		</a>
 		<div class="wee-block"></div>
 	</div>
 </div>
 
-<div class="box"><b></b></div>
+<div class="jupiter-container">
+	<RotatingJupiter />
+</div>
+
+
+
+
+<div class="image-container">
+	<div class="ribbon">Resume</div>
+	<img src="/images/marcus.jpg" alt="Marcus" />
+</div>
 
 <style>
+	/* HTML: <div class="ribbon">Your text content</div> */
+
+	h1 {
+		text-align: center;
+		color: yellow;
+		font-size: 2rem;
+	}
+	.card-container {
+		width: 300px;
+		height: 200px;
+		margin: 0 1rem;
+	}
 	.text-container {
 		display: flex;
 		flex-direction: row;
@@ -65,6 +154,7 @@
 		max-width: 70ch;
 		min-width: 300px; /* Set a width for the container */
 		margin: 0 1rem; /* Center the container */
+		margin-block-start: 1rem;
 	}
 	.my-col {
 		display: flex;
@@ -103,13 +193,14 @@
 	.box {
 		background-color: #006699;
 		margin: 0 auto;
-		width: 500px;
+		width: 180px;
 		height: 300px;
 		position: relative;
 		box-shadow: inset 0 0 20px #155;
-		border-radius: 20px;
+		border-radius: 0.5rem;
 		border: 1px solid #111;
 		overflow: hidden;
+		margin-block-start: 1rem;
 	}
 
 	.box b {
@@ -144,7 +235,7 @@
 			left: 0;
 		}
 		to {
-			left: 440px;
+			left: 120px;
 		}
 	}
 	@-moz-keyframes moveX {
@@ -152,7 +243,7 @@
 			left: 0;
 		}
 		to {
-			left: 440px;
+			left: 120px;
 		}
 	}
 	@-o-keyframes moveX {
@@ -160,7 +251,7 @@
 			left: 0;
 		}
 		to {
-			left: 440px;
+			left: 120px;
 		}
 	}
 	@keyframes moveX {
@@ -168,7 +259,7 @@
 			left: 0;
 		}
 		to {
-			left: 440px;
+			left: 120px;
 		}
 	}
 
@@ -204,4 +295,44 @@
 			top: 240px;
 		}
 	}
+
+	/* HTML: <div class="ribbon">Your text content</div> */
+	.ribbon {
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+}
+.ribbon {
+  --f: .5em; /* control the folded part */
+  
+  position: absolute;
+  top: 0;
+  left: 0;
+  line-height: 1.8;
+  padding-inline: 1lh;
+  padding-bottom: var(--f);
+  border-image: conic-gradient(#0008 0 0) 51%/var(--f);
+  clip-path: polygon(
+    100% calc(100% - var(--f)),100% 100%,calc(100% - var(--f)) calc(100% - var(--f)),var(--f) calc(100% - var(--f)), 0 100%,0 calc(100% - var(--f)),999px calc(100% - var(--f) - 999px),calc(100% - 999px) calc(100% - var(--f) - 999px));
+  transform: translate(calc((cos(45deg) - 1)*100%), -100%) rotate(-45deg);
+  transform-origin: 100% 100%;
+  background-color: #F07818; /* the main color  */
+}
+.image-container {
+	margin: 2rem;
+	position: relative;
+	display: inline-block;
+	width: 244px;
+	height: 244px;
+
+}
+
+img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 0.5rem;
+	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+}
 </style>
+

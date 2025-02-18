@@ -1,5 +1,7 @@
 <!-- src/lib/components/SkillItem.svelte -->
 <script lang="ts">
+	import { onMount } from 'svelte';
+	
 	let { name, icon, percentage, showWindow = false, onShowWindow } = $props<{
 		name: string;
 		icon: string;
@@ -8,9 +10,25 @@
 		onShowWindow?: (show: boolean) => void;
 	}>();
 	
+	let visible = $state(false);
+	let element: HTMLElement;
+
+	onMount(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					visible = true;
+					observer.disconnect();
+				}
+			},
+			{ threshold: 0.2 }
+		);
+
+		observer.observe(element);
+	});
 </script>
 
-<div class="column item">
+<div class="column item" bind:this={element}>
 	<div class="row">
 		
 		<div class="column">
@@ -87,7 +105,7 @@
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
-		background: conic-gradient(#012f3d calc(var(--percentage) * 1%), rgb(123, 237, 252) 0);
+		background: conic-gradient(#33ff00 calc(var(--percentage) * 1%), #ff0101);
 		position: relative;
 		width: 40px;
 	}

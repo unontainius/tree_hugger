@@ -1,10 +1,30 @@
 <script lang="ts">
+	import { user, loginRequestedState } from '$lib/stores/authStore';
+	import { authService } from '$lib/services/authService';
 	import MIcon from '$lib/components/common/MIcon.svelte';
 	import About from '$lib/components/resume/About.svelte';
 	import Experience from '$lib/components/resume/Experience.svelte';
 	import Skills from '$lib/components/resume/Skills.svelte';
+	import Projects from '$lib/components/resume/Projects.svelte';
+	import RotatingEarth from '$lib/components/RotatingEarth.svelte';
 
 	let expandedSidebar = $state(false);
+
+
+	async function handleLogout() {
+		if ($user) {
+			await authService.logout();
+			loginRequestedState.set(false);
+		}
+	}
+
+	function toggleLogin() {
+		if ($user) {
+			handleLogout();
+		} else {
+			loginRequestedState.set(true);
+		}
+	}
 </script>
 
 <div class="flex-row">
@@ -58,7 +78,29 @@
 				</div>
 				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>Contact</span>
 			</a>
+
+			<div class="sidebar-spacer"></div>
+
+			<button class="sidebar-link" onclick={toggleLogin}>
+				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Login/Logout">
+					{#if $user}
+						<MIcon name="logout" size="3rem" color="white" />
+					{:else}
+						<MIcon name="login" size="3rem" color="white" />
+					{/if}
+				</div>
+				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>
+					{#if $user}
+						Logout
+					{:else}
+						Login
+					{/if}
+				</span>
+			</button>
+
+
 		</div>
+
 	</div>
 	<!-- CONTENT --------------------------------------------------------------------------------->
 	<div class="content scroll-container snap-container">
@@ -75,13 +117,13 @@
 						</p>
 						</div>
 					</div>
-					<b> </b>
-					<b2></b2>
-					<b3></b3>
-					<b4></b4>
+					<b4>
+						<RotatingEarth />
+					</b4>
 				</div>
 			</div>
 		</div>
+
 		<div id="section2" class="section snap-child">
 			<About />
 		</div>
@@ -94,8 +136,7 @@
 			<Experience />
 		</div>
 		<div id="section6" class="section snap-child" title="Projects">
-			<MIcon name="projects" size="5.5rem" color="black" />
-			<h2>Projects</h2>
+			<Projects />
 		</div>
 		<div id="section7" class="section snap-child" title="Contact">
 			<MIcon name="contact" size="5.5rem" color="black" />
@@ -105,6 +146,7 @@
 </div>
 
 <style>
+
 	.section-content h1 {
 		margin: 0;
 		font-size: 3rem;
@@ -131,10 +173,8 @@
 		background-color: rgb(1, 97, 134);
 		width: 200px;
 		flex: none;
-		overflow-y: auto;
 		padding: 0.5rem;
 		z-index: 3;
-		height: 100vh;
 		transition: width 0.2s ease-in-out;
 	}
 	.sidebar.collapsed {
@@ -243,6 +283,7 @@
 		background-repeat: no-repeat;
 		background-position: center;
 		background-attachment: fixed; /* This creates the parallax effect */
+		background-color: rgba(255, 255, 255, 0.5);
 		color: white;
 		/* border-radius: 0.5rem; */
 		margin: 0;
@@ -266,7 +307,7 @@
 	.sidebar-content {
 		display: flex;
 		flex-direction: column;
-		overflow: hidden;
+		min-height: calc(100vh - 4rem); /* Account for padding and toggle button */
 	}
 
 	.sidebar.collapsed .sidebar-content {
@@ -349,18 +390,29 @@
 		/* background-color:linear-gradient(to bottom, rgba(203, 238, 7, 0.507), rgba(22, 22, 22, 0.836)); */
 	}
 	#section3 {
-		--s: 185px; /* control the size*/
-		--c1: #9bd9fd;
-		--c2: #ffffff;
-
-		--_g: #54b6f800 90deg, var(--c1) 0;
-		background: conic-gradient(from 90deg at 2px 2px, var(--_g)),
-			conic-gradient(from 90deg at 1px 1px, var(--_g)), var(--c2);
-		background-size:
-			var(--s) var(--s),
-			calc(var(--s) / 5) calc(var(--s) / 5);
+	--s: 179px; /* control the size*/
+	--c1: #b2b2b2;
+	--c2: #ffffff;
+	--c3: #d9d9d9;
+	
+	--_g: var(--c3) 0 120deg,#0000 0;
+	background:
+		conic-gradient(from -60deg at 50% calc(100%/3),var(--_g)),
+		conic-gradient(from 120deg at 50% calc(200%/3),var(--_g)),
+		conic-gradient(from  60deg at calc(200%/3),var(--c3) 60deg,var(--c2) 0 120deg,#0000 0),
+		conic-gradient(from 180deg at calc(100%/3),var(--c1) 60deg,var(--_g)),
+		linear-gradient(90deg,var(--c1)   calc(100%/6),var(--c2) 0 50%,
+							var(--c1) 0 calc(500%/6),var(--c2) 0);
+		background-size: calc(1.732*var(--s)) var(--s);
 	}
 	#section4 {
+		background-color: #3d3d3d;
+	}
+	#section6 {
+		background-color: #ececec;
+	}
+
+	#section7 {
 		background-color: #3d3d3d;
 	}
 
@@ -374,41 +426,11 @@
 		overflow: hidden;
 	}
 
-	/* Globe */
-	.box b {
+	/* Earth */
+	.box b4 {
 		display: block;
 		width: 90px;
 		height: 90px;
-		border-radius: 50%;
-		background-color: #999999;
-		box-shadow:
-			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
-			15px 15px 2px rgba(0, 0, 0, 0.04);
-		background-image: url('/images/planets/globe.png');
-		background-size: cover;
-		background-position: center;
-		z-index: 1010;
-		position: absolute;
-		-webkit-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		-moz-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		-o-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		animation:
-			moveX 12s linear 0s infinite alternate,
-			moveY 13.4s linear 0s infinite alternate,
-			rotate 5s linear infinite;
-	}
-
-	/* Moon */
-	.box b2 {
-		display: block;
-		width: 40px;
-		height: 40px;
 		border-radius: 50%;
 		background-color: #999999;
 		box-shadow:
@@ -429,73 +451,16 @@
 			moveX 2s linear 0s infinite alternate,
 			moveY 3.4s linear 0s infinite alternate;
 		animation:
-			moveX 6s linear 0s infinite alternate,
-			moveY 6.4s linear 0s infinite alternate;
-	}
-
-	/* Jupiter */
-	.box b3 {
-		display: block;
-		width: 290px;
-		height: 290px;
-		border-radius: 50%;
-		background-color: #999999;
-		box-shadow:
-			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
-			15px 15px 2px rgba(0, 0, 0, 0.04);
-		background-image: url('/images/planets/jupiter.png');
-		background-size: cover;
-		background-position: center;
-		position: absolute;
-		-webkit-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		-moz-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		-o-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		animation:
-			moveX 4s linear 0s infinite alternate,
-			moveY 4.4s linear 0s infinite alternate;
-	}
-
-	/* Earth */
-	.box b4 {
-		display: block;
-		width: 90px;
-		height: 90px;
-		border-radius: 50%;
-		background-color: #999999;
-		box-shadow:
-			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
-			15px 15px 2px rgba(0, 0, 0, 0.04);
-		background-image: url('/images/planets/earth.png');
-		background-size: cover;
-		background-position: center;
-		z-index: 1010;
-		position: absolute;
-		-webkit-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		-moz-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		-o-animation:
-			moveX 2s linear 0s infinite alternate,
-			moveY 3.4s linear 0s infinite alternate;
-		animation:
 			moveX 9s linear 0s infinite alternate,
-			moveY 9.4s linear 0s infinite alternate,
-			rotate 20s linear infinite;
+			moveY 9.4s linear 0s infinite alternate;
+
 	}
 	@-webkit-keyframes moveX {
 		from {
 			left: 0;
 		}
 		to {
-			left: calc(100vw - 170px);
+			left: calc(100vw - 270px);
 		}
 	}
 	@-moz-keyframes moveX {
@@ -503,7 +468,7 @@
 			left: 0;
 		}
 		to {
-			left: calc(100vw - 170px);
+			left: calc(100vw - 270px);
 		}
 	}
 	@-o-keyframes moveX {
@@ -511,7 +476,7 @@
 			left: 0;
 		}
 		to {
-			left: calc(100vw - 170px);
+			left: calc(100vw - 270px);
 		}
 	}
 	@keyframes moveX {
@@ -519,7 +484,7 @@
 			left: 0;
 		}
 		to {
-			left: calc(100vw - 170px);
+			left: calc(100vw - 390px);
 		}
 	}
 
@@ -528,7 +493,7 @@
 			top: 0;
 		}
 		to {
-			top: calc(100vh - 90px);
+			top: calc(100vh - 290px);
 		}
 	}
 	@-moz-keyframes moveY {
@@ -536,7 +501,7 @@
 			top: 0;
 		}
 		to {
-			top: calc(100vh - 90px);
+			top: calc(100vh - 290px);
 		}
 	}
 	@-o-keyframes moveY {
@@ -544,7 +509,7 @@
 			top: 0;
 		}
 		to {
-			top: calc(100vh - 90px);
+			top: calc(100vh - 290px);
 		}
 	}
 	@keyframes moveY {
@@ -552,7 +517,7 @@
 			top: 0;
 		}
 		to {
-			top: calc(100vh - 90px);
+			top: calc(100vh - 320px);
 		}
 	}
 
@@ -587,18 +552,7 @@
 			width: 100%;
 			height: 100vh;
 		}
-		.box b {
-			width: 100px;
-			height: 100px;
-		}
-		.box b2 {
-			width: 100px;
-			height: 100px;
-		}
-		.box b3 {
-			width: 90px;
-			height: 90px;
-		}	
+	
 		.box b4 {
 			width: 140px;
 			height: 140px;
@@ -641,4 +595,35 @@
 	mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
 	-webkit-mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
 }
+
+.sidebar-footer {
+	margin-top: auto;
+	padding: 1rem;
+}
+
+.sidebar-link {
+	color: white;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.5rem;
+	border-radius: 0.5rem;
+	transition: all 0.2s ease-in-out;
+	background: transparent;
+	border: none;
+	width: 100%;
+	cursor: pointer;
+}
+
+.sidebar-link:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	transform: translateY(-5px);
+}
+
+.sidebar-spacer {
+	margin-top: auto;
+	min-height: 0.5rem; /* Smaller spacing */
+}
+
 </style>

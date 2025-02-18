@@ -12,7 +12,10 @@
 	import PageTransition from '$lib/components/common/PageTransition.svelte';
 	import { menuName, menuConfigs, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
+	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
+    import type { PageData } from './$types';
+
 
 	let LoggedIn = $state(false);
 
@@ -21,13 +24,19 @@
 		LoggedIn = $user !== null;
 	});
 
-	let { children } = $props();
+
+	let { data, children }: {data: PageData, children: Snippet} = $props();
 	let ShowLoginForm = $state(false);
 	// let navIconSize = $state(browser ? (window.innerWidth > 768 ? 48 : 24) : 24);
 	let navIconSize = 48;
 
 	onMount(() => {
 		authService.getCurrentUser();
+	});
+
+	$effect(() => {
+		// This will run whenever loginRequestedState changes
+		ShowLoginForm = $loginRequestedState;
 	});
 
 	async function handleLogout() {
@@ -48,11 +57,17 @@
 		}
 		goto(item.path);
 	}
+
+	// When login completes successfully
+	function handleLoginSuccess() {
+		ShowLoginForm = false;
+		loginRequestedState.set(false);
+	}
 </script>
 
 <Toast />
 
-{#if $menuRequired}
+{#if !data.url.includes('resume') && !data.url.includes('project') }
 	<nav>
 		{#each menuConfigs[$menuName].menuItems as item}
 			{#if !item.requiresAuth || LoggedIn}
@@ -91,15 +106,14 @@
 		title="Login"
 		onClose={() => {
 			ShowLoginForm = false;
+			loginRequestedState.set(false);
 		}}
 		showMinimize={false}
 		showMaximize={false}
 		showFooter={false}
 	>
 		<LoginForm
-			onclose={() => {
-				ShowLoginForm = false;
-			}}
+			onclose={handleLoginSuccess}
 		/>
 	</Window>
 {/if}

@@ -3,6 +3,9 @@
 	import SkillItem from '$lib/components/resume/SkillItem.svelte';
 	import Window from '$lib/components/common/Window.svelte';
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
+
+	
 	let currentSkill = $state('VB.NET');
 	let skillSortOptions = $state([
 		{ label: 'Name', value: 'name' },
@@ -12,6 +15,9 @@
 
 	let showSvelteWindow = $state(false);
 	let windowPosition = $state({ x: browser ? window.innerWidth / 2 - 200 : 0, y: browser ? window.innerHeight / 2 - 150 : 0 });
+
+	let coreSkillsElement: HTMLElement;
+	let coreSkillsVisible = $state(false);
 
 	// const handleSkillChange = (value: string) => {
 	// 	currentSkill = value;
@@ -59,6 +65,24 @@
 		};
 		showSvelteWindow = true;
 	}
+
+	onMount(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				// Set visibility based on intersection state
+				coreSkillsVisible = entries[0].isIntersecting;
+			},
+			{ 
+				threshold: 0.2,
+				rootMargin: '50px' // Trigger slightly before element comes into view
+			}
+		);
+
+		observer.observe(coreSkillsElement);
+
+		// Cleanup on component destroy
+		return () => observer.disconnect();
+	});
 </script>
 
 {#if showSvelteWindow}
@@ -86,34 +110,46 @@
 
 	<div class="skills-grid">
 		<div class="skill-category">
-			<div class="skills-core">
+			<div class="skills-core" bind:this={coreSkillsElement}>
 				<div class="sort-group">
 					<h3>Core Skills</h3>
 				</div>
 				<div class="skill-bars">
 					<div class="skill-bar">
 						<span class="skill-name">Adaptability</span>
-						<div class="bar"><div class="fill" style="width: 100%"></div></div>
+						<div class="bar">
+							<div class="fill" style:width={coreSkillsVisible ? '100%' : '0%'}></div>
+						</div>
 					</div>
 					<div class="skill-bar">
 						<span class="skill-name">Leadership</span>
-						<div class="bar"><div class="fill" style="width: 85%"></div></div>
+						<div class="bar">
+							<div class="fill" style:width={coreSkillsVisible ? '85%' : '0%'}></div>
+						</div>
 					</div>
 					<div class="skill-bar">
 						<span class="skill-name">Communication</span>
-						<div class="bar"><div class="fill" style="width: 90%"></div></div>
+						<div class="bar">
+							<div class="fill" style:width={coreSkillsVisible ? '90%' : '0%'}></div>
+						</div>
 					</div>
 					<div class="skill-bar">
 						<span class="skill-name">Expertise</span>
-						<div class="bar"><div class="fill" style="width: 80%"></div></div>
+						<div class="bar">
+							<div class="fill" style:width={coreSkillsVisible ? '80%' : '0%'}></div>
+						</div>
 					</div>
 					<div class="skill-bar">
 						<span class="skill-name">Problem-solving</span>
-						<div class="bar"><div class="fill" style="width: 90%"></div></div>
+						<div class="bar">
+							<div class="fill" style:width={coreSkillsVisible ? '90%' : '0%'}></div>
+						</div>
 					</div>
 					<div class="skill-bar">
 						<span class="skill-name">Conflict-resolution</span>
-						<div class="bar"><div class="fill" style="width: 75%"></div></div>
+						<div class="bar">
+							<div class="fill" style:width={coreSkillsVisible ? '75%' : '0%'}></div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -261,7 +297,8 @@
 	.fill {
 		height: 100%;
 		background: linear-gradient(90deg, #04455f, #0a6491);
-		transition: width 0.5s ease-out;
+		transition: width 1s ease-out;
+		width: 0%;  /* Start at 0 */
 	}
 
 	.skills-technical {

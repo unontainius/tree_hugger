@@ -97,11 +97,11 @@
 				</div>
 				<div class="fact">
 					<div class="fact-image-container">
-						<img src="/icons/facts/projects.svg" alt="Projects" class="fact-image" />
+						<img src="/icons/facts/project.svg" alt="Projects" class="fact-image" />
 					</div>
 					<div class="fact-number-container">
 						<span class="fact-number">90</span>
-						<span class="fact-label">Projects</span>
+						<span class="fact-label">Projects Completed</span>
 					</div>
 				</div>
 				<div class="fact">
@@ -263,7 +263,6 @@
 		width: 100%;
 		height: 100%;
 		object-fit: contain;
-		filter: brightness(0) saturate(100%) invert(80%) sepia(32%) saturate(7076%) hue-rotate(179deg) brightness(101%) contrast(97%);
 	}
 
 	.fact-number-container {

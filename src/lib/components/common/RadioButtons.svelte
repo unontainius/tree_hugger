@@ -1,7 +1,7 @@
 <script lang="ts">
 	let {
 		options = [],
-		currentValue = $bindable(),
+		currentValue = $bindable(''),
 		onChange
 	} = $props<{
 		options: { label: string; value: string }[];
@@ -9,17 +9,26 @@
 		onChange: (value: string) => void;
 	}>();
 
-	// Use event delegation for better performance
 	function handleSelectedValueChanged(value: string) {
 		currentValue = value;
 		onChange(value);
 	}
 </script>
 
+<!-- use to hold the radio buttons -->
+<!-- .sort-group {
+	display: flex;
+	flex-wrap: wrap;
+	background: linear-gradient(90deg, #133b54, #1a4c6b);
+	justify-content: space-between;
+	align-items: center;
+	padding-right: 1rem;
+} -->
+
 <div class="radio-inputs">
 	{#each options as option}
 		<button
-			class={'radio-btn' + (currentValue === option.value ? ' selected' : '')}
+			class={'radio-btn' + (option.value === currentValue ? ' selected' : '')}
 			onclick={() => handleSelectedValueChanged(option.value)}
 		>
 			{option.label}

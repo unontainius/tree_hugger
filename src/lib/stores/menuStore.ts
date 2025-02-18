@@ -21,7 +21,7 @@ interface MenuConfig {
 	menuItems: MenuItem[];
 }
 
-export const menuRequired = writable<boolean>(false);
+export const menuRequired = writable<boolean>(true);
 export const menuName = writable<MenuType>('home');
 
 export const menuConfigs: Record<MenuType, MenuConfig> = {
