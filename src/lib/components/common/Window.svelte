@@ -525,7 +525,7 @@
 			</div>
 		</div>
 
-		<div class="body">
+		<div class="window-body">
 			{#if children}
 				<div class="body-content">
 					{@render children()}
@@ -568,7 +568,6 @@
 	}
 	.shell {
 		position: fixed;
-		background: rgb(32, 32, 32);
 		border-radius: 0.5rem;
 		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 		display: flex;
@@ -581,25 +580,26 @@
 		margin: 0;
 		border-radius: 0.5rem;
 		background: radial-gradient(
-				ellipse farthest-corner at right bottom,
-				#fedb37 0%,
-				#fdb931 8%,
-				#9f7928 30%,
-				#8a6e2f 40%,
-				transparent 80%
-			),
-			radial-gradient(
-				ellipse farthest-corner at left top,
-				#ffffff 0%,
-				#ffffac 8%,
-				#d1b464 25%,
-				#5d4a1f 62.5%,
-				#5d4a1f 100%
-			);
+			ellipse farthest-corner at right bottom,
+			#fedb37 0%,
+			#fdb931 8%,
+			#9f7928 30%,
+			#8a6e2f 40%,
+			transparent 80%
+		),
+		radial-gradient(
+			ellipse farthest-corner at left top,
+			#ffffff 0%,
+			#ffffac 8%,
+			#d1b464 25%,
+			#5d4a1f 62.5%,
+			#5d4a1f 100%
+		);
 		width: 100%;
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+		overflow: hidden;
 	}
 	.header {
 		height: 60px;
@@ -615,26 +615,26 @@
 		color: white;
 		border-top-left-radius: 0.4rem;
 		border-top-right-radius: 0.4rem;
+		margin-block-end: 3px
 	}
 	.title {
 		font-size: 1.2rem;
 		font-weight: 600;
 	}
-	.body {
-		flex: 1;
+	.window-body {
+		flex: 1 1 auto;
 		display: flex;
 		flex-direction: column;
-		min-height: 0;
 		position: relative;
 		overflow: hidden;
+		background: #242424;
+		border-radius: 0.3rem;
 	}
 
 	.body-content {
-		flex: 1;
+		flex: 1 1 auto;
 		padding: 0;
 		width: 100%;
-		height: 100%;
-		box-sizing: border-box;
 		overflow: auto;
 	}
 
@@ -680,7 +680,7 @@
 
 	.window-controls {
 		position: relative;
-		top: 11px;
+		top: 10px;
 		right: 0px;
 		height: 42px;
 		display: flex;
@@ -717,7 +717,6 @@
 	}
 	.shell.minimized {
 		resize: none;
-		.body,
 		.footer {
 			display: none;
 		}
