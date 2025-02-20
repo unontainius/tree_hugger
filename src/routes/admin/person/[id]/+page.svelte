@@ -15,6 +15,7 @@
 	import Window from '$lib/components/common/Window.svelte';
 	import { user } from '$lib/stores/authStore';
 	import { menuRequired, menuName } from '$lib/stores/menuStore';
+	import { PersonIdStore } from '$lib/stores/signalStore.js';
 
 	let { data } = $props();
 	let person = $state<PersonRow | null>(data.data as PersonRow);
@@ -47,11 +48,16 @@
 
 	let showCropper = $state(false);
 	let showImageSelector = $state(false);
-	// let imageSelectorWidth = $state(0);
-	// let imageSelectorHeight = $state(0);
+
 	let showDeletePersonConfirmation = $state(false);
 	let showDeleteImageConfirmation = $state(false);
-	let itemToDelete = $state<'Person' | 'Image' | null>(null);
+	let showDeleteParentConfirmation = $state(false);
+
+	let showDeleteConfirmation = $state(false);
+	let deleteFunction = $state<() => Promise<void>>(() => Promise.resolve());
+	let deleteMessage = $state<string | null>(null);
+
+	let itemToDelete = $state<'Person' | 'Image' | 'Parent' | null>(null);
 	let showRelationshipForm = $state(false);
 	let addingNewUser = $state(false);
 
@@ -77,7 +83,8 @@
 	});
 
 	async function loadPageData(loadWhat: string = 'all') {
-		if (!person) {
+		// Check for "0" or null ID to trigger new person creation
+		if (!person || data.data === null || person.id === '0') {
 			addingNewUser = true;
 			person = {
 				alias: null,
@@ -95,7 +102,9 @@
 				sex: 'Female',
 				last_edited_by: (await authService.getCurrentUser())?.email || ''
 			};
+			return; // Exit early since we're creating a new person
 		}
+
 		if (!addingNewUser) {
 			try {
 				if (loadWhat === 'all') {
@@ -133,32 +142,39 @@
 		if (formIsDirty) {
 			await handleSaveForm();
 		}
-		// Replace current URL in history instead of adding new entry
-		await goto(`/admin/person/${newPerson?.id}`, {
-			replaceState: true // This prevents adding to browser history
-		});
 
-		// Update the person state
-		person = newPerson;
-		formIsDirty = false;
-		// Reset other states
+		// Reset states when changing person
+		addingNewUser = false; // Reset this first
+		person = null; // Reset person before loading new data
 		parents = null;
 		siblings = null;
 		children = null;
 		isLoading = true;
+		formIsDirty = false;
 
-		// Load the new data
+		// Replace current URL in history instead of adding new entry
+		await goto(`/admin/person/${newPerson?.id || '0'}`, {
+			replaceState: true // This prevents adding to browser history
+		});
+
+		// Update the person state and load data
+		if (newPerson) {
+			person = newPerson;
+		}
+
+		// Load the new data (this will handle creating new person if id is "0")
 		await loadPageData();
 	}
 	// function handleConfirmationRecived(reason: string) {
 	// 	showImageSelector = false;
 	// }
 	async function handleRemoveImage() {
-		if (!(await isLoggedIn())) return;
+		if (!user) return;
 		console.log('remove image');
 	}
-	async function handleDeleteConfirmation(item: 'Person' | 'Image') {
-		if (!(await isLoggedIn())) return;
+
+	async function handleDeleteConfirmation(item: 'Person' | 'Image' | 'Parent') {
+		if (!user) return;
 		itemToDelete = item;
 		if (item === 'Person') {
 			showDeletePersonConfirmation = true;
@@ -166,50 +182,39 @@
 			showDeleteImageConfirmation = true;
 		}
 	}
-	// async function handleDeleteImage() {
-	// 	if (!(await isLoggedIn())) return;
-	// 	if (!person?.image_url) return;
-
-	// 	try {
-	// 		// Extract path from URL
-	// 		const path = person.image_url.split('/').pop();
-	// 		if (!path) throw new Error('Invalid image URL');
-
-	// 		await imageService.deleteImage(path);
-
-	// 		// Update person record
-	// 		await db.Person.update(person.id, { image_url: null });
-	// 		const updatedPerson = await db.Person.single(person.id);
-	// 		if (updatedPerson) {
-	// 			person = updatedPerson;
-	// 		}
-	// 	} catch (error) {
-	// 		console.error('Error deleting image:', error);
-	// 	}
-	// }
+	
 	async function handleAddImageFromLocal() {
 		if (!(await isLoggedIn())) return;
 
-		if (!fileInput) {
-			fileInput = document.createElement('input');
-			fileInput.type = 'file';
-			fileInput.accept = 'image/*';
-			fileInput.style.display = 'none';
-			document.body.appendChild(fileInput);
-
-			fileInput.onchange = async (e: Event) => {
-				const file = (e.target as HTMLInputElement).files?.[0];
-				if (file) {
-					try {
-						fileToUpload = file;
-						tempImageUrl = URL.createObjectURL(file);
-						showCropper = true;
-					} catch (error) {
-						console.error('Error handling file:', error);
-					}
-				}
-			};
+		// Remove existing fileInput if it exists
+		if (fileInput) {
+			fileInput.remove();
 		}
+
+		// Create new file input
+		fileInput = document.createElement('input');
+		fileInput.type = 'file';
+		fileInput.accept = 'image/*';
+		fileInput.style.display = 'none';
+		document.body.appendChild(fileInput);
+
+		fileInput.onchange = async (e: Event) => {
+			const file = (e.target as HTMLInputElement).files?.[0];
+			if (file) {
+				try {
+					fileToUpload = file;
+					// Revoke previous tempImageUrl if it exists
+					if (tempImageUrl) {
+						URL.revokeObjectURL(tempImageUrl);
+					}
+					tempImageUrl = URL.createObjectURL(file);
+					showCropper = true;
+				} catch (error) {
+					console.error('Error handling file:', error);
+				}
+			}
+		};
+
 		fileInput.click();
 	}
 	async function handleAddImageFromDatabase() {
@@ -340,11 +345,7 @@
 		showRelationshipForm = false;
 		changePerson(person);
 	}
-	// Update the state with both the boolean and a message
-	// function openImageSelector() {
-	// 	showImageSelector = true;
-	// 	// debugMessage = 'Image selector opened';
-	// }
+
 	function closeImageSelector() {
 		// debugState.showImageSelector = false;
 		// debugState.personId = null;
@@ -375,138 +376,244 @@
 		itemToDelete = null;
 		toasts.success(`Item successfully removed from the database.`);
 	}
+	async function handleDeleteParent(parentId: string) {
+		if (!person) return;
+		// set the delete function and message
+		console.log('handleDeleteParent', parentId);
+		deleteFunction = () => deleteParent(parentId);
+		
+		deleteMessage = `
+			<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+				<p style="font-size: 1.2rem; font-weight: bold;">Remove this Parent?</p>
+				<p>Only the relationship will be removed.  NOT the person.</p>
+			</div>`;
+		showDeleteConfirmation = true;
+	}
+
+	async function deleteParent(parentId: string) {
+		if (!person) return;
+		const response = await db.Tie.deleteParent(person.id, parentId);
+		if (response) {
+			await changePerson(person);
+		}
+		// reset the delete confirmation
+		showDeleteConfirmation = false;
+		deleteFunction = () => Promise.resolve();
+		deleteMessage = null;
+	}
+
+	function handleDeleteSibling(siblingId: string) {
+			console.log('delete sibling', siblingId);
+			showDeleteConfirmation = true;
+			deleteFunction = () => deleteSibling(siblingId);
+			deleteMessage = `
+				<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+					<p style="font-size: 1.2rem; font-weight: bold;">Remove this Sibling?</p>
+				<p>Only the relationship will be removed.  NOT the person.</p>
+			</div>`;
+	}
+	async function deleteSibling(siblingId: string) {	
+		if (!person) return;
+		const response = await db.Tie.deleteSibling(siblingId);
+		if (response) {
+			await changePerson(person);
+		}
+		showDeleteConfirmation = false;
+		deleteFunction = () => Promise.resolve();
+		deleteMessage = null;
+	}
+
+	function handleDeletePartner(personId: string) {
+		if (!person) return;
+		showDeleteConfirmation = true;
+		deleteFunction = () => deletePartner(personId);
+		deleteMessage = `
+			<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+				<p style="font-size: 1.2rem; font-weight: bold;">Remove this Partner?</p>
+				<p>Only the relationship will be removed.  NOT the person.</p>
+			</div>`;
+	}
+	async function deletePartner(partnerId: string) {
+		if (!person) return;
+		const response = await db.Tie.deletePartner(person.id, partnerId);
+		if (response) {
+			await changePerson(person);
+		}
+		showDeleteConfirmation = false;
+		deleteFunction = () => Promise.resolve();
+		deleteMessage = null;
+	}
+	function handleDeleteChild(childId: string) {
+		console.log('delete child', childId);
+		showDeleteConfirmation = true;
+		deleteFunction = () => deleteChild(childId);
+		deleteMessage = `
+			<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+				<p style="font-size: 1.2rem; font-weight: bold;">Remove this Child?</p>
+				<p>Only the relationship will be removed.  NOT the person.</p>
+			</div>`;
+	}
+	async function deleteChild(childId: string) {
+		if (!person) return;
+		const response = await db.Tie.deleteChild(childId);
+		if (response) {
+			await changePerson(person);
+		}
+		showDeleteConfirmation = false;
+		deleteFunction = () => Promise.resolve();
+		deleteMessage = null;
+	}
 </script>
+
 
 {#if isPageLoading}
 	<div class="loading">
-
-			<span class="loader"></span>
-
+		<span class="loader"></span>
 	</div>
 {:else}
 	<div class="page-container">
 		<div class="content-container">
-			{#if !addingNewUser}
-				{#if person}
-					<!-- Parents -->
-					<div class="row-container left">
-						<div class="column-container">
-							<div class="section-header">
-								Parents
-								<button class="section-header-icon" onclick={() => handleAddRelationship('Parent')}>
-									<MIcon name="add" size="24px" />
-								</button>
-							</div>
-							<div class="section-content">
-								{#if parents && (parents.parent_b.length > 0 || parents.parent_c.length > 0)}
-									<!-- Parent B -->
-									{#each parents.parent_b as parent}
-										<PersonCard person={parent} onclick={() => changePerson(parent)} />
-									{/each}
-									<!-- Parent C -->
-									{#each parents.parent_c as parent}
-										<PersonCard person={parent} onclick={() => changePerson(parent)} />
-									{/each}
-								{:else}
-									<p class="empty-section">No parents recorded</p>
-								{/if}
-							</div>
+			{#if person}
+				<!-- Parents -->
+				<div class="row-container center">
+					<div class="column-container">
+						<div class="section-header center">
+							Parents
+							<button class="section-header-icon" onclick={() => handleAddRelationship('Parent')}>
+								<MIcon name="add" size="24px" />
+							</button>
+						</div>
+						<div class="section-content">
+							{#if parents && (parents.parent_b.length > 0 || parents.parent_c.length > 0)}
+								<!-- Parent B -->
+								{#each parents.parent_b as parent}
+									<PersonCard
+										person={parent}
+										onclick={() => changePerson(parent)}
+										ondelete={(id) => handleDeleteParent(id)}
+									/>
+								{/each}
+								<!-- Parent C -->
+								{#each parents.parent_c as parent}
+									<PersonCard
+										person={parent}
+										onclick={() => changePerson(parent)}
+										ondelete={(id) => handleDeleteParent(id)}
+									/>
+								{/each}
+							{:else}
+								<p class="empty-section">No parents recorded</p>
+							{/if}
 						</div>
 					</div>
-					<!-- Immediate Family -->
-					<div class="row-container left">
-						<div class="column-container">
-							<div class="section-header">
-								Siblings
-								<button class="section-header-icon" onclick={() => handleAddRelationship('Sibling')}>
-									<MIcon name="add" size="24px" />
-								</button>
-							</div>
-							<div class="section-content">
-								{#if siblings}
-									{#each siblings as sibling}
-										<PersonCard person={sibling} onclick={() => changePerson(sibling)} />
-									{/each}
-								{:else}
-									<p class="empty-section">No siblings recorded</p>
-								{/if}
-							</div>
+				</div>
+				<!-- Immediate Family -->
+				<div class="row-container center">
+					<div class="column-container center">
+						<div class="section-header center">
+							Siblings
+							<button class="section-header-icon" onclick={() => handleAddRelationship('Sibling')}>
+								<MIcon name="add" size="24px" />
+							</button>
+						</div>
+						<div class="section-content">
+							{#if siblings}
+								{#each siblings as sibling}
+									<PersonCard
+										person={sibling}
+										onclick={() => changePerson(sibling)}
+										ondelete={(id) => handleDeleteSibling(id)}
+									/>
+								{/each}
+							{:else}
+								<p class="empty-section">No siblings recorded</p>
+							{/if}
 						</div>
 					</div>
-				{/if}
+				</div>
 			{/if}
+
 			<!-- Main Character info -->
 			<div class="image-controls-row">
-				{#if !addingNewUser}
-					{#if person}
-						<div class="image-container-column">
-							<div class="redacted-container">
-								<h1 class={LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
-									{person.first_name}
-									{person.last_name}
-								</h1>
-							</div>
+				{#if person}
+					<div class="image-container-column">
+						<div class="redacted-container">
+							<h1 class={LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
+								{person.first_name}
+								{#if person.alias}
+									"{person.alias}"
+								{/if}
+								{person.last_name}
+							</h1>
+						</div>
 
-							<div class="image-header-row">
-								<div class="image-container-column">
-									<!-- Image -->
-									<div class="image">
-										{#if person.image_url?.length && person.image_url.length > 10}
-											<img src={person.image_url} alt="Person Avatar" />
-										{:else}
-											<img src="/images/noimage3.png" alt=" no Personal Avatar yet" />
-										{/if}
-									</div>
-									<!-- Image buttons -->
+						<div class="image-header-row">
+							<div class="image-container-column">
+								<!-- Image -->
+								<div class="image">
+									{#if person.image_url?.length && person.image_url.length > 10}
+										<img src={person.image_url} alt="Person Avatar" />
+									{:else}
+										<img src="/images/noimage3.png" alt=" no Personal Avatar yet" />
+									{/if}
 								</div>
-								<div class="image-buttons-column">
-									<button
-										class="image-btn"
-										onclick={handleAddImageFromLocal}
-										title="Load Image from your Device"
-									>
-										<MIcon name="upload" size="32px" />
-									</button>
-									<button
-										class="image-btn"
-										onclick={handleAddImageFromDatabase}
-										title="Download Image from our database"
-									>
-										<MIcon name="download" size="32px" />
-									</button>
-									<button
-										class="image-btn"
-										onclick={handleRemoveImage}
-										title="Remove this Image from this Person"
-									>
-										<MIcon name="remove-image" size="32px" />
-									</button>
-								</div>
+								<!-- Image buttons -->
 							</div>
-							<div class="image-delete-row">
+							<div class="image-buttons-column">
 								<button
-									class="btn-delete"
-									onclick={() => handleDeleteConfirmation('Person')}
-									title="Permanently Delete this Person from the database"
+									class="image-btn"
+									onclick={handleAddImageFromLocal}
+									title="Load Image from your Device"
 								>
-									<MIcon name="bomb" size="64px" />
-									<div class="column-container">
-										<p>Forever! No backsies.</p>
-										<p>The end. Finito</p>
-									</div>
+									<MIcon name="upload" size="32px" />
+								</button>
+								<button
+									class="image-btn"
+									onclick={handleAddImageFromDatabase}
+									title="Download Image from our database"
+								>
+									<MIcon name="download" size="32px" />
+								</button>
+								<button
+									class="image-btn red"
+									onclick={handleRemoveImage}
+									title="Remove this Image from this Person"
+								>
+									<MIcon name="remove-image" size="32px" />
 								</button>
 							</div>
 						</div>
-					{/if}
-				{:else}
-					<div class="new-person-col">
-						<h1>New Person</h1>
+						<div class="image-delete-row">
+							<button
+								class="btn-delete"
+								onclick={() => handleDeleteConfirmation('Person')}
+								title="Permanently Delete this Person from the database"
+							>
+								<MIcon name="bomb" size="64px" />
+								<div class="column-container">
+									<p>Forever! No backsies.</p>
+									<p>The end. Finito</p>
+								</div>
+							</button>
+						</div>
 					</div>
-				{/if}
-				{#if person}
 					<!-- Person info (2 columns)-->
-
 					<div class="info-column">
+						<div class="main-char-buttons">
+							<button class="btn-add-person" onclick={() => goto('/admin/person')}>
+								<span><MIcon name="search" size="24px" /></span>
+								<p>Search</p>
+							</button>
+							<button
+								class="btn-add-person"
+								onclick={() => goto('/admin/person/new')}
+								disabled={!$user}
+							>
+								<span><MIcon name="add" size="24px" /></span>
+								<p>New Person</p>
+							</button>
+						</div>
+
 						<div class="info-row">
 							<div class="info-content-column">
 								<div class="field">
@@ -522,52 +629,45 @@
 								</div>
 								<div class="field">
 									<h2>Middle</h2>
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="text"
-											bind:value={person.middle_name}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-									</div>
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.middle_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
 								</div>
 								<div class="field">
 									<h2>Last Name</h2>
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="text"
-											bind:value={person.last_name}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-									</div>
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.last_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
 								</div>
 								<div class="field">
 									<h2>Maiden</h2>
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="text"
-											bind:value={person.maiden_name}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-									</div>
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.maiden_name}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
 								</div>
 								<div class="field">
 									<h2>Alias</h2>
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="text"
-											bind:value={person.alias}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-									</div>
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.alias}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
 								</div>
+								<div class="field"></div>
 							</div>
 							<div class="info-content-column">
 								<div class="field">
@@ -583,170 +683,178 @@
 								<div class="field">
 									<h2>Born</h2>
 									<div class="row-content-container-text">
-										<div class="redacted-container">
-											<input
-												class={LoggedIn ? '' : 'blurred'}
-												type="date"
-												bind:value={person.born}
-												onchange={() => (formIsDirty = true)}
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="date"
+											bind:value={person.born}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+										{#if person.born}
+											<button
+												class="btn-clear"
+												onclick={() => {
+													if (person) {
+														person.born = null;
+													}
+												}}
 												disabled={LoggedIn === false}
-											/>
-											{#if person.born}
-												<button
-													class="btn-clear"
-													onclick={() => {
-														if (person) {
-															person.born = null;
-														}
-													}}
-													disabled={LoggedIn === false}
-												>
-													<MIcon name="close" size="1.5rem" />
-												</button>
-											{/if}
-										</div>
+											>
+												<MIcon name="close" size="1.5rem" />
+											</button>
+										{/if}
 									</div>
 								</div>
 
 								<div class="field">
 									<h2>Phone</h2>
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="text"
-											bind:value={person.phone_number}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-									</div>
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="text"
+										bind:value={person.phone_number}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
 								</div>
 								<div class="field">
 									<h2>Email</h2>
-									<div class="redacted-container">
-										<input
-											class={LoggedIn ? '' : 'blurred'}
-											type="email"
-											bind:value={person.email}
-											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
-										/>
-									</div>
+									<input
+										class={LoggedIn ? '' : 'blurred'}
+										type="email"
+										bind:value={person.email}
+										onchange={() => (formIsDirty = true)}
+										disabled={LoggedIn === false}
+									/>
 								</div>
 
 								<div class="field">
 									<h2>Died</h2>
 									<div class="row-content-container-text">
-										<div class="redacted-container">
-											<input
-												class={LoggedIn ? '' : 'blurred'}
-												type="date"
-												bind:value={person.died}
-												onchange={() => (formIsDirty = true)}
+										<input
+											class={LoggedIn ? '' : 'blurred'}
+											type="date"
+											bind:value={person.died}
+											onchange={() => (formIsDirty = true)}
+											disabled={LoggedIn === false}
+										/>
+										{#if person.died}
+											<button
+												class="btn-clear"
+												onclick={() => {
+													if (person) {
+														person.died = null;
+													}
+												}}
 												disabled={LoggedIn === false}
-											/>
-											{#if person.died}
-												<button
-													class="btn-clear"
-													onclick={() => {
-														if (person) {
-															person.died = null;
-														}
-													}}
-													disabled={LoggedIn === false}
-												>
-													<MIcon name="close" size="1.5rem" />
-												</button>
-											{/if}
-										</div>
+											>
+												<MIcon name="close" size="1.5rem" />
+											</button>
+										{/if}
 									</div>
+								</div>
+								<div class="field">
+									<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
+										{#if LoggedIn}
+											<span><MIcon name="save" size="24px" /></span>
+											<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
+										{:else}
+											<div>
+												<MIcon name="locked" size="24px" />
+											</div>
+										{/if}
+									</button>
 								</div>
 							</div>
 						</div>
-						<div class="flex flex-row gap-2 self-end"></div>
-						<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
-							{#if LoggedIn}
-								<span><MIcon name="save" size="24px" /></span>
-								<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
-							{:else}
-								<div style="padding: 0.5rem;">
-									<MIcon name="locked" size="24px" />
-								</div>
-							{/if}
-						</button>
 					</div>
 				{/if}
 			</div>
 
-			{#if !addingNewUser}
-				<!-- Relationships -->
-				{#if isLoading}
-					<p>Loading ...</p>
-				{:else}
-					<div class="row-content-container left">
-						{#if children && children.partners.length > 0}
-							{#each children.partners as partnerGroup}
-								<div class="partner-children-container">
-									<div class="partner-children-row">
-										<div class="partner-column">
+			<!-- Relationships -->
+			{#if isLoading}
+				<p>Loading ...</p>
+			{:else}
+				<div class="row-content-container left">
+					{#if children && children.partners.length > 0}
+						{#each children.partners as partnerGroup}
+							<div class="partner-children-container">
+								<div class="partner-children-row">
+									<div class="partner-column">
+										<div class="section-header">
+											Partner
+											<button
+												class="section-header-icon"
+												onclick={() => handleAddRelationship('Partner')}
+											>
+												<MIcon name="add" size="24px" />
+											</button>
+										</div>
+										<div class="section-content">
+											<PersonCard
+												person={partnerGroup.partner}
+												onclick={() => changePerson(partnerGroup.partner)}
+												ondelete={(id) => handleDeletePartner(id)}
+											/>
+										</div>
+									</div>
+									{#if partnerGroup.children.some((child) => child.first_name !== 'No')}
+										<div class="children-column">
 											<div class="section-header">
-												Partner
-												<button class="section-header-icon" onclick={() => handleAddRelationship('Partner')}>
+												Children
+												<button
+													class="section-header-icon"
+													onclick={() => handleAddRelationship('Child')}
+												>
 													<MIcon name="add" size="24px" />
 												</button>
 											</div>
-											<div class="section-content">
-												<PersonCard
-													person={partnerGroup.partner}
-													onclick={() => changePerson(partnerGroup.partner)}
-												/>
+											<div class="section-content children-content">
+												{#if partnerGroup.children.length > 0}
+													{#each partnerGroup.children as child}
+														{#if child.first_name !== 'No'}
+															<PersonCard
+																person={child}
+																onclick={() => changePerson(child)}
+																ondelete={(id) => handleDeleteChild(partnerGroup.partner.id)}
+															/>
+														{/if}
+													{/each}
+												{:else}
+													<p class="empty-section">No children recorded</p>
+												{/if}
 											</div>
 										</div>
-										{#if partnerGroup.children.some((child) => child.first_name !== 'No')}
-											<div class="children-column">
-												<div class="section-header">
-													Children
-													<button class="section-header-icon" onclick={() => handleAddRelationship('Child')}>
-														<MIcon name="add" size="24px" />
-													</button>
-												</div>
-												<div class="section-content children-content">
-													{#if partnerGroup.children.length > 0}
-														{#each partnerGroup.children as child}
-															{#if child.first_name !== 'No'}
-																<PersonCard person={child} onclick={() => changePerson(child)} />
-															{/if}
-														{/each}
-													{:else}
-														<p class="empty-section">No children recorded</p>
-													{/if}
-												</div>
-											</div>
-										{/if}
-									</div>
-								</div>
-							{/each}
-						{:else}
-							<!-- Show empty state with add buttons -->
-							<div class="row-container left">
-								<div class="column-container">
-									<div class="section-header">
-										Partner
-										<button class="section-header-icon" onclick={() => handleAddRelationship('Partner')}>
-											<MIcon name="add" size="24px" />
-										</button>
-									</div>
-
-									<div class="section-header">
-										Children
-										<button class="section-header-icon" onclick={() => handleAddRelationship('Child')}>
-											<MIcon name="add" size="24px" />
-										</button>
-									</div>
+									{/if}
 								</div>
 							</div>
-						{/if}
-					</div>
-				{/if}
+						{/each}
+					{:else}
+						<!-- Show empty state with add buttons -->
+						<div class="row-container left">
+							<div class="column-container">
+								<div class="section-header">
+									Partner
+									<button
+										class="section-header-icon"
+										onclick={() => handleAddRelationship('Partner')}
+									>
+										<MIcon name="add" size="24px" />
+									</button>
+								</div>
+
+								<div class="section-header">
+									Children
+									<button
+										class="section-header-icon"
+										onclick={() => handleAddRelationship('Child')}
+									>
+										<MIcon name="add" size="24px" />
+									</button>
+								</div>
+							</div>
+						</div>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	</div>
@@ -824,7 +932,33 @@
 		</Window>
 	</div>
 {/if}
-
+<!-- generic delete confirmation -->
+{#if showDeleteConfirmation}
+	<div style="position: fixed; inset: 0; z-index: 9998;">
+		<Window
+			title="User Confirmation Required"
+			showMinimize={false}
+			showMaximize={false}
+			onClose={() => {
+				showDeleteConfirmation = false;
+				deleteFunction = () => Promise.resolve();
+				deleteMessage = null;
+			}}
+			showFooter={true}
+			acceptButtonText="Yes, remove"
+			cancelButtonText="Cancel"
+			preset="small"
+			onDialogResponse={(result) => {
+				result ? deleteFunction() : showDeleteConfirmation = false;
+			}}
+		>
+			<div class="item-to-delete-container">
+				<MIcon name="exclamation" size="128px" />
+				{@html deleteMessage}
+			</div>
+		</Window>
+	</div>
+{/if}
 {#if person && showRelationshipForm}
 	<div style="position: fixed; inset: 0; z-index: 9998;">
 		<Window
@@ -963,8 +1097,8 @@
 		justify-self: flex-start;
 		font-size: 2.5rem;
 		margin: 0;
+		padding-inline-end: 4rem;
 		margin-block-end: 2rem;
-		padding-inline-start: 1rem;
 	}
 	.image-header-row {
 		display: flex;
@@ -996,13 +1130,16 @@
 		transform: scale(0.9);
 		border-radius: 2rem;
 	}
+	.image-btn.red {
+		background-color: red;
+	}
 	.info-column {
 		display: flex;
 		flex-direction: column;
 		align-items: stretch;
 		justify-content: flex-start;
 		padding: 1rem;
-		padding-block-start: 2rem;
+		padding-block-start: 0;
 		min-width: 320px;
 		max-width: 520px;
 		flex: 1;
@@ -1075,30 +1212,18 @@
 		z-index: 10;
 	}
 
-	.btn-add {
-		border-radius: 0;
-		padding: 0.25rem;
-		color: rgb(255, 255, 255);
-		width: 48px;
-		height: 48px;
-		border-radius: 50%;
-	}
 	.btn-delete {
 		background-color: red;
 		margin-block-start: 1.5rem;
 	}
 	.btn-save {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-
+		width: 100%;
+		margin-inline: 0;
 		background-color: green;
-		margin-block-start: 1rem;
-		text-align: center;
-		border-radius: 2rem;
-		cursor: pointer;
-		pointer-events: auto;
+	}
+	.btn-add-person {
+		margin-inline: 0;
+		background-color: dodgerblue;
 	}
 
 	button:disabled {
@@ -1113,13 +1238,7 @@
 		justify-content: flex-start;
 		align-items: start;
 	}
-	.new-person-col {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-	}
+
 	.item-to-delete-container {
 		display: flex;
 		flex-direction: row;
@@ -1135,6 +1254,184 @@
 		font-size: 1.5rem;
 		font-weight: medium;
 		text-align: center;
+	}
+
+	/* Section Headers */
+	.section-header {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 2rem;
+		font-size: 2rem;
+		font-weight: 300;
+		color: white;
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+		margin: 0.5rem;
+		margin-block-start: 0;
+		text-align: left;
+		width: 100%;
+	}
+	.section-header-icon {
+		background-color: dodgerblue;
+		border: none;
+		padding: 0.5rem;
+		margin: 0;
+		cursor: pointer;
+		border-radius: 2rem;
+	}
+	/* Section Content */
+	.section-content {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: 1rem;
+		padding: 0.5rem;
+		background-color: rgba(255, 255, 255, 0.1);
+		border-radius: 0.5rem;
+		width: 100%;
+	}
+	.center {
+		justify-content: center;
+		align-items: center;
+	}
+	/* Empty Section Message */
+	.empty-section {
+		color: rgba(255, 255, 255, 0.5);
+		font-style: italic;
+		text-align: center;
+		padding: 1rem;
+	}
+
+	.partner-children-container {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0.5rem;
+		width: 100%;
+		min-width: 100%;
+		/* background-color: rgba(255, 255, 255, 0.05); */
+		border-radius: 0.5rem;
+		/* padding: 0.5rem; */
+		margin-bottom: 0.5rem;
+	}
+
+	.partner-children-row {
+		display: flex;
+		flex-direction: row;
+		gap: 0.5rem;
+		width: 100%;
+		flex-wrap: wrap;
+	}
+
+	.partner-column {
+		flex: 0 0 auto;
+	}
+
+	.children-column {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.children-content {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: 1rem;
+		width: 100%;
+	}
+
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 70vh;
+	}
+
+	.loader {
+		transform: rotateZ(45deg);
+		perspective: 1000px;
+		border-radius: 50%;
+		width: 148px;
+		height: 148px;
+		color: #fff;
+	}
+	.loader:before,
+	.loader:after {
+		content: '';
+		display: block;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: inherit;
+		height: inherit;
+		border-radius: 50%;
+		transform: rotateX(70deg);
+		animation: 1s spin linear infinite;
+	}
+	.loader:after {
+		color: #ff3d00;
+		transform: rotateY(70deg);
+		animation-delay: 0.4s;
+	}
+
+	@keyframes rotate {
+		0% {
+			transform: translate(-50%, -50%) rotateZ(0deg);
+		}
+		100% {
+			transform: translate(-50%, -50%) rotateZ(360deg);
+		}
+	}
+
+	@keyframes rotateccw {
+		0% {
+			transform: translate(-50%, -50%) rotate(0deg);
+		}
+		100% {
+			transform: translate(-50%, -50%) rotate(-360deg);
+		}
+	}
+
+	@keyframes spin {
+		0%,
+		100% {
+			box-shadow: 0.2em 0px 0 0px currentcolor;
+		}
+		12% {
+			box-shadow: 0.2em 0.2em 0 0 currentcolor;
+		}
+		25% {
+			box-shadow: 0 0.2em 0 0px currentcolor;
+		}
+		37% {
+			box-shadow: -0.2em 0.2em 0 0 currentcolor;
+		}
+		50% {
+			box-shadow: -0.2em 0 0 0 currentcolor;
+		}
+		62% {
+			box-shadow: -0.2em -0.2em 0 0 currentcolor;
+		}
+		75% {
+			box-shadow: 0px -0.2em 0 0 currentcolor;
+		}
+		87% {
+			box-shadow: 0.2em -0.2em 0 0 currentcolor;
+		}
+	}
+
+	.main-char-buttons {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		gap: 0.5rem;
 	}
 
 	@media (max-width: 768px) {
@@ -1206,172 +1503,4 @@
 			justify-content: center;
 		}
 	}
-
-	/* Section Headers */
-	.section-header {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-start;
-		gap: 2rem;
-		font-size: 2.0rem;
-		font-weight: 300;
-		color: white;
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-		margin: 0.5rem;
-		margin-block-start: 0;
-		text-align: left;
-		width: 100%;
-	}
-	.section-header-icon {
-		background-color: dodgerblue;
-		border: none;
-		padding: 0.5rem;
-		margin: 0;
-		cursor: pointer;
-		border-radius: 2rem;
-
-	}
-	/* Section Content */
-	.section-content {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: flex-start;
-		align-items: flex-start;
-		gap: 1rem;
-		padding: 0.5rem;
-		background-color: rgba(255, 255, 255, 0.1);
-		border-radius: 0.5rem;
-		width: 100%;
-	}
-
-	/* Empty Section Message */
-	.empty-section {
-		color: rgba(255, 255, 255, 0.5);
-		font-style: italic;
-		text-align: center;
-		padding: 1rem;
-	}
-
-	.partner-children-container {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 0.5rem;
-		width: 100%;
-		min-width: 100%;
-		/* background-color: rgba(255, 255, 255, 0.05); */
-		border-radius: 0.5rem;
-		/* padding: 0.5rem; */
-		margin-bottom: 0.5rem;
-	}
-
-	.partner-children-row {
-		display: flex;
-		flex-direction: row;
-		gap: 0.5rem;
-		width: 100%;
-	}
-
-	.partner-column {
-		flex: 0 0 auto;
-	}
-
-	.children-column {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.children-content {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: flex-start;
-		align-items: flex-start;
-		gap: 1rem;
-		width: 100%;
-	}
-
-	.loading {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 70vh;
-	}
-
-	.loader {
-        transform: rotateZ(45deg);
-        perspective: 1000px;
-        border-radius: 50%;
-        width: 148px;
-        height: 148px;
-        color: #fff;
-      }
-        .loader:before,
-        .loader:after {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: inherit;
-          height: inherit;
-          border-radius: 50%;
-          transform: rotateX(70deg);
-          animation: 1s spin linear infinite;
-        }
-        .loader:after {
-          color: #FF3D00;
-          transform: rotateY(70deg);
-          animation-delay: .4s;
-        }
-
-      @keyframes rotate {
-        0% {
-          transform: translate(-50%, -50%) rotateZ(0deg);
-        }
-        100% {
-          transform: translate(-50%, -50%) rotateZ(360deg);
-        }
-      }
-
-      @keyframes rotateccw {
-        0% {
-          transform: translate(-50%, -50%) rotate(0deg);
-        }
-        100% {
-          transform: translate(-50%, -50%) rotate(-360deg);
-        }
-      }
-
-      @keyframes spin {
-        0%,
-        100% {
-          box-shadow: .2em 0px 0 0px currentcolor;
-        }
-        12% {
-          box-shadow: .2em .2em 0 0 currentcolor;
-        }
-        25% {
-          box-shadow: 0 .2em 0 0px currentcolor;
-        }
-        37% {
-          box-shadow: -.2em .2em 0 0 currentcolor;
-        }
-        50% {
-          box-shadow: -.2em 0 0 0 currentcolor;
-        }
-        62% {
-          box-shadow: -.2em -.2em 0 0 currentcolor;
-        }
-        75% {
-          box-shadow: 0px -.2em 0 0 currentcolor;
-        }
-        87% {
-          box-shadow: .2em -.2em 0 0 currentcolor;
-        }
-      }
-   
 </style>

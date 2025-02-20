@@ -72,4 +72,11 @@
             transform: rotate(360deg);
         }
     }
+
+    @media (max-width: 768px) {
+        .earth-container {
+            width: 190px;
+            height: 190px;
+        }
+    }
 </style>

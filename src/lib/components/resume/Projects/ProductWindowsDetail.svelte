@@ -78,12 +78,13 @@
 			</div>
 		{:else}
             {#if project?.project_name}
-			    <ImageGallery 
-					bucketName="project"
-					path={project.project_name.replace(/\s+/g, '-')}
-					canAddNewImages={true}
-					bind:viewedFolder={viewedFolder}
-				/>
+				<div class="image-gallery">
+					<ImageGallery 
+						path={`project/${project.project_name}`}
+						canAddNewImages={false}
+						viewedFolder={viewedFolder}
+					/>
+				</div>
             {/if}
 		{/if}
 	</div>
@@ -115,11 +116,13 @@
 		height: 100%;
 	}
 
-	/* .window-content h1 {
-		font-size: 1.5rem;
-		color: yellow;
-		margin: 0;
-	} */
+	.image-gallery {
+		width: calc(100% - 2rem);
+		height: 100%;
+		background: rgb(39, 39, 39);
+		border-radius: 1rem;
+		margin-inline: 1rem;
+	}
 	.window-content h2 {
 		font-size: 1.2rem;
 		color: #fff;

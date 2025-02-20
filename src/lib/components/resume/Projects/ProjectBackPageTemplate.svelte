@@ -16,10 +16,10 @@
 </script>
 
 <div class="project-back-page">
-    <h2>{project.project_name}</h2>
+    <!-- <h2>{project.project_name}</h2>
     <p>{project.category}</p>
     <p>{project.client}</p>
-    <p>{project.century}</p>
+    <p>{project.century}</p> -->
     <button onclick={showMore}>Show More ...</button>
 </div>
 
@@ -31,13 +31,6 @@
         justify-content: center;
         gap: 1rem;
         padding: 1rem;
-    }
-    .project-back-page h2 {
-        font-size: 1.5rem;
-        margin: 0;
-    }
-    .project-back-page p {
-        margin: 0;
     }
     .project-back-page button {
         width: 130px;

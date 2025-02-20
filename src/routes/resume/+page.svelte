@@ -111,10 +111,10 @@
 					<div id="section-content-1" class="section-content welcome-content">
 						<h1>Welcome</h1>
 						<div class="tooltip">
-						<p class="intro-text">
-							Scroll down to explore my journey, or use the navigation menu to jump to specific
-							sections.
-						</p>
+							<p class="intro-text">
+								Scroll down to explore my journey, or use the navigation menu to jump to specific
+								sections.
+							</p>
 						</div>
 					</div>
 					<b4>
@@ -560,13 +560,13 @@
 		
 	}
 
-	/* HTML: <div class="tooltip">This is the same as #7 but with another shape for the tail </div> */
+
 .tooltip {
   color: #fff;
   font-size: 18px;
   max-width: 78ch;
   text-align: center;
-  z-index: 100;
+  z-index: 2000;
 }
 .tooltip {
 	/* tail dimension */
@@ -626,4 +626,25 @@
 	min-height: 0.5rem; /* Smaller spacing */
 }
 
+@media (max-width: 768px) {
+	.tooltip {
+		width: 80%;
+
+	}
+	.intro-text {
+		text-align: center;
+		font-size: 1.5rem;
+
+	}
+	.box b4 {
+		width: 90px;
+		height: 90px;
+	}
+	#section2  {
+		padding:0.25rem;
+	}
+	.about-section {
+		padding:0.25rem;
+	}
+}
 </style>

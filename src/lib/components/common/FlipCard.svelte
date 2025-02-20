@@ -37,7 +37,9 @@
 	.flip-card {
 		background-color: transparent;
 		width: 100%;
+		min-width: 250px;
 		height: 100%;
+		min-height: 250px;
 		perspective: 1000px;
 		border-radius: 1rem;
 
@@ -74,9 +76,14 @@
 	}
 
 	.flip-card-back {
-		background-color: #297fb9e1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: transparent;
 		color: white;
 		transform: rotateY(180deg);
 		border-radius: 1rem;
+		height: 80%;
 	}
 </style>

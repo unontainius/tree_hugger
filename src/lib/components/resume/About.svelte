@@ -18,36 +18,37 @@
 
 					<div class="about-info-block">
 						<div class="info-row">
-							<div class="label">Birthday:</div>
-							<div>8 August 1967</div>
+							<div class="label">🎁</div>
+							<div class="info-text">August 1967</div>
 						</div>
 						<div class="info-row">
-							<div class="label">Website:</div>
-							<div>www.v-sys.co.nz</div>
+							<div class="label">🌐</div>
+							<a href="https://www.v-sys.co.nz" target="_blank">
+								<div class="info-text">www.v-sys.co.nz</div>
+							</a>
 						</div>
 						<div class="info-row">
-							<div class="label">Phone:</div>
-							<div>+642 7221 2880</div>
+							<div class="label">@</div>
+							<div class="info-text">marcus@v-sys.co.nz</div>
 						</div>
 						<div class="info-row">
-							<div class="label">City:</div>
-							<div>Nelson, Zealand</div>
+							<div class="label">📱</div>
+							<a href="tel:+64272212880" target="_blank">
+								<div class="info-text">+642 7221 2880</div>
+							</a>
 						</div>
 						<div class="info-row">
-							<div class="label">Age:</div>
-							<div>Old enough</div>
+							<div class="label">⛪</div>
+							<div class="info-text">Nelson, Zealand</div>
 						</div>
 						<div class="info-row">
-							<div class="label">Experience:</div>
-							<div>30yrs</div>
+							<div class="label">💫</div>
+							<div class="info-text">30yrs</div>
 						</div>
+
 						<div class="info-row">
-							<div class="label">Email:</div>
-							<div>marcus@v-sys.co.nz</div>
-						</div>
-						<div class="info-row">
-							<div class="label">Freelance:</div>
-							<div>Available</div>
+							<div class="label">⚒️</div>
+							<div class="info-text">Available</div>
 						</div>
 					</div>
 
@@ -210,11 +211,10 @@
 
 	.about-info-block .info-row {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-start;
 		align-items: center;
 		padding: 0.8rem 0;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-		gap: 1rem;
 	}
 
 	.about-info-block .info-row:last-child {
@@ -222,11 +222,19 @@
 	}
 
 	.label {
+		font-size: 1.5rem;
 		font-weight: 500;
 		color: #77defd;
-		min-width: 100px;
+		width: 20px;
+		margin-right: 0;
 	}
 
+	.info-text {
+		flex: 1;
+		font-size: 1.25rem;
+		font-weight: 100;
+		color: #a4e7fc;
+	}
 	.my-col {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -286,39 +294,6 @@
 		letter-spacing: 0.05em;
 	}
 
-	@media (max-width: 1200px) {
-		.info-row {
-			grid-template-columns: 1fr;
-		}
-
-		.my-col {
-			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-		}
-	}
-
-	@media (max-width: 768px) {
-		.section-content {
-			padding: 2rem 0.25rem;
-		}
-
-		.about-title {
-			font-size: 2.0rem;
-		}
-
-		.about-info-block {
-			float: none;
-			width: 100%;
-			margin: 1.5rem 0;
-		}
-
-		.fact {
-			padding: 1rem;
-		}
-
-		.fact-number {
-			font-size: 1.8rem;
-		}
-	}
 
 	.side-content {
 		display: flex;
@@ -369,6 +344,44 @@
 		/* On mobile, match single fact card width */
 		.profile-image-container {
 			max-width: calc(180px + 1.5rem);
+		}
+		.about-container {
+			padding: 1rem;
+		}
+	}
+
+	
+	@media (max-width: 1200px) {
+		.info-row {
+			grid-template-columns: 1fr;
+		}
+
+		.my-col {
+			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		}
+	}
+
+	@media (max-width: 768px) {
+		.section-content {
+			padding: 2rem 0.25rem;
+		}
+
+		.about-title {
+			font-size: 2.0rem;
+		}
+
+		.about-info-block {
+			width: 300px;
+			margin: 1.5rem 0;
+			margin-inline-end: 1rem;
+		}
+
+		.fact {
+			padding: 1rem;
+		}
+
+		.fact-number {
+			font-size: 1.8rem;
 		}
 	}
 </style>

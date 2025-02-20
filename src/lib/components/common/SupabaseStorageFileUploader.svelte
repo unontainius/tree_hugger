@@ -1,10 +1,10 @@
 <script lang="ts">
     import supabase from '$lib/supabaseClient'; 
     import { toasts } from '$lib/stores/toastStore';
-    import { createStorageBucket, removeSpaces, bucketExists, uploadFile } from '$lib/services/StorageBucketService';
+    import { uploadFile, getPublicUrl } from '$lib/services/StorageBucketService';
     // Define types for props
     type FileUploaderProps = {
-        bucketName: string;
+        bucketName: string; // Now accepts paths like "project/anchors"
         imageSaved: (path: string) => void;
     };
 
@@ -28,13 +28,24 @@
         const files = target.files;
 
         if (files && files.length > 0) {
-            selectedFile = files[0]; // Store the selected file in state
-            error = ''; // Clear any previous errors
+            selectedFile = files[0];
+            console.log('Selected file name:', selectedFile.name);  // Log original name
+            error = '';
             sendFile();
         } else {
-            selectedFile = null; // Reset if no file is selected
+            selectedFile = null;
         }
     }
+
+    // Improved getBaseFilename function
+    // function getBaseFilename(filename: string): string {
+    //     // Check if filename has the timestamp pattern (13 digits followed by dash)
+    //     const hasTimestamp = /^\d{13}-/.test(filename);
+    //     if (hasTimestamp) {
+    //         return filename.slice(14).toLowerCase();
+    //     }
+    //     return filename.toLowerCase();
+    // }
 
     // Function to upload the selected file to Supabase storage
     async function sendFile(): Promise<void> {
@@ -44,35 +55,19 @@
                 return;
             }
 
-            if (!bucketName) {
-                error = 'Bucket name is missing.';
-                return;
-            }
-
             isLoading = true;
             error = '';
 
-            // Extract the project name from the full path (e.g., "project/Svelte Family Tree" -> "Svelte Family Tree")
-            const projectPath = bucketName.split('/')[1];
-            
-            console.log('Uploading to project bucket:', {
-                bucket: 'project',
-                projectPath,
-                fileName: selectedFile.name
-            });
-
-            // Upload directly to the project bucket with the project folder path
-            const filePath = `${projectPath}/${Date.now()}-${selectedFile.name}`.replace(/\s+/g, '-');
-            
-            const { data, error: uploadError } = await supabase.storage
-                .from('project')
-                .upload(filePath, selectedFile);
-
-            if (uploadError) throw uploadError;
-
-            console.log('File uploaded successfully:', data);
-            imageSaved(data?.path || '');
-            toasts.success('File uploaded successfully');
+            // Pass the original file name without modification
+            const result = await uploadFile(bucketName, selectedFile.name, selectedFile);
+            if (!result) {
+                toasts.error('Upload failed' + result);
+                throw new Error('Upload failed');
+            }
+            // build the public url
+            const publicUrl = getPublicUrl(bucketName, result.path);
+            imageSaved(publicUrl);
+            toasts.warning('Image uploaded - Remember to save the project to keep changes');
             
             // Reset form
             if (fileInput) fileInput.value = '';
@@ -81,6 +76,7 @@
         } catch (err) {
             console.error('Upload error:', err);
             error = err instanceof Error ? err.message : 'Unknown error';
+            toasts.error(`Upload failed: ${error}`);
         } finally {
             isLoading = false;
         }
@@ -91,10 +87,14 @@
 
 <!-- Template -->
 <div>
-    <!-- Button to trigger file selection -->
+    <!-- Add type="button" to prevent form submission -->
     <button
+        type="button"
         class="file-upload-button"
-        onclick={triggerFileSelect}
+        onclick={(e) => {
+            e.preventDefault();  // Prevent any form submission
+            triggerFileSelect();
+        }}
         disabled={isLoading}
     >
         {#if isLoading}

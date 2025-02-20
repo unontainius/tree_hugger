@@ -7,24 +7,29 @@ export function removeSpaces(str: string) {
 
 export async function createStorageBucket(bucketName: string, isPublic: boolean = false) {
     try {
+        console.log('Attempting to create bucket:', bucketName);
         const { data, error } = await supabase.storage.createBucket(bucketName, {
             public: isPublic,
             allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
             fileSizeLimit: 1024 * 1024 * 2 // 2MB limit
         });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Bucket creation error:', error);
+            throw error;
+        }
+        console.log('Bucket created successfully:', bucketName);
 
-        // Create both public and authenticated policies
+        // Create both public and anonymous policies
+        console.log('Setting up bucket policies for:', bucketName);
         await Promise.all([
             createPublicAnonymousPolicy(bucketName),
             createPublicAuthenticatedPolicy(bucketName)
         ]);
         
-        toasts.success(`Bucket ${bucketName} created successfully`);
         return data;
     } catch (error) {
-        console.error('Failed to create bucket:', error);
+        console.error('Failed to create bucket:', bucketName, error);
         toasts.error(`Failed to create bucket: ${error instanceof Error ? error.message : 'Unknown error'}`);
         return null;
     }
@@ -64,20 +69,56 @@ export async function bucketExists(bucketName: string): Promise<boolean> {
 
 export async function uploadFile(bucketName: string, path: string, file: File) {
     try {
-        // Check if bucket exists, create if it doesn't
-        if (!(await bucketExists(bucketName))) {
-            await createStorageBucket(bucketName, true);
+        // Split the path to get just the bucket name (first part)
+        const [bucket, ...pathParts] = bucketName.split('/');
+        const subfolderPath = pathParts.join('/');
+        
+        console.log('Upload request:', { 
+            originalBucket: bucketName,
+            bucket,
+            subfolderPath,
+            fileName: file.name 
+        });
+        
+        if (!(await bucketExists(bucket))) {
+            console.log('Bucket does not exist, creating:', bucket);
+            await createStorageBucket(bucket, true);
+        } else {
+            console.log('Bucket exists:', bucket);
         }
 
-        const { data, error } = await supabase.storage
-            .from(bucketName)
-            .upload(path, file);
+        // Construct the full path for the file
+        const cleanFileName = removeSpaces(file.name);
+        const fullPath = subfolderPath 
+            ? `${subfolderPath}/${cleanFileName}`
+            : cleanFileName;
+            
+        console.log('Uploading to path:', fullPath);
 
-        if (error) throw error;
+        const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(fullPath, file, { upsert: true });
+
+        if (error) {
+            console.error('Upload error:', error);
+            throw error;
+        }
+        console.log('Upload successful:', data);
         return data;
     } catch (error) {
-        console.error('Upload error:', error);
+        console.error('Upload failed:', error);
         toasts.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         return null;
     }
+}
+
+export function RemovePublicDomain(url: string) {
+    return url.replace(import.meta.env.VITE_PUBLIC_SUPABASE_URL + '/storage/v1/object', '');
+}
+
+export function getPublicUrl(bucket: string, path: string) {
+    if (!path) return '';
+    
+    // Use the environment variable for Supabase URL
+    return `${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/storage/v1/object/${bucket}/${path}`;
 }

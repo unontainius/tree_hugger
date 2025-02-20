@@ -311,6 +311,7 @@
 	}
 
 	onMount(() => {
+		console.log('<Window>onMount', id);
 		windows.register(id);
 		document.addEventListener('mousemove', handleMouseMove);
 		document.addEventListener('mouseup', handleMouseUp);

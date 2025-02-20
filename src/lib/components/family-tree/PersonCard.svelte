@@ -1,21 +1,29 @@
 <script lang="ts">
 	import type { PersonRow } from '$lib/types/database.types';
 	import { user } from '$lib/stores/authStore';
+	import MIcon from '../common/MIcon.svelte';
 
-	let LoggedIn = $state(false);
-
-	$effect(() => {
-		// This will run whenever $user changes
-		LoggedIn = $user !== null;
-	});
-
-	let { person, onclick }: { person: PersonRow; onclick: () => void } = $props();
+	let {
+		person,
+		onclick,
+		ondelete
+	}: {
+		person: PersonRow;
+		onclick: () => void;
+		ondelete: (personId: string) => void;
+	} = $props();
 
 	function formatDateToLocal(date: string) {
 		if (date.length > 8) {
 			return new Date(date).toLocaleDateString();
 		}
 		return date;
+	}
+
+	function handleDeleteParent(e: Event, personId: string) {
+		e.preventDefault();
+		console.log('delete parent', personId);
+		ondelete(personId);
 	}
 </script>
 
@@ -27,16 +35,39 @@
 	{/if}
 
 	<div class="person-info">
-		<div class={LoggedIn ? '' : 'blurred'}>
+		<div class={$user ? '' : 'blurred'}>
 			<h1>{person.first_name} {person.last_name}</h1>
 		</div>
-		<div class="info-content">
-			<div class={LoggedIn ? '' : 'blurred'}>
-				<p>{formatDateToLocal(person.born ?? '')}</p>
+		<div class="info-row">
+			<div class="info-content">
+				<div class={$user ? '' : 'blurred'}>
+					<p>{formatDateToLocal(person.born ?? '')}</p>
+				</div>
+				<div class={$user ? '' : 'blurred'}>
+					<p>{person.alias}</p>
+				</div>
 			</div>
-			<div class={LoggedIn ? '' : 'blurred'}>
-				<p>{person.alias}</p>
-			</div>
+			{#if $user}
+				<div class="actions">
+					<div
+						class="btn-delete"
+						onclick={(e) => {
+							e.stopPropagation();
+							handleDeleteParent(e, person.id);
+						}}
+						onkeydown={(e) => {
+							if (e.key === 'Delete') {
+								e.stopPropagation();
+								handleDeleteParent(e, person.id);
+							}
+						}}
+						role="button"
+						tabindex="0"
+					>
+						<MIcon name="close" size="16px" color="#b90404" />
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 </button>
@@ -85,22 +116,37 @@
 		cursor: pointer;
 		z-index: 100;
 	}
+	.info-row {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+	}
 	.person-info {
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
 		align-items: flex-start;
+		flex-grow: 1;
 		gap: 0.25rem;
 		padding: 0.25rem 0.5rem;
-		height: 80px;
 	}
 
 	.info-content {
-		transition: all 0.3s ease;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: flex-start;
+		max-height: 100%;
 	}
 
 	.blurred {
 		filter: blur(3px);
+	}
+	.btn-delete {
+		color: #b90404;
+		cursor: pointer;
 	}
 
 	@media (max-width: 468px) {

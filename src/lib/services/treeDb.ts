@@ -204,6 +204,15 @@ export default {
 			}
 			return parents;
 		},
+		async deleteParent(personId: string, parentId: string): Promise<boolean> {
+			// delete all records where person_a is personId and (person_b or person_c is parentId)
+			const { error } = await supabase
+				.from('tie')
+				.delete()
+				.match({ person_a: personId })
+				.or(`person_b.eq.${parentId},person_c.eq.${parentId}`);
+			return error ? false : true;
+		},
 		async Siblings(
 			id: string,
 			parent_b: PersonRow,
@@ -233,6 +242,13 @@ export default {
 			}
 			return siblings;
 		},
+		async deleteSibling(siblingId: string): Promise<boolean> {
+			const { error } = await supabase
+				.from('tie')
+				.delete()
+				.eq('person_a', siblingId);
+			return error ? false : true;
+		},
 		async Partners(id: string): Promise<{ partner: PersonRow[] } | null> {
 			const { data, error } = await supabase
 				.from('tie')
@@ -255,6 +271,14 @@ export default {
 			}
 			return partners;
 		},
+		async deletePartner(personId: string, partnerId: string): Promise<boolean> {
+			const { error } = await supabase
+				.from('tie')
+				.delete()
+				.match({ person_b: personId, person_c: partnerId })
+				.or(`person_b.eq.${partnerId},person_c.eq.${personId}`);
+			return error ? false : true;
+		},
 		async Children(
 			id: string
 		): Promise<{ partners: { partner: PersonRow; children: PersonRow[] }[] } | null> {
@@ -274,6 +298,13 @@ export default {
 				}
 			}
 			return results;
+		},
+		async deleteChild(childId: string): Promise<boolean> {
+			const { error } = await supabase
+				.from('tie')
+				.delete()
+				.eq('person_a', childId);
+			return error ? false : true;
 		},
 		relationship: {
 			async create(data: TieRelationInsertRow): Promise<TieRelationRow | null> {

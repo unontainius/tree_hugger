@@ -6,6 +6,7 @@
 	import RadioButtons from '$lib/components/common/RadioButtons.svelte';
 	import { onMount } from 'svelte';
 	import { debounce } from '$lib/utils/debounce';
+	import { user } from '$lib/stores/authStore';
 
 	let people = $state<PersonRow[] | null>(null);
 	let initialLoading = $state(true);
@@ -41,6 +42,7 @@
 		}
 	});
 </script>
+
 
 <div class="row">
 	<div class="search-group">
@@ -80,6 +82,17 @@
 			bind:currentValue={sortField}
 			onChange={loadData}
 		/>
+
+		<a 
+			href={$user ? "/admin/person/new" : undefined}
+			class="add-button"
+			class:disabled={!$user}
+			onclick={e => !$user && e.preventDefault()}
+			title={!$user ? "Please log in to add new people" : "Add New Person"}
+		>
+			<MIcon name="add" size="24px" />
+			New
+		</a>
 	</div>
 </div>
 
@@ -169,5 +182,29 @@
 		padding-block: 0.45rem;
 		border: 1px solid #b6b6b6;
 		border-radius: 0.25rem;
+	}
+
+	.add-button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: dodgerblue;
+		color: white;
+		text-decoration: none;
+		border-radius: 0.5rem;
+		transition: all 0.2s ease;
+	}
+
+	.add-button:hover:not(.disabled) {
+		background: rgb(24, 100, 177);
+		transform: translateY(-2px);
+	}
+
+	.disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		background: gray;
+		pointer-events: none;
 	}
 </style>

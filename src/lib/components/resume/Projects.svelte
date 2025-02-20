@@ -7,6 +7,7 @@
 	import { user } from '$lib/stores/authStore';
     import type { User } from '$lib/services/authService';
 	import ProductWindowsDetail from './Projects/ProductWindowsDetail.svelte';
+	import { RemovePublicDomain } from '$lib/services/StorageBucketService';
 
 
 	interface ProjectRow {
@@ -39,37 +40,42 @@
 			projects = data;
 		}
 	});
+
 </script>
 
 <div class="page-container">
 	{#if $user && ($user.email === 'unobtainius@gmail.com' || $user.email === 'marcus@v-sys.co.nz')}
 		<div class="admin-link">
-			<a href="./admin/projects">Projects</a>
-			<h2>Projects</h2>
+			<a href="./admin/projects">Maintain Projects</a>
 	    </div>
 	{/if}
-
+	<h2>Projects</h2>
 	<div class="page-content">
-		{#each projects as project (project.id)}
-			{#snippet frontPage()}
-			{project.project_name}
-				<div class="front-page">
+		<div class="items-container">
+			{#each projects as project (project.id)}
 
-						<img src={project.img_url} alt={project.project_name} />
+				{#snippet frontPage()}
+					<div class="front-page">
+						{#if project?.img_url}
+							<img src={project.img_url} alt={RemovePublicDomain(project.img_url)} />
+						{/if}
+					</div>
+				{/snippet}
 
+				{#snippet backPage()}
+					<ProjectBackPageTemplate {project} showMore={() => showMoreDetailHandler(project)} />
+				{/snippet}
+
+				<div class="item">
+					<div class="project-name">{project.project_name}</div>
+					<FlipCard {frontPage} {backPage} />
 				</div>
-			{/snippet}
-
-			{#snippet backPage()}
-				<ProjectBackPageTemplate {project} showMore={() => showMoreDetailHandler(project)} />
-			{/snippet}
-
-			<div class="item">
-				<FlipCard {frontPage} {backPage} />
-			</div>
-		{/each}
+				
+			{/each}
+		</div>
 	</div>
 </div>
+
 {#if showMoreDetail}
 	<Window
 		title="Project information"
@@ -116,9 +122,21 @@
 		padding: 1rem;
 		gap: 3rem;
 	}
+	.items-container {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
 	.item {
 		width: 300px;
-		height: 230px;
+		height: 300px;
+		background-color: transparent;
+		text-align: center;
+		/* border-radius: 1rem;
+		border: 1px solid #dcdddd; */
 	}
 	.page-container {
 		width: 100%;
@@ -127,6 +145,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+
 
 	}
     .page-content {
@@ -137,30 +156,33 @@
 		justify-content: center;
 		background-color: transparent;
 		padding: 2rem;
-		height: 100vh;
+
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-bottom: 3rem;
 	}
-	/* .window-content {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		background-color: #212121;
-		padding: 2rem;
-		height: 100vh;
-	} */
+	.project-name {
+		font-size: 1.5rem;
+		font-weight: 500;
+		color: #bf0af7;
+		min-width: 100px;
+		background-color: transparent;
+
+
+	}
+
 
 	.front-page {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		width: 100%;
-		height: 100%;
 		background-color: transparent;
+
 	}
     .front-page img {
-        height: 200px;
+		margin-block-start: 1rem;
+        height: 225px;
         object-fit: cover;
         border-radius: 1rem;
     }
