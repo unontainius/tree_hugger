@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.48.1",
+		"animate.css": "^4.1.1",
 		"cropperjs": "^1.6.2"
 	}
 }

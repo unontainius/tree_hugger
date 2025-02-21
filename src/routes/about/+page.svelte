@@ -1,33 +1,39 @@
 <script lang="ts">
+
 </script>
 
 <div class="content">
-	<div class="row">
-		<div class="header">
-			<div class="gold">
+	<div class="row ">
+		<div class="header ">
+			<div class="header-image">
 				<img src="/images/familytree.png" alt="logo" />
 			</div>
-			<h1 class="gold-text">About</h1>
+			<div class="header-text">
+				<h1 class=" gold-text">About</h1>
+			</div>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col-start">
-			<p>
+			<div class="quote">
 				&#x201F;My intention is to keep developing this site with more and more features as I think
 				of them, or as the users, you, suggest them to me.&#x201D;
-			</p>
+			</div>
 
-			<p>
+			<div class="other-end">
 				&#x201F;I'd like to add the ability to add pictures and stories to individuals. A quick
 				"show me birthdays" or "show me anniversaries" could be a nice features too.&#x201D;
-			</p>
-			<div class="signed">Marcus 😉</div>
+			</div>
+			<div class="footer">
+				<div class="signed">Marcus 😉</div>
+			</div>
 		</div>
 	</div>
 </div>
 
 <style>
+
 	.gold-text {
 		background: linear-gradient(
 			to right,
@@ -52,54 +58,58 @@
 		font-size: 4rem;
 		color: rgba(255, 255, 255, 0.63);
 	}
-	p {
+
+	.quote {
 		font-size: 1.5rem;
-		color: white;
+		font-weight: 100;
+		color: rgba(255, 255, 255, 0.801);
 		max-width: 50ch;
 		border-radius: 8px;
-		border-left: 8px solid rgba(255, 255, 255, 0.623);
-		padding-left: 1rem;
-		margin-inline: 2rem;
-		margin-block-start: 2rem;
+		border-left: 8px solid rgba(3, 140, 253, 0.623);
+		padding: 1rem;
+		margin: 2rem;
+		margin-block-end: 0.5rem;
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
+	}
+	.other-end {
+		font-size: 1.5rem;
+		font-weight: 100;
+		color: rgba(255, 255, 255, 0.801);
+		max-width: 50ch;
+		border-radius: 8px;
+		border-left: 0;
+		border-right: 8px solid rgba(3, 140, 253, 0.623);
+		padding: 1rem;
+		margin: 2rem;
+		margin-block:0.5rem;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 	}
 	.content {
 		width: 100vw;
-		height: 100vh;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		margin-block-start: 4rem;
 	}
 
 	.header {
-		padding: 0;
-		margin: 0;
 		display: flex;
 		flex-direction: row;
-		justify-content: flex-end;
-		align-items: flex-end;
+		justify-content: center;
+		align-items: center;
 		flex-wrap: wrap;
 		gap: 1rem;
+		width: 100vw;
+		padding: 0;
+		margin-block-start: 2rem;
 	}
-	.col-start p {
-		font-size: 1.5rem;
-		font-weight: 100;
-		color: rgba(255, 255, 255, 0.67);
-		max-width: 50ch;
-		border-radius: 8px;
-		border-left: 8px solid rgba(255, 255, 255, 0.623);
-		padding-left: 1rem;
-		margin-inline: 2rem;
-	}
-	.signed {
-		font-size: 1.5rem;
-
-		color: rgba(255, 255, 255, 0.608);
-		max-width: 50ch;
-		width: 100%;
-		text-align: right;
-		padding-inline-end: 2rem;
+	.header-image {
+		width: 120px;
+		height: 120px;
+		display: flex;
+		justify-content: flex-end;
+		align-items: flex-end;
 	}
 
 	.row {
@@ -112,42 +122,36 @@
 	.col-start {
 		display: flex;
 		flex-direction: column;
-		justify-content: flex-start;
-		align-items: flex-start;
+		justify-content: center;
+		align-items: center;
 		height: 100%;
 		gap: 1.5rem;
 	}
-	.gold {
-		margin-block-start: 1rem;
-		width: 220px;
-		height: 220px;
-		border-radius: 50%;
-		padding: 0.5rem;
-		background: radial-gradient(
-				ellipse farthest-corner at right bottom,
-				#fedb37 0%,
-				#fdb931 8%,
-				#9f7928 30%,
-				#8a6e2f 40%,
-				transparent 80%
-			),
-			radial-gradient(
-				ellipse farthest-corner at left top,
-				#ffffff 0%,
-				#ffffac 8%,
-				#d1b464 25%,
-				#5d4a1f 62.5%,
-				#5d4a1f 100%
-			);
-	}
-	.gold img {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		border-radius: 50%;
-	}
 
+	.footer {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 1rem;
+		width: 100%;
+	}
+	.signed {
+		color: rgba(255, 255, 255, 0.608);
+		max-width: 50ch;
+		width: 150px;
+		text-align: center;
+		background-color: rgba(27, 27, 27, 0.911);
+		border-radius: 8px;
+		padding: 0.5rem;
+		justify-self: flex-end;
+		margin: 1rem;
+		margin-inline-end:3rem;
+	}
 	@media (max-width: 768px) {
+		.content {
+			margin-block-start: 2rem;
+			height: 100%;
+		}
 	}
 </style>

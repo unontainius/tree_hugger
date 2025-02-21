@@ -6,11 +6,13 @@
 	let {
 		person,
 		onclick,
-		ondelete
+		ondelete,
+		showDeleteButton = true
 	}: {
 		person: PersonRow;
 		onclick: () => void;
 		ondelete: (personId: string) => void;
+		showDeleteButton?: boolean;
 	} = $props();
 
 	function formatDateToLocal(date: string) {
@@ -47,7 +49,7 @@
 					<p>{person.alias}</p>
 				</div>
 			</div>
-			{#if $user}
+			{#if $user && showDeleteButton}
 				<div class="actions">
 					<div
 						class="btn-delete"

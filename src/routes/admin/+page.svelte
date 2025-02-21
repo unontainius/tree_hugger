@@ -1,39 +1,12 @@
 <script lang="ts">
 	import { user } from '$lib/stores/authStore';
-	import { menuName } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
-	import { tick } from 'svelte';
 	import FamilyMenuItem from '$lib/components/family-tree/FamilyMenuItem.svelte';
 
-	let LoggedIn = $state(false);
-
-	$effect(() => {
-		LoggedIn = $user !== null;
-	});
-
 	async function setFamilyTreeMenu() {
-		$menuName = 'family-tree';
-		await tick();
 		goto('/admin/person');
 	}
 
-	async function setFamilyPhotosMenu() {
-		$menuName = 'photos';
-		await tick();
-		goto('/photos');
-	}
-
-	async function setAnniversariesMenu() {
-		$menuName = 'anniversaries';
-		await tick();
-		goto('/anniversaries');
-	}
-
-	async function setFamilyStoriesMenu() {
-		$menuName = 'stories';
-		await tick();
-		goto('/stories');
-	}
 </script>
 
 <div class="welcome-container">
@@ -41,7 +14,7 @@
 		title="Family Tree&nbsp;Hugger"
 		description="Show me the People"
 		image="/images/familytree.png"
-		loggedIn={LoggedIn}
+		loggedIn={$user !== null}
 		onclick={setFamilyTreeMenu}
 	/>
 
@@ -49,24 +22,24 @@
 		title="Photos & Memories"
 		description="HEAD SHOT!"
 		image="/images/sniper.jpg"
-		loggedIn={LoggedIn}
-		onclick={setFamilyPhotosMenu}
+		loggedIn={$user !== null}
+		onclick={() => goto('/comming-soon')}
 	/>
 
 	<FamilyMenuItem
 		title="Stories & Tall&nbsp;Tales"
 		description="Once upon a time ..."
 		image="/images/book.jpg"
-		loggedIn={LoggedIn}
-		onclick={setFamilyStoriesMenu}
+		loggedIn={$user !== null}
+		onclick={() => goto('/comming-soon')}
 	/>
 
 	<FamilyMenuItem
 		title="Anniversaries & Birthdays"
 		description="Oh!  Was that today?"
 		image="/images/celebration.jpg"
-		loggedIn={LoggedIn}
-		onclick={setAnniversariesMenu}
+		loggedIn={$user !== null}
+		onclick={() => goto('/comming-soon')}
 	/>
 </div>
 

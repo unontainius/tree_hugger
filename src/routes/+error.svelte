@@ -3,7 +3,7 @@
 </script>
 
 <div class="col">
-	<div class="error">
+	<div class="error ">
 		<h1>Error</h1>
 		<p>Page: {page.url.pathname}</p>
 		<p>Message: {page.error?.message}</p>
@@ -20,6 +20,9 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		animation: fadeIn 2.5s ease-in-out;
+		animation-fill-mode: forwards;
+
 	}
 	.error {
 		display: flex;

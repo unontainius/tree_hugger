@@ -14,7 +14,7 @@
 	{#if people}
 		{#each people as person}
 			{#if person.first_name != 'No'}
-				<PersonCard {person} onclick={() => handlePersonClick(person.id)} />
+				<PersonCard {person} onclick={() => handlePersonClick(person.id)} ondelete={() => (void 0)} showDeleteButton={false}/>
 			{/if}
 		{/each}
 	{/if}
