@@ -67,7 +67,7 @@
 
 		switch (preset) {
 			case 'small':
-				return { width: 400, height: 250 };
+				return { width: 360, height: 250 };
 			case 'medium':
 				return {
 					width: Math.floor(window.innerWidth * 0.5),
@@ -613,8 +613,7 @@
 		cursor: grab;
 		user-select: none;
 		color: white;
-		border-top-left-radius: 0.4rem;
-		border-top-right-radius: 0.4rem;
+		border-radius: 0.4rem;
 		margin-block-end: 3px
 	}
 	.title {
@@ -634,6 +633,7 @@
 	.body-content {
 		flex: 1 1 auto;
 		padding: 0;
+	
 		width: 100%;
 		overflow: auto;
 	}
@@ -644,9 +644,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
-		background: #f5f5f5;
+		background: #013d55;
 		gap: 10px;
 		flex-shrink: 0;
+		border-bottom-left-radius: 0.4rem;
+		border-bottom-right-radius: 0.4rem;
+		margin-top: 3px;
 	}
 
 	.resize-handle {

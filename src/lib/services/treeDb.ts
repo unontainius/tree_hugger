@@ -205,13 +205,7 @@ export default {
 			return parents;
 		},
 		async deleteParent(personId: string, parentId: string): Promise<boolean> {
-			// delete all records where person_a is personId and (person_b or person_c is parentId)
-			const { error } = await supabase
-				.from('tie')
-				.delete()
-				.match({ person_a: personId })
-				.or(`person_b.eq.${parentId},person_c.eq.${parentId}`);
-			return error ? false : true;
+			return this.deletePartner(personId, parentId);
 		},
 		async Siblings(
 			id: string,
@@ -243,12 +237,17 @@ export default {
 			return siblings;
 		},
 		async deleteSibling(siblingId: string): Promise<boolean> {
-			const { error } = await supabase
-				.from('tie')
-				.delete()
-				.eq('person_a', siblingId);
+			console.log('delete sibling', siblingId);
+			const { data, error } = await supabase.rpc('delete_sibling', { siblingid: siblingId });
+			console.log(`const { data, error } = await supabase.rpc('delete_sibling', { siblingid: ${siblingId} });`);
+			if (error) {
+				console.error('Error deleting sibling:', error);
+			} else {
+				console.log('Sibling deleted successfully:', data);
+			}
 			return error ? false : true;
 		},
+
 		async Partners(id: string): Promise<{ partner: PersonRow[] } | null> {
 			const { data, error } = await supabase
 				.from('tie')
@@ -261,24 +260,33 @@ export default {
 			}
 			const partners: { partner: PersonRow[] } = { partner: [] };
 			for (const tie of data) {
-				const partner = await db.Person.single(tie.person_b === id ? tie.person_c : tie.person_b);
-				if (partner) {
-					// check if partner is already in the array
-					if (!partners.partner.some((p) => p.id === partner.id)) {
-						partners.partner.push(partner);
+				if (tie.person_c !== '') {
+					const partner = await db.Person.single(tie.person_b === id ? tie.person_c : tie.person_b);
+					if (partner) {
+						// check if partner is already in the array
+						if (!partners.partner.some((p) => p.id === partner.id)) {
+							partners.partner.push(partner);
+						}
 					}
 				}
 			}
 			return partners;
 		},
 		async deletePartner(personId: string, partnerId: string): Promise<boolean> {
-			const { error } = await supabase
-				.from('tie')
-				.delete()
-				.match({ person_b: personId, person_c: partnerId })
-				.or(`person_b.eq.${partnerId},person_c.eq.${personId}`);
+			const { data, error } = await supabase
+			.rpc('delete_partnership', {
+			  person_x: personId,
+			  person_y: partnerId
+			});
+		  
+		  if (error) {
+			console.error('Error deleting relationship:', error);
+		  } else {
+			console.log('Relationship deleted successfully:', data);
+		  }
 			return error ? false : true;
 		},
+
 		async Children(
 			id: string
 		): Promise<{ partners: { partner: PersonRow; children: PersonRow[] }[] } | null> {
@@ -299,12 +307,21 @@ export default {
 			}
 			return results;
 		},
-		async deleteChild(childId: string): Promise<boolean> {
-			const { error } = await supabase
-				.from('tie')
-				.delete()
-				.eq('person_a', childId);
-			return error ? false : true;
+		async deleteChild(childId: string, partnerId: string, personId: string): Promise<boolean> {
+			console.log('delete child', personId, childId);
+			const { data, error } = await supabase
+				.rpc('delete_child_relationship', {
+					person_x: childId,
+					person_y: partnerId,
+					person_z: personId
+				});
+
+				if (error) {
+					console.error('Error deleting relationship:', error);
+				} else {
+					console.log('Relationship deleted successfully:', data);
+				}
+			return true;
 		},
 		relationship: {
 			async create(data: TieRelationInsertRow): Promise<TieRelationRow | null> {
@@ -405,6 +422,10 @@ export default {
 			}
 		},
 		async insert(tie: TieInsertRow): Promise<TieRow> {
+			console.log('insert tie', tie);
+			if (tie.person_c === null) {
+				tie.person_c = 'null';
+			}
 			const { data, error } = await supabase.from('tie').insert(tie).select().single();
 
 			if (error) throw error;

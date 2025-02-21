@@ -65,13 +65,6 @@
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	let fileToUpload: File | null = $state(null);
 
-	let LoggedIn = $state(false);
-
-	$effect(() => {
-		// This will run whenever $user changes
-		LoggedIn = $user !== null;
-	});
-
 	onMount(async () => {
 		isPageLoading = true;
 		// Keep menu but ensure it's properly configured
@@ -165,14 +158,10 @@
 		// Load the new data (this will handle creating new person if id is "0")
 		await loadPageData();
 	}
-	// function handleConfirmationRecived(reason: string) {
-	// 	showImageSelector = false;
-	// }
 	async function handleRemoveImage() {
 		if (!user) return;
 		console.log('remove image');
 	}
-
 	async function handleDeleteConfirmation(item: 'Person' | 'Image' | 'Parent') {
 		if (!user) return;
 		itemToDelete = item;
@@ -182,8 +171,7 @@
 			showDeleteImageConfirmation = true;
 		}
 	}
-	
-	async function handleAddImageFromLocal() {
+		async function handleAddImageFromLocal() {
 		if (!(await isLoggedIn())) return;
 
 		// Remove existing fileInput if it exists
@@ -337,12 +325,16 @@
 			relationshipFormPersonA = null;
 			relationshipFormPersonB = person;
 			relationshipFormPersonC = otherPerson;
+			console.log('handleAddRelationship', relationship, otherPerson, person?.id);
 		}
 		showRelationshipForm = true;
 	}
 	async function handleCloseRelationshipForm() {
 		if (!person) return;
 		showRelationshipForm = false;
+		relationshipFormPersonA = null;
+		relationshipFormPersonB = null;
+		relationshipFormPersonC = null;
 		changePerson(person);
 	}
 
@@ -403,10 +395,11 @@
 	}
 
 	function handleDeleteSibling(siblingId: string) {
-			console.log('delete sibling', siblingId);
-			showDeleteConfirmation = true;
-			deleteFunction = () => deleteSibling(siblingId);
-			deleteMessage = `
+		if (!person) return;
+		console.log('handle DEL', siblingId);
+		showDeleteConfirmation = true;
+		deleteFunction = () => deleteSibling(siblingId);
+		deleteMessage = `
 				<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
 					<p style="font-size: 1.2rem; font-weight: bold;">Remove this Sibling?</p>
 				<p>Only the relationship will be removed.  NOT the person.</p>
@@ -414,8 +407,9 @@
 	}
 	async function deleteSibling(siblingId: string) {	
 		if (!person) return;
-		const response = await db.Tie.deleteSibling(siblingId);
-		if (response) {
+		console.log('call DEL', siblingId);
+		const success = await db.Tie.deleteSibling(siblingId);
+		if (success) {
 			await changePerson(person);
 		}
 		showDeleteConfirmation = false;
@@ -423,40 +417,41 @@
 		deleteMessage = null;
 	}
 
-	function handleDeletePartner(personId: string) {
+	function handleDeletePartner(partnerId: string) {
 		if (!person) return;
 		showDeleteConfirmation = true;
-		deleteFunction = () => deletePartner(personId);
+		deleteFunction = () => deletePartner(person?.id || '', partnerId);
 		deleteMessage = `
 			<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
 				<p style="font-size: 1.2rem; font-weight: bold;">Remove this Partner?</p>
 				<p>Only the relationship will be removed.  NOT the person.</p>
 			</div>`;
 	}
-	async function deletePartner(partnerId: string) {
+	async function deletePartner(personId: string, partnerId: string) {
 		if (!person) return;
-		const response = await db.Tie.deletePartner(person.id, partnerId);
-		if (response) {
+		const success = await db.Tie.deletePartner(personId, partnerId);
+		if (success) {
+			console.log('deletePartner', personId, partnerId);
 			await changePerson(person);
 		}
 		showDeleteConfirmation = false;
 		deleteFunction = () => Promise.resolve();
 		deleteMessage = null;
 	}
-	function handleDeleteChild(childId: string) {
-		console.log('delete child', childId);
+	function handleDeleteChild(partnerId: string, childId: string) {
+		console.log(`handle delete child  Child:${childId} partner:${partnerId} Person:${person?.id}`);
 		showDeleteConfirmation = true;
-		deleteFunction = () => deleteChild(childId);
+		deleteFunction = () => deleteChild(childId, partnerId, person?.id || '');
 		deleteMessage = `
 			<div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
 				<p style="font-size: 1.2rem; font-weight: bold;">Remove this Child?</p>
 				<p>Only the relationship will be removed.  NOT the person.</p>
 			</div>`;
 	}
-	async function deleteChild(childId: string) {
+	async function deleteChild(childId: string, partnerId: string, personId: string) {
 		if (!person) return;
-		const response = await db.Tie.deleteChild(childId);
-		if (response) {
+		const success = await db.Tie.deleteChild(childId, partnerId, personId);
+		if (success) {
 			await changePerson(person);
 		}
 		showDeleteConfirmation = false;
@@ -473,79 +468,18 @@
 {:else}
 	<div class="page-container">
 		<div class="content-container">
-			{#if person}
-				<!-- Parents -->
-				<div class="row-container center">
-					<div class="column-container">
-						<div class="section-header center">
-							Parents
-							<button class="section-header-icon" onclick={() => handleAddRelationship('Parent')}>
-								<MIcon name="add" size="24px" />
-							</button>
-						</div>
-						<div class="section-content">
-							{#if parents && (parents.parent_b.length > 0 || parents.parent_c.length > 0)}
-								<!-- Parent B -->
-								{#each parents.parent_b as parent}
-									<PersonCard
-										person={parent}
-										onclick={() => changePerson(parent)}
-										ondelete={(id) => handleDeleteParent(id)}
-									/>
-								{/each}
-								<!-- Parent C -->
-								{#each parents.parent_c as parent}
-									<PersonCard
-										person={parent}
-										onclick={() => changePerson(parent)}
-										ondelete={(id) => handleDeleteParent(id)}
-									/>
-								{/each}
-							{:else}
-								<p class="empty-section">No parents recorded</p>
-							{/if}
-						</div>
-					</div>
-				</div>
-				<!-- Immediate Family -->
-				<div class="row-container center">
-					<div class="column-container center">
-						<div class="section-header center">
-							Siblings
-							<button class="section-header-icon" onclick={() => handleAddRelationship('Sibling')}>
-								<MIcon name="add" size="24px" />
-							</button>
-						</div>
-						<div class="section-content">
-							{#if siblings}
-								{#each siblings as sibling}
-									<PersonCard
-										person={sibling}
-										onclick={() => changePerson(sibling)}
-										ondelete={(id) => handleDeleteSibling(id)}
-									/>
-								{/each}
-							{:else}
-								<p class="empty-section">No siblings recorded</p>
-							{/if}
-						</div>
-					</div>
-				</div>
-			{/if}
+
 
 			<!-- Main Character info -->
 			<div class="image-controls-row">
 				{#if person}
 					<div class="image-container-column">
-						<div class="redacted-container">
-							<h1 class={LoggedIn ? 'image-header-title' : 'image-header-title blurredx2'}>
-								{person.first_name}
-								{#if person.alias}
-									"{person.alias}"
-								{/if}
-								{person.last_name}
-							</h1>
-						</div>
+
+						<h1 class={$user ? 'image-header-title' : 'image-header-title blurredx2'}>
+							{person.first_name} {person.last_name}
+						</h1>
+
+
 
 						<div class="image-header-row">
 							<div class="image-container-column">
@@ -555,6 +489,9 @@
 										<img src={person.image_url} alt="Person Avatar" />
 									{:else}
 										<img src="/images/noimage3.png" alt=" no Personal Avatar yet" />
+									{/if}
+									{#if person.alias}
+										<h2 class="alias"><em>"{person.alias}"</em></h2>
 									{/if}
 								</div>
 								<!-- Image buttons -->
@@ -609,7 +546,7 @@
 								onclick={() => goto('/admin/person/new')}
 								disabled={!$user}
 							>
-								<span><MIcon name="add" size="24px" /></span>
+								<span><MIcon name="new" size="24px" /></span>
 								<p>New Person</p>
 							</button>
 						</div>
@@ -618,53 +555,52 @@
 							<div class="info-content-column">
 								<div class="field">
 									<h2>First</h2>
-
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="text"
 										bind:value={person.first_name}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user }
 									/>
 								</div>
 								<div class="field">
 									<h2>Middle</h2>
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="text"
 										bind:value={person.middle_name}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user}
 									/>
 								</div>
 								<div class="field">
 									<h2>Last Name</h2>
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="text"
 										bind:value={person.last_name}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user}
 									/>
 								</div>
 								<div class="field">
 									<h2>Maiden</h2>
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="text"
 										bind:value={person.maiden_name}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user}
 									/>
 								</div>
 								<div class="field">
 									<h2>Alias</h2>
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="text"
 										bind:value={person.alias}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user}
 									/>
 								</div>
 								<div class="field"></div>
@@ -672,8 +608,8 @@
 							<div class="info-content-column">
 								<div class="field">
 									<h2>Gender</h2>
-									<div class={LoggedIn ? '' : 'blurred'}>
-										<select bind:value={person.sex} disabled={LoggedIn === false}>
+									<div class={$user ? '' : 'blurred'}>
+										<select bind:value={person.sex} disabled={!$user}>
 											<option value="Male">Male</option>
 											<option value="Female">Female</option>
 											<option value="Other">Other</option>
@@ -684,11 +620,11 @@
 									<h2>Born</h2>
 									<div class="row-content-container-text">
 										<input
-											class={LoggedIn ? '' : 'blurred'}
+											class={$user ? '' : 'blurred'}
 											type="date"
 											bind:value={person.born}
 											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
+											disabled={!$user}
 										/>
 										{#if person.born}
 											<button
@@ -698,7 +634,7 @@
 														person.born = null;
 													}
 												}}
-												disabled={LoggedIn === false}
+												disabled={!$user}
 											>
 												<MIcon name="close" size="1.5rem" />
 											</button>
@@ -709,21 +645,21 @@
 								<div class="field">
 									<h2>Phone</h2>
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="text"
 										bind:value={person.phone_number}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user}
 									/>
 								</div>
 								<div class="field">
 									<h2>Email</h2>
 									<input
-										class={LoggedIn ? '' : 'blurred'}
+										class={$user ? '' : 'blurred'}
 										type="email"
 										bind:value={person.email}
 										onchange={() => (formIsDirty = true)}
-										disabled={LoggedIn === false}
+										disabled={!$user}
 									/>
 								</div>
 
@@ -731,11 +667,11 @@
 									<h2>Died</h2>
 									<div class="row-content-container-text">
 										<input
-											class={LoggedIn ? '' : 'blurred'}
+											class={$user ? '' : 'blurred'}
 											type="date"
 											bind:value={person.died}
 											onchange={() => (formIsDirty = true)}
-											disabled={LoggedIn === false}
+											disabled={!$user}
 										/>
 										{#if person.died}
 											<button
@@ -745,7 +681,7 @@
 														person.died = null;
 													}
 												}}
-												disabled={LoggedIn === false}
+												disabled={!$user}
 											>
 												<MIcon name="close" size="1.5rem" />
 											</button>
@@ -754,7 +690,7 @@
 								</div>
 								<div class="field">
 									<button class="btn-save" onclick={() => handleSaveForm()} disabled={!formIsDirty}>
-										{#if LoggedIn}
+										{#if $user}
 											<span><MIcon name="save" size="24px" /></span>
 											<p>{formIsDirty ? 'Save Changes' : 'Saved'}</p>
 										{:else}
@@ -769,10 +705,16 @@
 					</div>
 				{/if}
 			</div>
-
 			<!-- Relationships -->
 			{#if isLoading}
-				<p>Loading ...</p>
+				<div class="row-content-container left">
+					<div class="column-container">
+						<div class="section-header">
+							loading relatives
+							<span class="loader"></span>
+						</div>
+					</div>
+				</div>
 			{:else}
 				<div class="row-content-container left">
 					{#if children && children.partners.length > 0}
@@ -803,7 +745,7 @@
 												Children
 												<button
 													class="section-header-icon"
-													onclick={() => handleAddRelationship('Child')}
+													onclick={() => handleAddRelationship('Child',partnerGroup.partner)}
 												>
 													<MIcon name="add" size="24px" />
 												</button>
@@ -815,7 +757,7 @@
 															<PersonCard
 																person={child}
 																onclick={() => changePerson(child)}
-																ondelete={(id) => handleDeleteChild(partnerGroup.partner.id)}
+																ondelete={(id) => handleDeleteChild(partnerGroup.partner.id, child.id)}
 															/>
 														{/if}
 													{/each}
@@ -854,6 +796,64 @@
 							</div>
 						</div>
 					{/if}
+				</div>
+				<div class="divider">&nbsp;</div>
+				<!-- Immediate Family -->
+				<div class="row-container center">
+					<div class="column-container center">
+						<div class="section-header center">
+							Siblings
+							<button class="section-header-icon" onclick={() => handleAddRelationship('Sibling')}>
+								<MIcon name="add" size="24px" />
+							</button>
+						</div>
+						<div class="section-content">
+							{#if siblings}
+								{#each siblings as sibling}
+									<PersonCard
+										person={sibling}
+										onclick={() => changePerson(sibling)}
+										ondelete={(id) => handleDeleteSibling(id)}
+									/>
+								{/each}
+							{:else}
+								<p class="empty-section">No siblings recorded</p>
+							{/if}
+						</div>
+					</div>
+				</div>
+				<!-- Parents -->
+				<div class="row-container center">
+					<div class="column-container">
+						<div class="section-header center">
+							Parents
+							<button class="section-header-icon" onclick={() => handleAddRelationship('Parent')}>
+								<MIcon name="add" size="24px" />
+							</button>
+						</div>
+						<div class="section-content">
+							{#if parents && (parents.parent_b.length > 0 || parents.parent_c.length > 0)}
+								<!-- Parent B -->
+								{#each parents.parent_b as parent}
+									<PersonCard
+										person={parent}
+										onclick={() => changePerson(parent)}
+										ondelete={(id) => handleDeleteParent(id)}
+									/>
+								{/each}
+								<!-- Parent C -->
+								{#each parents.parent_c as parent}
+									<PersonCard
+										person={parent}
+										onclick={() => changePerson(parent)}
+										ondelete={(id) => handleDeleteParent(id)}
+									/>
+								{/each}
+							{:else}
+								<p class="empty-section">No parents recorded</p>
+							{/if}
+						</div>
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -964,7 +964,7 @@
 		<Window
 			title={`Add ${relationshipType}`}
 			onClose={() => {
-				showRelationshipForm = false;
+				handleCloseRelationshipForm();
 			}}
 			showMinimize={false}
 			showMaximize={false}
@@ -1054,7 +1054,7 @@
 		background-color: rgb(255, 255, 255);
 		padding: 10px;
 		padding-bottom: 40px;
-		transform: rotate(3deg);
+		transform: rotate(-3deg);
 		transition: transform 0.3s ease-in-out;
 		border-radius: 0.5rem;
 		box-shadow: 0 0 1.5rem 0 rgba(0, 0, 0, 0.8);
@@ -1098,7 +1098,13 @@
 		font-size: 2.5rem;
 		margin: 0;
 		padding-inline-end: 4rem;
-		margin-block-end: 2rem;
+		margin-block-end: 1.5rem;
+	}
+	.alias {
+		font-size: 1.5rem;
+		font-weight: 300;
+		color: rgba(32, 32, 32, 0.5);
+		text-align: center;
 	}
 	.image-header-row {
 		display: flex;
@@ -1378,6 +1384,16 @@
 		color: #ff3d00;
 		transform: rotateY(70deg);
 		animation-delay: 0.4s;
+	}
+	.divider {
+		display: flex;
+		flex: 1;
+		width: 100%;
+		height: 3px;
+		font-size: 2px;
+		background-color: #5f7b8c;
+		margin-block: 1rem;
+		border-radius: 1rem;
 	}
 
 	@keyframes rotate {

@@ -24,7 +24,7 @@
 
 	function handleDeleteParent(e: Event, personId: string) {
 		e.preventDefault();
-		console.log('delete parent', personId);
+		console.log('delete', `${personId} ${person.first_name} ${person.last_name}`);
 		ondelete(personId);
 	}
 </script>

@@ -36,3 +36,23 @@ button:active {
 button:focus {
 	outline: none;
 }
+/* Scrollbar styles */
+	::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+	}
+	
+	::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 10px;
+	}
+	
+	::-webkit-scrollbar-thumb {
+	border: 1px solid #003c4b;
+	border-radius: 1rem;
+	background: linear-gradient(to right, #333333, #a8a8a8, #2f3030);  
+	}
+	
+	::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(to right, #016c8699, #bad8fa99, #016c8699);  
+	}

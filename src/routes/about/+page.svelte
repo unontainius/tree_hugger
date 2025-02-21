@@ -102,7 +102,7 @@
 		gap: 1rem;
 		width: 100vw;
 		padding: 0;
-		margin-block-start: 2rem;
+		margin-block-start: 4rem;
 	}
 	.header-image {
 		width: 120px;

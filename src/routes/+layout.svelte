@@ -111,6 +111,7 @@
 		showMinimize={false}
 		showMaximize={false}
 		showFooter={false}
+		initialSize={{width: 360, height: 340}}
 	>
 		<LoginForm
 			onclose={handleLoginSuccess}

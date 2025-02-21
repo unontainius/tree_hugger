@@ -10,7 +10,7 @@
 		console.log(path);
 		toasts.success("Image saved", 3000);
 	};
-
+	let testGrid = $state('page-grid-1');
 	onMount(() => {
 		authService.login('marcus@v-sys.co.nz', 'abc1234');
 	});
@@ -36,7 +36,6 @@
 {/snippet}
 
 {#snippet backPage()}
-
 	<div>
 		<div class="ribbon">Back</div>
 		<p>
@@ -118,15 +117,173 @@
 	<RotatingJupiter />
 </div>
 
-
-
-
 <div class="image-container">
 	<div class="ribbon">Resume</div>
 	<img src="/images/marcus.jpg" alt="Marcus" />
 </div>
 
+		<select bind:value={testGrid}>
+			<option value="page-grid-1">Page Grid 1</option>
+			<option value="page-grid-2">Page Grid 2</option>
+			<option value="page-grid-3">Page Grid 3</option>
+			<option value="page-grid-4">Page Grid 4</option>
+		</select>
+<div class={testGrid}>
+	<div class="header">Header
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	</div>
+	<div class="aside">Aside
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	
+	</div>
+	<div class="main">Main
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	
+	</div>
+	<div class="footer">Footer
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		Lorem ipsum dolor sit amet, con7
+		sectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+		lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	
+	</div>
+</div>
 <style>
+
+	.page-grid-1 {
+		display: grid;
+		grid-template-areas: 
+		"a a a a a a a a a a a a a"
+		"b b b b c c c c c c c c c"
+		"b b b b d d d d d d d d d";
+		width: calc(100vw - 3rem);
+		height: 400px;
+		background-color: black;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid #ccc;
+		margin: 1rem;
+		overflow: auto;
+	}
+	.page-grid-2 {
+		display: grid;
+		grid-template-areas: 
+		"a a a a a a a a a a a a a"
+		"c c c c c c c c c c c b b"
+		"d d d d d d d d d d d b b";
+		width: calc(100vw - 3rem);
+		height: 400px;
+		background-color: black;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid #ccc;
+		margin: 1rem;
+		overflow: auto;
+	}	
+	.page-grid-3 {
+		display: grid;
+		grid-template-areas: 
+		"a a a a b b b c c d d d d"
+		"a a a a b b b c c d d d d"
+		"a a a a b b b c c d d d d";
+		width: calc(100vw - 3rem);
+		height: 400px;
+		background-color: black;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid #ccc;
+		margin: 1rem;
+		overflow: auto;
+	}
+	.page-grid-4 {
+		display: grid;
+		grid-template-areas: 
+		"a a a a a a a a a a a a a"
+		"b b b b b b b b b b b b b"
+		"b b b b b b b b b b b b b"
+		"b b b b b b b b b b b b b"
+		"b b b b b b b b b b b b b"
+		"c d d d d d d d d d d d d";
+		width: calc(100vw - 3rem);
+		height: 400px;
+		background-color: black;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid #ccc;
+		margin: 1rem;
+		overflow: auto;
+	}
+	.header {
+		grid-area: a;
+		width: 100%;
+		background-color: red;
+		padding: 1rem;
+	}
+	.main {
+		grid-area: c;
+		width: 100%;
+		max-height: 200px;
+		background-color: blue;
+		padding: 1rem;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	.aside {
+		grid-area: b;
+		width: 100%;
+		background-color: green;
+		padding: 1rem;
+	}
+	.footer {
+		grid-area: d;
+		width: 100%;
+		background-color: yellow;
+		color: black;
+		padding: 1rem;
+	}
+	
+
 	/* HTML: <div class="ribbon">Your text content</div> */
 
 	h1 {

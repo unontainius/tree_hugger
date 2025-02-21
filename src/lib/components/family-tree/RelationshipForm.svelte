@@ -21,14 +21,19 @@
 		name_c: '',
 		person_a: person_a?.id || '',
 		person_b: person_b?.id || '',
-		person_c: person_c?.id || '',
+		person_c: person_c?.id || null,
 		tie_relation: 'Child'
 	});
 
 	let people: PersonRow[] = $state([]);
 	let savable: boolean = $derived(tie.person_a !== '' && tie.person_b !== '');
+	
 	onMount(async () => {
 		people = (await loadPeople()) || [];
+	});
+
+	$effect(() => {
+		$inspect(`a: ${tie.person_a} b: ${tie.person_b} c: ${tie.person_c}`);
 	});
 
 	async function handleSubmit() {
@@ -103,9 +108,9 @@
 		gap: 0.5rem;
 		padding: 0.5rem;
 		background-color: rgb(96, 136, 160);
-		border-bottom-left-radius: 0.5rem;
-		border-bottom-right-radius: 0.5rem;
+		border-bottom-left-radius: 0.4rem;
+		border-bottom-right-radius: 0.4rem;
 		width: 100%;
-		height: 433px;
+		height: 430px;
 	}
 </style>
