@@ -77,7 +77,7 @@
 <style>
 	h1 {
 		color: #222222;
-		font-size: 1rem;
+		font-size: 0.8rem;
 		font-weight: 800;
 		text-align: left;
 	}
@@ -88,7 +88,7 @@
 	}
 
 	img {
-		width: 80px;
+		width: 84px;
 		height: 100%;
 		border-top-left-radius: 0.5rem;
 		border-bottom-left-radius: 0.5rem;
@@ -107,13 +107,13 @@
 		padding: 0;
 		border-radius: 0.5rem;
 		margin: 0;
-		min-width: 260px;
+		min-width: 210px;
 		max-width: 95vw;
-		box-shadow: 4px 4px 5px 0 rgba(0, 0, 0, 0.4);
-		width: 80px;
+		box-shadow: 4px 4px 5px 0 rgba(0, 0, 0, 0.1);
+		width: 110px;
 	}
 	button:hover {
-		background-color: rgb(30, 255, 41);
+		background-color: dodgerblue;
 		color: white;
 		cursor: pointer;
 		z-index: 100;
@@ -150,28 +150,38 @@
 		color: #b90404;
 		cursor: pointer;
 	}
-
+	.actions {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 0.25rem;
+	}
 	@media (max-width: 468px) {
 		.person-card {
 			flex-direction: row;
-			width: 95%;
-			height: 120px;
+			min-width: 160px;
+			gap: 0.25rem;
+			width: 42%;
+			height: 48px;
 		}
 		img {
-			width: 120px;
-			height: 120px;
+			width: 48px;
+			height: 48px;
 			object-fit: cover;
 		}
 
 		.person-info {
-			height: 120px;
-			gap: 0.5rem;
+			height: 42px;
+			gap: 0;
 		}
 		h1 {
-			font-size: 1.1rem;
+			font-size: 0.7rem;
 		}
+
 		p {
-			font-size: 1rem;
+			display: none;
+			font-size: 0.6rem;
 			text-align: left;
 			width: 100%;
 		}

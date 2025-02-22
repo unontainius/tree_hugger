@@ -79,7 +79,7 @@
 				<div class="field">
 					<div class="required-row">
 						<h2>First</h2>
-						<MIcon name="asterisk" size="24px" />
+						<MIcon name="asterisk" size="24px" color="red"/>
 					</div>
 					<input
 						type="text"
@@ -103,7 +103,7 @@
 				<div class="field">
 					<div class="required-row">
 						<h2>Last</h2>
-						<MIcon name="asterisk" size="24px" />
+						<MIcon name="asterisk" size="24px" color="red"/>
 					</div>
 					<input
 						type="text"
@@ -153,7 +153,7 @@
 				<div class="field">
 					<div class="required-row">
 						<h2>Born</h2>
-						<MIcon name="asterisk" size="24px" />
+						<MIcon name="asterisk" size="24px" color="red"/>
 					</div>
 					<div class="date-row">
 						<input
@@ -231,7 +231,7 @@
 			</button>
 			<button class="btn-save" onclick={handleSaveForm} disabled={!formIsDirty}>
 				<MIcon name="save" size="24px" />
-				<span>Save Changes</span>
+				<span>Save</span>
 			</button>
 		</div>
 	</div>
@@ -247,6 +247,7 @@
 		padding: 2rem;
 		padding-block-start: 6rem;
 		gap: 2rem;
+		color: rgb(32, 32, 32);
 	}
 
 	h1 {
@@ -282,7 +283,7 @@
 	}
 
 	.field h2 {
-		color: #fff;
+		color: rgb(32, 32, 32);
 		font-size: 1rem;
 		margin: 0;
 	}

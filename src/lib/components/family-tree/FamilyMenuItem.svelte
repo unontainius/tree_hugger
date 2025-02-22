@@ -177,4 +177,31 @@
 		font-size: 0.8rem;
 		color: #666;
 	}
+	@media (max-width: 768px) {
+		.gold-border {
+			margin: 0;
+			width: 90%;
+		}
+		.card {
+			flex-direction: column;
+		}
+		:global(button) {
+			display: flex;
+			flex-direction: row !important;
+			align-items: center;
+			justify-content: center;
+		}
+		.gold {
+			width: 100px;
+			height: 100px;
+		}
+		.gold img {
+			width: 100%;
+			height: 100%;
+		}
+
+		.row {
+			flex-direction: column;
+		}	
+	}
 </style>

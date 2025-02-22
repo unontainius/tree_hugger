@@ -37,18 +37,23 @@
 </div>
 
 <style>
+	button {
+		box-shadow: none;
+		color: rgb(22, 22, 22);
+	}
 	/* From Uiverse.io by Yaya12085 */
 	.radio-inputs {
 		position: relative;
 		display: flex;
-		flex-wrap: wrap;
 		border-radius: 2rem;
-		background-color: #eeeeee56;
+		background-color: #f3f3f3;
+		border: 1px solid #5555552a;
 		box-sizing: border-box;
 		padding: 0.25rem;
 		margin: 0.5rem;
 		font-size: 1rem;
 		contain: content; /* Keep the performance optimization */
+
 	}
 
 	.radio-btn {

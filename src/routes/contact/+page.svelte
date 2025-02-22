@@ -4,17 +4,15 @@
 
 <div class="content">
 	<div class="header">
-		<div class="gold">
-			<img src="/images/familytree.png" alt="logo" />
-		</div>
+		<MIcon name="info" size="256px" color="black"/>
 
 		<div class="col-center">
-			<h1 class="gold-text">Contact</h1>
+			<h1>Contact</h1>
 			<div class="col-start">
-				<div class="flex flex-row gap-4"><MIcon name="email" size="2rem" /> marcus@v-sys.co.nz</div>
-				<div class="flex flex-row gap-4"><MIcon name="phone" size="2rem" /> 64 27 2212 880</div>
-				<div class="flex flex-row gap-4">
-					<MIcon name="web" size="2rem" />
+				<div class="info-row"><MIcon name="email" size="2rem" color="black"/> marcus@v-sys.co.nz</div>
+				<div class="info-row"><MIcon name="phone" size="2rem" color="black"/> 64 27 2212 880</div>
+				<div class="info-row">
+					<MIcon name="web" size="2rem" color="black"/>
 					<a href="https://v-sys.co.nz" target="_blank"> https://v-sys.co.nz</a>
 				</div>
 			</div>
@@ -25,27 +23,19 @@
 <style>
 	h1 {
 		font-size: 4rem;
-		color: rgba(255, 255, 255, 0.308);
+		font-weight: 600;
+		color: rgb(255, 255, 255);
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.945);
 	}
 	a:hover {
 		color: rgb(241, 4, 241);
 	}
-	.gold-text {
-		background: linear-gradient(
-			to right,
-			#462523 0,
-			#cb9b51 22%,
-			#f6e27a 45%,
-			#f6f2c0 50%,
-			#f6e27a 55%,
-			#cb9b51 78%,
-			#462523 100%
-		);
-		color: transparent;
-		-webkit-background-clip: text;
-		background-clip: text;
-		font-weight: bold;
-		text-shadow: 1px 1px 1px rgba(203, 155, 81, 0.7);
+	.info-row {
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: center;
+		gap: 1.5rem;
 	}
 	.content {
 		display: flex;
@@ -81,34 +71,4 @@
 		gap: 1rem;
 	}
 
-	.gold {
-		margin-block-start: 1rem;
-		width: 220px;
-		height: 220px;
-		border-radius: 50%;
-		padding: 0.5rem;
-		background: radial-gradient(
-				ellipse farthest-corner at right bottom,
-				#fedb37 0%,
-				#fdb931 8%,
-				#9f7928 30%,
-				#8a6e2f 40%,
-				transparent 80%
-			),
-			radial-gradient(
-				ellipse farthest-corner at left top,
-				#ffffff 0%,
-				#ffffac 8%,
-				#d1b464 25%,
-				#5d4a1f 62.5%,
-				#5d4a1f 100%
-			);
-	}
-	.gold img {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		border-radius: 50%;
-	}
 </style>

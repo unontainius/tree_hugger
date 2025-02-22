@@ -1,45 +1,22 @@
 <script lang="ts">
 	import MIcon from '$lib/components/common/MIcon.svelte';
 	import { user } from '$lib/stores/authStore';
-	import { menuName, menuRequired } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
-	import { tick } from 'svelte';
 
-	let LoggedIn = $state(false);
-
-	$effect(() => {
-		LoggedIn = $user !== null;
-	});
-
-	async function setFamilyTreeMenu() {
-		$menuRequired = true;
-		$menuName = 'family-tree';
-		await tick();
-		goto('/admin');
-	}
-
-	async function setResumeMenu() {
-		$menuRequired = false;
-		$menuName = 'resume';
-		await tick();
-		goto('/resume');
-	}
 </script>
 
 <div class="welcome-container">
 	<div class="gold-border">
 		<div class="card">
-			<button onclick={setFamilyTreeMenu}>
+			<button onclick={() => {goto('/admin')}}>
 				<div class="row">
-					<div class="column center">
-						<div class="gold">
-							<img src="/images/familytree.png" alt="Tree Hugger" />
-						</div>
+					<div class="gold">
+						<img src="/images/familytree.png" alt="Tree Hugger" />
 					</div>
-					<div class="column center">
+					<div class="text-content">
 						<h2>Family Tree Hugger</h2>
 						<p>Browse and search your family members</p>
-						{#if !LoggedIn}
+						{#if !$user}
 							<div class="login-hint">
 								Hint:
 								<MIcon name="login" size="24px" />
@@ -54,23 +31,21 @@
 
 	<div class="gold-border">
 		<div class="card">
-			<button class="resume-button" onclick={setResumeMenu}>
+			<button class="resume-button" onclick={() => {goto('/resume')}}>
 				<div class="row">
-					<div class="column center">
-						<div class="gold">
-							<img src="/images/marcus.jpg" alt="Tree Hugger" />
-						</div>
+					<div class="gold">
+						<img src="/images/marcus.jpg" alt="Tree Hugger" />
 					</div>
-					<div class="column center">
+					<div class="text-content">
 						<h2 class="resume-title">Resume</h2>
 						<p>My professional journey</p>
+						{#if !$user}
+							<div class="resume-spacer">
+								Hint:
+								<span>Login to edit</span>
+							</div>
+						{/if}
 					</div>
-					{#if !LoggedIn}
-						<div class="resume-spacer">
-							Hint:
-							<span>Login to edit</span>
-						</div>
-					{/if}
 				</div>
 			</button>
 		</div>
@@ -81,9 +56,7 @@
 	.resume-title {
 		font-size: 2rem;
 		margin-block-start: 1rem;
-		background: linear-gradient(0deg, #064e09, #88ff00);
-		background-clip: text;
-		-webkit-background-clip: text;
+
 	}
 	.resume-spacer {
 		display: flex;
@@ -99,26 +72,16 @@
 	button {
 		cursor: pointer;
 		pointer-events: auto;
-		background: rgb(26, 114, 180);
-		background: -moz-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
-		background: -webkit-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
-		background: linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
-		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1a72b4",endColorstr="#1e293b",GradientType=1);
 		border: none;
 		border-radius: 1rem;
+		background: none;
 		padding: 0;
 		margin: 0;
 		font: inherit;
 		color: inherit;
 		box-shadow: none;
 	}
-	.resume-button {
-		background: rgb(26, 114, 180);
-		background: -moz-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgb(0, 0, 0) 54%);
-		background: -webkit-linear-gradient(180deg, rgba(26, 114, 180, 1) 0%, rgba(30, 41, 59, 1) 54%);
-		background: linear-gradient(180deg, rgb(255, 169, 39) 0%, rgba(30, 41, 59, 1) 54%);
-		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#1a72b4",endColorstr="#1e293b",GradientType=1);
-	}
+
 	.row {
 		display: flex;
 		flex-direction: row;
@@ -145,12 +108,11 @@
 		width: 100%;
 		height: 100%;
 		flex-wrap: wrap;
-		min-width: 300px;
 		text-align: center;
 	}
 	.card {
 		margin: 2px;
-		width: 340px;
+		width: 300px;
 	}
 	.column img {
 		width: 200px;
@@ -178,15 +140,12 @@
 	h2 {
 		font-size: 2rem;
 		margin-block-start: 1rem;
-		background: linear-gradient(0deg, #064e09, #88ff00);
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 	}
 	p {
 		font-size: 1rem;
 		margin-block-end: 1rem;
-		color: rgba(255, 255, 255, 0.5);
+		color: rgba(22, 22, 22, 0.5);
 	}
 	.login-hint {
 		display: flex;
@@ -204,22 +163,7 @@
 		height: 220px;
 		border-radius: 50%;
 		padding: 0.5rem;
-		background: radial-gradient(
-				ellipse farthest-corner at right bottom,
-				#fedb37 0%,
-				#fdb931 8%,
-				#9f7928 30%,
-				#8a6e2f 40%,
-				transparent 80%
-			),
-			radial-gradient(
-				ellipse farthest-corner at left top,
-				#ffffff 0%,
-				#ffffac 8%,
-				#d1b464 25%,
-				#5d4a1f 62.5%,
-				#5d4a1f 100%
-			);
+
 	}
 	.gold img {
 		position: relative;
@@ -232,23 +176,63 @@
 		padding: 0;
 		margin: 0;
 		border-radius: 1rem;
-		background: radial-gradient(
-				ellipse farthest-corner at right bottom,
-				#fedb37 0%,
-				#fdb931 8%,
-				#9f7928 30%,
-				#8a6e2f 40%,
-				transparent 80%
-			),
-			radial-gradient(
-				ellipse farthest-corner at left top,
-				#ffffff 0%,
-				#ffffac 8%,
-				#d1b464 25%,
-				#5d4a1f 62.5%,
-				#5d4a1f 100%
-			);
+		background: white;
+	}
+	.text-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		text-align: center;
 	}
 	@media (max-width: 768px) {
+		.welcome-container {
+			flex-direction: column;
+			gap: 1rem;
+			padding-inline: 1rem;
+		}
+
+		.card {
+			width: 100%;
+		}
+
+		.row {
+			flex-wrap: nowrap;
+			flex-direction: row;
+			justify-content: flex-start;
+			padding: 0.5rem;
+		}
+
+		.column {
+			width: auto;
+			flex: 0 0 auto;
+		}
+
+		.column.center {
+			align-items: flex-start;
+			padding-left: 1rem;
+			justify-content: center;
+		}
+
+		.gold {
+			width: 80px;
+			height: 80px;
+			margin: 0;
+		}
+
+		h2 {
+			font-size: 1.5rem;
+			margin-block-start: 0;
+		}
+
+		.login-hint {
+			margin-block-end: 0;
+		}
+
+		.text-content {
+			align-items: flex-start;
+			text-align: left;
+		}
 	}
 </style>

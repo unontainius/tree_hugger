@@ -135,8 +135,8 @@
 		margin: 0;
 		padding: 0;
 		overflow-x: hidden;
-		background-color: #013d55;
-		color: white;
+		background-color: #e8eaeb;
+		color: rgb(32, 32, 32);
 		width: 100vw;
 		font-family: 'Assistant', sans-serif;
 	}
@@ -155,7 +155,7 @@
 		padding-inline: 1rem;
 		height: 4rem;
 		z-index: 1000;
-		background-color: #ffffff34;
+		background-color: #272727;
 		margin: 0;
 
 		/* outline: 1px solid rgba(255, 255, 255, 0.51);
@@ -182,11 +182,11 @@
 		font-weight: thin;
 	}
 	.nav-item p:hover {
-		color: rgba(251, 255, 0, 0.93);
+		color: dodgerblue;
 	}
 
 	.nav-item:hover {
-		color: rgba(251, 255, 0, 0.93);
+		color: dodgerblue;
 	}
 
 	@keyframes gradient {
@@ -202,7 +202,7 @@
 	}
 
 	.wave {
-		background: rgb(255 255 255 / 25%);
+		background: rgba(24, 24, 24, 0.25);
 		border-radius: 1000% 1000% 0 0;
 		position: fixed;
 		width: 200%;

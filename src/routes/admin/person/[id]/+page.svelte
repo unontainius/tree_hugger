@@ -1270,9 +1270,9 @@
 		justify-content: flex-start;
 		gap: 2rem;
 		font-size: 2rem;
-		font-weight: 300;
-		color: white;
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+		font-weight: 600;
+		color: rgba(14, 13, 13, 0.664);
+		/* text-shadow: 1px 1px 1px rgba(0, 0, 0, 1); */
 		margin: 0.5rem;
 		margin-block-start: 0;
 		text-align: left;

@@ -46,7 +46,9 @@
 
 <div class="row">
 	<div class="search-group">
-		<MIcon name="search" size="24px" />
+		<div class="search-icon-container">
+			<MIcon name="search" size="24px" color="black" />
+		</div>
 		<input
 			bind:this={searchInput}
 			id="search-input"
@@ -124,6 +126,7 @@
 		flex-wrap: wrap;
 		gap: 1rem;
 		padding-block-end: 1rem;
+		color: rgb(32, 32, 32);
 	}
 	.search-group {
 		display: flex;
@@ -131,20 +134,29 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		background-color: #eeeeee56;
+		background-color: #f3f3f3;
+		border: 1px solid #5555552a;
 		border-radius: 2rem;
 		padding: 0.5rem 1.5rem;
 		margin-inline: 0.5rem;
-		outline: 1px solid #ffffff2a;
-		outline-offset: -5px;
+		color: rgb(32, 32, 32);
 	}
 
+	.search-icon-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		color: dodgerblue;
+	}
 	.sort-group {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
+		flex-wrap: wrap;
+		color: dodgerblue;
 	}
 	.sort-direction-btn {
 		padding: 0;
