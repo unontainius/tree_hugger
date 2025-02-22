@@ -31,7 +31,7 @@
 		align-items: stretch;
 		justify-content: center;
 		z-index: 1;
-		min-height: 70vh;
+		min-height: 100vh;
 		width: 100vw;
 		gap: 2rem;
 		flex-wrap: wrap;

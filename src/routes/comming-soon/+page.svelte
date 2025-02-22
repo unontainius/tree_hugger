@@ -15,7 +15,7 @@ function handleAnimationEnd() {
     <h1>Coming Sooner or later</h1>
     {#if showText}
         <p class="animate__animated animate__hinge" onanimationend={handleAnimationEnd}>
-            This page is under construction. Please check back sooner or later.
+            Under construction. Please check back sooner or later.
         </p>
     {/if}
 </div>
@@ -41,7 +41,6 @@ function handleAnimationEnd() {
         font-size: 2rem;
         font-weight: bold;
         color: #333;
-        color: yellow;
     }
     
     .animate__hinge {
