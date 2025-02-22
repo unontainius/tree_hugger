@@ -59,6 +59,7 @@
 		width: 150px;
 	}
 	.gold-border {
+		display: flex;
 		padding: 3px;
 		margin: 1rem;
 		border-radius: 0.5rem;
@@ -78,6 +79,9 @@
 				rgb(170, 136, 57) 62.5%,
 				rgb(146, 123, 68) 100%
 			);
+		width: 200px;
+		height: 100%;
+
 	}
 
 	.gold-text {
@@ -107,8 +111,8 @@
 		background: rgb(32, 32, 32);
 		padding: 0.5rem;
 		border-radius: 0.5rem;
+		flex: 1;
 		width: 100%;
-		height: 100%;
 	}
 
 	button {
@@ -116,7 +120,8 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		width: 100%;
+		flex: 1;
+		min-width: 100%;
 		background: transparent;
 		border: none;
 		color: white;
@@ -130,7 +135,9 @@
 		gap: 1rem;
 		align-items: center;
 	}
-
+	p {
+		max-width: 25ch;
+	}
 	.column {
 		display: flex;
 		flex-direction: column;
@@ -180,14 +187,14 @@
 	@media (max-width: 768px) {
 		.gold-border {
 			margin: 0;
-			width: 90%;
+			width: 200px;
 		}
 		.card {
 			flex-direction: column;
 		}
-		:global(button) {
+		button {
 			display: flex;
-			flex-direction: row !important;
+			flex-direction: column;
 			align-items: center;
 			justify-content: center;
 		}
@@ -199,9 +206,11 @@
 			width: 100%;
 			height: 100%;
 		}
-
 		.row {
 			flex-direction: column;
-		}	
+		}
+		.column.center {
+			width: 100%;
+		}
 	}
 </style>

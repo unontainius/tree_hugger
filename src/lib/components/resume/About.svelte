@@ -335,9 +335,7 @@
 
 	@media (max-width: 1200px) {
 		/* Adjust for smaller screens - two fact cards at 180px each */
-		.profile-image-container {
-			max-width: calc(360px + 1.5rem);
-		}
+
 	}
 
 	@media (max-width: 768px) {
@@ -348,10 +346,16 @@
 		.about-container {
 			padding: 1rem;
 		}
+		.about-info-block {
+			width: 100%;
+		}
 	}
 
 	
 	@media (max-width: 1200px) {
+		.profile-image-container {
+			max-width: calc(360px + 1.5rem);
+		}
 		.info-row {
 			grid-template-columns: 1fr;
 		}
@@ -371,7 +375,7 @@
 		}
 
 		.about-info-block {
-			width: 300px;
+			width:100%;
 			margin: 1.5rem 0;
 			margin-inline-end: 1rem;
 		}

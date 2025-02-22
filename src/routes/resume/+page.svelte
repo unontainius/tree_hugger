@@ -7,9 +7,26 @@
 	import Skills from '$lib/components/resume/Skills.svelte';
 	import Projects from '$lib/components/resume/Projects.svelte';
 	import RotatingEarth from '$lib/components/RotatingEarth.svelte';
+	import { onMount } from 'svelte';
 
 	let expandedSidebar = $state(false);
+	let showBackToTop = $state(false);
 
+	onMount(() => {
+		const handleScroll = () => {
+			// Get the viewport height
+			const viewportHeight = window.innerHeight;
+			// Show button when scrolled more than viewport height
+			showBackToTop = window.scrollY > viewportHeight / 2;
+		};
+
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	});
+
+	function scrollToTop() {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
 
 	async function handleLogout() {
 		if ($user) {
@@ -25,84 +42,86 @@
 			loginRequestedState.set(true);
 		}
 	}
+
+	function handleNavClick(event: MouseEvent) {
+		event.preventDefault();  // Prevent default anchor behavior
+		expandedSidebar = false;
+
+		// Get the href from the clicked anchor
+		const href = (event.currentTarget as HTMLAnchorElement).getAttribute('href');
+		if (href && href.startsWith('#')) {
+			const targetId = href.substring(1);
+			const element = document.getElementById(targetId);
+			if (element) {
+				element.scrollIntoView({ behavior: 'smooth' });
+			}
+		} else if (href === '/') {
+			// Handle home link normally
+			window.location.href = href;
+		}
+	}
 </script>
 
-<div class="flex-row">
-	<div class={`sidebar scroll-container ${expandedSidebar ? 'expanded' : 'collapsed'}`}>
-		<button class="sidebar-toggle" onclick={() => (expandedSidebar = !expandedSidebar)}>
-			<MIcon name={expandedSidebar ? 'left' : 'right'} size="1.5rem" color="white" />
-		</button>
-		<div class="sidebar-content">
-			<a href="/">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Home">
-					<MIcon name="home" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>Home</span>
-			</a>
-			<a href="#section1">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Home">
-					<MIcon name="top" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>Top</span>
-			</a>
-			<a href="#section2">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="About">
-					<MIcon name="info" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>About</span>
-			</a>
-			<a href="#section3">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Experience">
-					<MIcon name="experience" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}
-					>Skills & Expertise</span
-				>
-			</a>
-			<a href="#section4">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Education">
-					<MIcon name="education" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>Experience</span>
-			</a>
-
-			<a href="#section6">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Projects">
-					<MIcon name="projects" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>Projects</span>
-			</a>
-			<a href="#section7">
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Contact">
-					<MIcon name="contact" size="3rem" color="white" />
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>Contact</span>
-			</a>
-
-			<div class="sidebar-spacer"></div>
-
-			<button class="sidebar-link" onclick={toggleLogin}>
-				<div class={`narrow ${expandedSidebar ? 'visible' : 'narrow'}`} title="Login/Logout">
-					{#if $user}
-						<MIcon name="logout" size="3rem" color="white" />
-					{:else}
-						<MIcon name="login" size="3rem" color="white" />
-					{/if}
-				</div>
-				<span class={`sidebar-text ${expandedSidebar ? 'visible' : 'hidden'}`}>
-					{#if $user}
-						Logout
-					{:else}
-						Login
-					{/if}
-				</span>
-			</button>
-
-
+<div class="flex-col">
+	<nav class="top-nav">
+		<div class="nav-content">
+			<div class="nav-item">
+				<a href="/" onclick={handleNavClick}>
+					<div class="icon-container">
+						<MIcon name="home" size="2rem" color="white" />
+					</div>
+					<span class="nav-text">Home</span>
+				</a>
+			</div>
+			<div class="nav-item">
+				<a href="#section2" onclick={handleNavClick}>
+					<div class="icon-container">
+						<MIcon name="info" size="2rem" color="white" />
+					</div>
+					<span class="nav-text">About</span>
+				</a>
+			</div>
+			<div class="nav-item">
+				<a href="#section3" onclick={handleNavClick}>
+					<div class="icon-container">
+						<MIcon name="experience" size="2rem" color="white" />
+					</div>
+					<span class="nav-text">Skills & Expertise</span>
+				</a>
+			</div>
+			<div class="nav-item">
+				<a href="#section4" onclick={handleNavClick}>
+					<div class="icon-container">
+						<MIcon name="education" size="2rem" color="white" />
+					</div>
+					<span class="nav-text">Experience</span>
+				</a>
+			</div>
+			<div class="nav-item">
+				<a href="#section6" onclick={handleNavClick}>
+					<div class="icon-container">
+						<MIcon name="projects" size="2rem" color="white" />
+					</div>
+					<span class="nav-text">Projects</span>
+				</a>
+			</div>
+			<div class="nav-item">
+				<a href="#section7" onclick={handleNavClick}>
+					<div class="icon-container">
+						<MIcon name="contact" size="2rem" color="white" />
+					</div>
+					<span class="nav-text">Contact</span>
+				</a>
+			</div>
 		</div>
+	</nav>
 
-	</div>
-	<!-- CONTENT --------------------------------------------------------------------------------->
+	{#if showBackToTop}
+		<button class="back-to-top" onclick={scrollToTop}>
+			<MIcon name="top" size="24px" color="white" />
+		</button>
+	{/if}
+
 	<div class="content scroll-container snap-container">
 		<div id="section1" class="section snap-child">
 			<div class="section-overlay">
@@ -147,6 +166,106 @@
 
 <style>
 
+	.top-nav {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		background-color: rgb(1, 97, 134);
+		z-index: 3;
+	}
+
+	.nav-content {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.nav-item {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+	}
+
+	.nav-item a {
+		color: white;
+		text-decoration: none;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		border-radius: 0.5rem;
+		transition: all 0.2s ease-in-out;
+		white-space: nowrap;
+	}
+
+	.nav-text {
+		color: rgba(255, 255, 255, 0.678);
+	}
+
+	@media (max-width: 768px) {
+		.nav-content {
+			justify-content: space-around;
+			padding: 0.25rem;
+			flex-wrap: wrap;
+		}
+
+		.nav-item a {
+			flex-direction: column;
+			align-items: center;
+			padding: 0.5rem;
+			gap: 0.1rem;
+		}
+
+		.icon-container {
+			margin-bottom: 0.1rem;
+		}
+
+		.nav-text {
+			font-size: 0.7rem;
+		}
+
+		.tooltip {
+			width: 80%;
+		}
+
+		.intro-text {
+			text-align: center;
+			font-size: 1.5rem;
+		}
+
+		.box {
+			width: 100%;
+			height: 100vh;
+		}
+
+		.box b4 {
+			width: 90px;
+			height: 90px;
+		}
+
+		#section2 {
+			padding: 0.25rem;
+		}
+
+		.back-to-top {
+			bottom: 1rem;
+			right: 1rem;
+			width: 2.5rem;
+			height: 2.5rem;
+		}
+	}
+
+	.content {
+		margin-top: 64px;
+		flex: 1;
+		overflow-y: auto;
+	}
+
 	.section-content h1 {
 		margin: 0;
 		font-size: 3rem;
@@ -155,75 +274,7 @@
 		font-family: 'poppins', Courier, monospace;
 		color: white;
 	}
-	.hidden {
-		display: none;
-	}
 
-	.flex-row {
-		display: flex;
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		padding-inline: 0.5rem;
-	}
-
-	.sidebar {
-		background-color: rgb(1, 97, 134);
-		width: 200px;
-		flex: none;
-		padding: 0.5rem;
-		z-index: 3;
-		transition: width 0.2s ease-in-out;
-	}
-	.sidebar.collapsed {
-		width: 64px;
-		min-width: 64px;
-	}
-	.sidebar button {
-		background: transparent;
-		border: none;
-		color: white;
-		cursor: pointer;
-		padding: 0;
-		margin: 0;
-		width: 48px;
-		height: 48px;
-		box-shadow: none;
-	}
-	.sidebar a {
-		color: white;
-		text-decoration: none;
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 1rem;
-		border-radius: 0.5rem;
-		margin-block: 0.5rem;
-		transition: all 0.2s ease-in-out;
-	}
-
-	.sidebar a:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-		transform: translateY(-5px);
-	}
-
-	.content {
-		background-color: rgb(236, 237, 238);
-		flex: 1;
-		height: calc(100vh);
-		overflow-y: auto;
-		scroll-behavior: smooth;
-		scroll-snap-type: y mandatory;
-		padding: 0;
-		margin: 0;
-		margin-left: 0.25rem;
-
-		position: relative;
-		z-index: 2;
-		isolation: isolate;
-	}
 	.section {
 		display: flex;
 		justify-content: center;
@@ -251,22 +302,6 @@
 		text-shadow: 1px 1px 4px 4px rgba(0, 0, 0, 1);
 	}
 
-	.red {
-		background-color: #f00;
-		color: #000;
-	}
-	.green {
-		background-color: #0f0;
-		color: #000;
-	}
-	.blue {
-		background-color: #00f;
-		color: #000;
-	}
-	.dark {
-		background-color: #000;
-		color: #fff;
-	}
 	:global(.wave-container) {
 		display: none !important;
 	}
@@ -289,100 +324,11 @@
 		margin: 0;
 	}
 
-	.sidebar-toggle {
-		width: 48px;
-		height: 48px;
-		padding: 0.5rem;
-		background: rgba(255, 255, 255, 0.1);
-		border: none;
-		border-radius: 0.25rem;
-		color: white;
-		cursor: pointer;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		margin-bottom: 0.5rem;
-	}
-
-	.sidebar-content {
-		display: flex;
-		flex-direction: column;
-		min-height: calc(100vh - 4rem); /* Account for padding and toggle button */
-	}
-
-	.sidebar.collapsed .sidebar-content {
-		display: flex;
-	}
-
-	.sidebar-text {
-		transition: opacity 0.2s ease-in-out;
-		opacity: 0.9;
-	}
-
-	.sidebar.collapsed .sidebar-text {
-		opacity: 0;
-		width: 0;
-		overflow: hidden;
-	}
-
-	.narrow {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 48px;
-		height: 48px;
-		min-width: 48px;
-		flex-shrink: 0;
-	}
-
-	.sidebar.collapsed .narrow {
-		width: 48px;
-		height: 48px;
-	}
-
-	.sidebar a {
-		color: white;
-		text-decoration: none;
-		display: flex;
-		align-items: center;
-		gap: 1.5rem;
-		padding: 1rem;
-		padding-left: 0;
-		border-radius: 0.5rem;
-		margin-block: 0.5rem;
-		transition: all 0.2s ease-in-out;
-	}
-
-	.sidebar.collapsed a {
-		justify-content: center;
-		margin-block: 1rem;
-		padding: 0.5rem;
-	}
-
 	.intro-text {
 		font-size: 2.5rem;
 		color: rgb(244, 248, 1);
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 		margin-top: 1rem;
-	}
-
-	.label {
-		font-weight: bold;
-	}
-
-	.stats-container {
-		width: 100%;
-		padding-top: 2rem;
-		border-top: 1px solid rgba(1, 61, 85, 0.1);
-	}
-
-	.quick-facts {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		gap: 1rem;
-		text-align: center;
-		justify-content: space-around;
 	}
 
 	#section2 {
@@ -531,23 +477,7 @@
 	}
 
 	@media (max-width: 768px) {
-		.personal-info {
-			width: 100%;
-			position: static;
-			float: none;
-			margin: 1rem 0;
-			min-width: 100%;
-		}
 
-		.info-row-container {
-			gap: 1rem;
-		}
-		.sidebar.collapsed {
-			display: none;
-		}
-		.info-col {
-			width: 100%;
-		}
 		.box {
 			width: 100%;
 			height: 100vh;
@@ -596,35 +526,6 @@
 	-webkit-mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
 }
 
-.sidebar-footer {
-	margin-top: auto;
-	padding: 1rem;
-}
-
-.sidebar-link {
-	color: white;
-	text-decoration: none;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	padding: 0.5rem;
-	border-radius: 0.5rem;
-	transition: all 0.2s ease-in-out;
-	background: transparent;
-	border: none;
-	width: 100%;
-	cursor: pointer;
-}
-
-.sidebar-link:hover {
-	background-color: rgba(255, 255, 255, 0.1);
-	transform: translateY(-5px);
-}
-
-.sidebar-spacer {
-	margin-top: auto;
-	min-height: 0.5rem; /* Smaller spacing */
-}
 
 @media (max-width: 768px) {
 	.tooltip {
@@ -643,8 +544,45 @@
 	#section2  {
 		padding:0.25rem;
 	}
-	.about-section {
-		padding:0.25rem;
+
+}
+
+@media (max-width: 768px) {
+	.nav-content {
+		flex-wrap: wrap;
 	}
+}
+
+.back-to-top {
+	position: fixed;
+	bottom: 2rem;
+	right: 2rem;
+	background-color: rgb(1, 97, 134);
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 2.5rem;
+	height: 2.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+	transition: all 0.2s ease-in-out;
+	z-index: 9999;
+	padding: 0;
+}
+
+.back-to-top:hover {
+	transform: translateY(-2px);
+	background-color: rgb(2, 116, 160);
+}
+
+@media (max-width: 768px) {
+	.back-to-top {
+		bottom: 1rem;
+		right: 1rem;
+	}
+
 }
 </style>
