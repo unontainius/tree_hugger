@@ -160,7 +160,7 @@
 	}
 	async function handleRemoveImage() {
 		if (!user) return;
-		console.log('remove image');
+		// console.log('remove image');
 	}
 	async function handleDeleteConfirmation(item: 'Person' | 'Image' | 'Parent') {
 		if (!user) return;
@@ -257,7 +257,7 @@
 	async function handleSaveForm() {
 		if (!(await isLoggedIn())) return;
 		if (!person) return;
-		console.log('handleSaveForm', person);
+		// console.log('handleSaveForm', person);
 		toasts.success(`saving changes for ${person.first_name} ${person.last_name}`);
 		if (addingNewUser) {
 			await db.Person.create(person).then(async (newPerson) => {
@@ -325,7 +325,7 @@
 			relationshipFormPersonA = null;
 			relationshipFormPersonB = person;
 			relationshipFormPersonC = otherPerson;
-			console.log('handleAddRelationship', relationship, otherPerson, person?.id);
+			// console.log('handleAddRelationship', relationship, otherPerson, person?.id);
 		}
 		showRelationshipForm = true;
 	}
@@ -371,7 +371,7 @@
 	async function handleDeleteParent(parentId: string) {
 		if (!person) return;
 		// set the delete function and message
-		console.log('handleDeleteParent', parentId);
+		// console.log('handleDeleteParent', parentId);
 		deleteFunction = () => deleteParent(parentId);
 		
 		deleteMessage = `
@@ -396,7 +396,7 @@
 
 	function handleDeleteSibling(siblingId: string) {
 		if (!person) return;
-		console.log('handle DEL', siblingId);
+		// console.log('handle DEL', siblingId);
 		showDeleteConfirmation = true;
 		deleteFunction = () => deleteSibling(siblingId);
 		deleteMessage = `
@@ -407,7 +407,7 @@
 	}
 	async function deleteSibling(siblingId: string) {	
 		if (!person) return;
-		console.log('call DEL', siblingId);
+		// console.log('call DEL', siblingId);
 		const success = await db.Tie.deleteSibling(siblingId);
 		if (success) {
 			await changePerson(person);
@@ -431,7 +431,7 @@
 		if (!person) return;
 		const success = await db.Tie.deletePartner(personId, partnerId);
 		if (success) {
-			console.log('deletePartner', personId, partnerId);
+			// console.log('deletePartner', personId, partnerId);
 			await changePerson(person);
 		}
 		showDeleteConfirmation = false;
@@ -439,7 +439,7 @@
 		deleteMessage = null;
 	}
 	function handleDeleteChild(partnerId: string, childId: string) {
-		console.log(`handle delete child  Child:${childId} partner:${partnerId} Person:${person?.id}`);
+		// console.log(`handle delete child  Child:${childId} partner:${partnerId} Person:${person?.id}`);
 		showDeleteConfirmation = true;
 		deleteFunction = () => deleteChild(childId, partnerId, person?.id || '');
 		deleteMessage = `

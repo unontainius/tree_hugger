@@ -29,7 +29,7 @@
 
         if (files && files.length > 0) {
             selectedFile = files[0];
-            console.log('Selected file name:', selectedFile.name);  // Log original name
+            // console.log('Selected file name:', selectedFile.name);
             error = '';
             sendFile();
         } else {

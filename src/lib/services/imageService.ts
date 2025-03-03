@@ -19,7 +19,7 @@ export const imageService = {
 			const fileExt = file instanceof File ? file.name.split('.').pop() : 'jpg';
 			const fileName = `${Date.now()}.${fileExt}`;
 
-			console.log('Uploading file:', fileName);
+			// console.log('Uploading file:', fileName);
 
 			const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
 				contentType: 'image/jpeg',
@@ -29,13 +29,13 @@ export const imageService = {
 			if (error) throw error;
 			if (!data) throw new Error('Upload failed - no data returned');
 
-			console.log('Upload successful:', data);
+			// console.log('Upload successful:', data);
 
 			const {
 				data: { publicUrl }
 			} = supabase.storage.from(bucket).getPublicUrl(data.path);
 
-			console.log('Public URL:', publicUrl);
+			// console.log('Public URL:', publicUrl);
 
 			return {
 				url: publicUrl,
@@ -52,7 +52,7 @@ export const imageService = {
 	 */
 	async deleteImage(path: string, bucket: string = 'profile-images'): Promise<void> {
 		try {
-			console.log('Deleting image:', path);
+			// console.log('Deleting image:', path);
 			const { error } = await supabase.storage.from(bucket).remove([path]);
 
 			if (error) {

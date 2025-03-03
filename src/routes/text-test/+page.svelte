@@ -5,9 +5,10 @@
 	import { toasts } from "$lib/stores/toastStore";
 	import { authService } from "$lib/services/authService";
 	import { onMount } from "svelte";
+	import Card from "./Card.svelte";
 	// JavaScript logic can be added here if needed
 	function imageSaved(path: string) {
-		console.log(path);
+		// console.log(path);
 		toasts.success("Image saved", 3000);
 	};
 	let testGrid = $state('page-grid-1');
@@ -189,6 +190,8 @@
 	
 	</div>
 </div>
+
+<Card />
 <style>
 
 	.page-grid-1 {

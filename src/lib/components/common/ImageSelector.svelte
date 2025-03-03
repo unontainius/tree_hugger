@@ -12,9 +12,9 @@
 		onComplete: () => void;
 	}>();
 
-	$effect(() => {
-		console.log('ImageSelector mounted:', { personId });
-	});
+	// $effect(() => {
+	// 	console.log('ImageSelector mounted:', { personId });
+	// });
 
 	let images = $state<{ name: string; url: string; path: string }[]>([]);
 	let isLoading = $state(false);

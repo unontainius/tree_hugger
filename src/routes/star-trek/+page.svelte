@@ -4,7 +4,7 @@
     let { data }: { data: PageData } = $props();
 
     function engage() {
-        console.log('Engage');
+        // console.log('Engage');
         goto('/');
     }
 </script>

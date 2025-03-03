@@ -41,17 +41,17 @@
 			// Just use the subfolderPath directly, ignore currentPath
 			const listPath = subfolderPath || '';
 
-			console.log('Final list path:', listPath);
+			// console.log('Final list path:', listPath);
 
 			const { data, error } = await supabase.storage.from(bucket).list(listPath);
 
 			if (error) throw error;
 
-			console.log('Loading images from:', {
-				bucket,
-				subfolderPath,
-				data
-			});
+			// console.log('Loading images from:', {
+			// 	bucket,
+			// 	subfolderPath,
+			// 	data
+			// });
 
 			// Filter for image files and get their public URLs
 			const imageFiles = data
@@ -86,7 +86,7 @@
 		}
 	});
 
-	console.log('PATH', path);
+	// console.log('PATH', path);
 
 	function navigateToFolder(folderName: string) {
 		currentPath = [...currentPath, folderName];
@@ -166,12 +166,12 @@
 				'https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/project/';
 			const filePath = image.url.replace(storageUrl, '');
 
-			console.log('Deleting file:', {
-				bucket: 'project',
-				filePath,
-				originalUrl: image.url,
-				decodedPath: decodeURIComponent(filePath)
-			});
+			// console.log('Deleting file:', {
+			// 	bucket: 'project',
+			// 	filePath,
+			// 	originalUrl: image.url,
+			// 	decodedPath: decodeURIComponent(filePath)
+			// });
 
 			const { error } = await supabase.storage
 				.from('project')

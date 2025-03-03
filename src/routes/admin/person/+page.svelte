@@ -127,6 +127,8 @@
 		gap: 1rem;
 		padding-block-end: 1rem;
 		color: rgb(32, 32, 32);
+		background-color: #464646;
+		margin-block-end: 1rem;
 	}
 	.search-group {
 		display: flex;

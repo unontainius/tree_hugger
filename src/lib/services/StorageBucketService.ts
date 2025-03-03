@@ -7,7 +7,7 @@ export function removeSpaces(str: string) {
 
 export async function createStorageBucket(bucketName: string, isPublic: boolean = false) {
     try {
-        console.log('Attempting to create bucket:', bucketName);
+        // console.log('Attempting to create bucket:', bucketName);
         const { data, error } = await supabase.storage.createBucket(bucketName, {
             public: isPublic,
             allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
@@ -18,10 +18,10 @@ export async function createStorageBucket(bucketName: string, isPublic: boolean 
             console.error('Bucket creation error:', error);
             throw error;
         }
-        console.log('Bucket created successfully:', bucketName);
+        // console.log('Bucket created successfully:', bucketName);
 
         // Create both public and anonymous policies
-        console.log('Setting up bucket policies for:', bucketName);
+        // console.log('Setting up bucket policies for:', bucketName);
         await Promise.all([
             createPublicAnonymousPolicy(bucketName),
             createPublicAuthenticatedPolicy(bucketName)
@@ -73,18 +73,18 @@ export async function uploadFile(bucketName: string, path: string, file: File) {
         const [bucket, ...pathParts] = bucketName.split('/');
         const subfolderPath = pathParts.join('/');
         
-        console.log('Upload request:', { 
-            originalBucket: bucketName,
-            bucket,
-            subfolderPath,
-            fileName: file.name 
-        });
+        // console.log('Upload request:', { 
+        //     originalBucket: bucketName,
+        //     bucket,
+        //     subfolderPath,
+        //     fileName: file.name 
+        // });
         
         if (!(await bucketExists(bucket))) {
-            console.log('Bucket does not exist, creating:', bucket);
+            // console.log('Bucket does not exist, creating:', bucket);
             await createStorageBucket(bucket, true);
         } else {
-            console.log('Bucket exists:', bucket);
+            // console.log('Bucket exists:', bucket);
         }
 
         // Construct the full path for the file
@@ -93,7 +93,7 @@ export async function uploadFile(bucketName: string, path: string, file: File) {
             ? `${subfolderPath}/${cleanFileName}`
             : cleanFileName;
             
-        console.log('Uploading to path:', fullPath);
+        // console.log('Uploading to path:', fullPath);
 
         const { data, error } = await supabase.storage
             .from(bucket)
@@ -103,7 +103,7 @@ export async function uploadFile(bucketName: string, path: string, file: File) {
             console.error('Upload error:', error);
             throw error;
         }
-        console.log('Upload successful:', data);
+        // console.log('Upload successful:', data);
         return data;
     } catch (error) {
         console.error('Upload failed:', error);

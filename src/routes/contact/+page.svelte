@@ -4,7 +4,7 @@
 
 <div class="content">
 	<div class="header">
-		<MIcon name="info" size="256px" color="black"/>
+		<MIcon name="contact" size="256px" color="rgba(0, 0, 0, 0.645)"/>
 
 		<div class="col-center">
 			<h1>Contact</h1>

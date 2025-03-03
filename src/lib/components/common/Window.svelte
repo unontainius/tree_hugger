@@ -313,21 +313,36 @@
 	onMount(() => {
 		console.log('<Window>onMount', id);
 		windows.register(id);
-		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', handleMouseUp);
-		document.addEventListener('touchmove', handleTouchMove, { capture: true });
-		document.addEventListener('touchend', handleMouseUp, { capture: true });
-		shell?.addEventListener('touchstart', handleTouchStart, { capture: true });
+		function initMouseEventListeners(node: HTMLElement) {
+			node.addEventListener('mousemove', handleMouseMove);
+			node.addEventListener('mouseup', handleMouseUp);
+			return {
+				destroy() {
+					node.removeEventListener('mousemove', handleMouseMove);
+					node.removeEventListener('mouseup', handleMouseUp);
+				}
+			};
+		}
+		initMouseEventListeners(shell);
+
+		function initTouchEventListeners(node: HTMLElement) {
+			node.addEventListener('touchstart', handleTouchStart, { passive: true });
+			node.addEventListener('touchmove', handleTouchMove, { passive: true });
+			node.addEventListener('touchend', handleMouseUp, { passive: true });
+			return {
+				destroy() {
+					node.removeEventListener('touchstart', handleTouchStart);
+					node.removeEventListener('touchmove', handleTouchMove);
+					node.removeEventListener('touchend', handleMouseUp);
+				}
+			};
+		}
+		initTouchEventListeners(shell);
 	});
 
 	onDestroy(() => {
 		windows.remove(id);
 		taskbarStore.removeItem(id);
-		document.removeEventListener('mousemove', handleMouseMove);
-		document.removeEventListener('mouseup', handleMouseUp);
-		document.removeEventListener('touchmove', handleTouchMove, { capture: true });
-		document.removeEventListener('touchend', handleMouseUp, { capture: true });
-		shell?.removeEventListener('touchstart', handleTouchStart, { capture: true });
 	});
 
 	// Animation utility

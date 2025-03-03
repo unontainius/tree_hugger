@@ -22,6 +22,13 @@
 		loggedIn={$user !== null}
 		onclick={() => goto('/resume')}
 	/>
+	<FamilyMenuItem
+		title="POS"
+		description="Point of Sale"
+		image="/images/pos.jpg"
+		loggedIn={$user !== null}
+		onclick={() => goto('/pos')}
+	/>
 </div>
 
 <style>

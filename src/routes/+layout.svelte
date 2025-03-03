@@ -15,7 +15,7 @@
 	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
     import type { PageData } from './$types';
-
+	import { page } from '$app/stores';
 
 	let LoggedIn = $state(false);
 
@@ -23,7 +23,6 @@
 		// This will run whenever $user changes
 		LoggedIn = $user !== null;
 	});
-
 
 	let { data, children }: {data: PageData, children: Snippet} = $props();
 	let ShowLoginForm = $state(false);
@@ -63,11 +62,12 @@
 		ShowLoginForm = false;
 		loginRequestedState.set(false);
 	}
+
 </script>
 
 <Toast />
 
-{#if !data.url.includes('resume') && !data.url.includes('project') }
+
 	<nav>
 		{#each menuConfigs[$menuName].menuItems as item}
 			{#if !item.requiresAuth || LoggedIn}
@@ -98,7 +98,6 @@
 			</button>
 		{/if}
 	</nav>
-{/if}
 
 {#if ShowLoginForm}
 	<!-- showMinimize={false} showMaximize={false}  -->
