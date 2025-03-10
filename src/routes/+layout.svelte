@@ -147,6 +147,7 @@
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		justify-content: center;
 		position: absolute;
 		top: 0;
 		width: 100vw;
@@ -155,7 +156,7 @@
 		height: 4rem;
 		z-index: 1000;
 		background-color: #272727;
-		margin: 0;
+		margin: auto;
 
 		/* outline: 1px solid rgba(255, 255, 255, 0.51);
 		outline-offset: -4px; */

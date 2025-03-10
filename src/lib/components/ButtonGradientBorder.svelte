@@ -25,7 +25,6 @@
         padding: 0;
         background: linear-gradient(90deg, #03a9f4, #f441a5);
         border-radius: 12em;
-        transition: all 0.4s ease;
         height: 100%;
         width: 100%;
         display: flex;
@@ -37,15 +36,15 @@
         position: relative;
         width: calc(100% - 4px);
         height: calc(100% - 4px);
-        margin: 2px;
+        margin: 0;
+        padding: 0;
         letter-spacing: 0.07rem;
         font-weight: 400;
-        padding: 0.2rem 0.8rem;
+        padding-inline-end: 0.8rem;
         border-radius: 12em;
         border: none;
         cursor: pointer;
         box-shadow: 2px 2px 3px #000000b4;
-        transition: all 0.3s ease;
         z-index: 1;
         display: flex;
         align-items: center;

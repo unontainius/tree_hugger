@@ -23,7 +23,7 @@
 
 			<div class="other-end">
 				&#x201F;I'd like to add the ability to add pictures and stories to individuals. A quick
-				"show me birthdays" or "show me anniversaries" could be a nice features too.&#x201D;
+				"show me birthdays" or "show me anniversaries" could be nice features too.&#x201D;
 			</div>
 			<div class="footer">
 				<div class="signed">Marcus 😉</div>
@@ -39,8 +39,7 @@
 	h1 {
 		font-size: 4rem;
 		font-weight: 600;
-		color: rgb(255, 255, 255);
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.945);
+		color: rgb(65, 65, 65);
 	}
 
 	.quote {

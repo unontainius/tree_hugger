@@ -11,14 +11,15 @@
 		borderColor,
 		icon,
 		iconSize = "24px", // Default size if not provided
-		onclick = (() => {}) as MouseEventHandler<HTMLButtonElement>
+		onclick = (() => {}) as MouseEventHandler<HTMLButtonElement>,
+		selected = false
 	} = $props();
 </script>
 
 <button 
 	bind:this={buttonElement}
 	onclick={onclick} 
-	style={`background: ${bgColor}; color: ${foregroundColor}; border: 3px solid ${borderColor};`}
+	style={`background: ${bgColor}; color: ${foregroundColor}; border: 3px solid ${borderColor}; ${selected ? 'box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);' : ''}`}
 >
 	<MIcon name={icon} size={iconSize} color={foregroundColor}/>
 </button>
@@ -33,7 +34,6 @@
 		height: 100%;
 		padding: 0;
 		margin: 0;
-		border: 1px solid #5555552a;
 		border-radius: 2rem;
 		cursor: pointer;
 		transition: all 0.2s ease-in-out;

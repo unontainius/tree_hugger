@@ -9,7 +9,7 @@
 <div class="welcome-container">
 	<FamilyMenuItem
 		title="Family Tree"
-		description="Browse and search your family members"
+		description="Record, browse and search family members"
 		image="/images/familytree.png"
 		loggedIn={$user !== null}
 		onclick={() => goto('/admin')}
@@ -19,16 +19,23 @@
 		title="Resume"
 		description="My professional journey"
 		image="/images/marcus.jpg"
-		loggedIn={$user !== null}
+		loggedIn={true}
 		onclick={() => goto('/resume')}
 	/>
 	<FamilyMenuItem
 		title="POS"
 		description="Point of Sale"
 		image="/images/pos.jpg"
-		loggedIn={$user !== null}
+		loggedIn={true}
 		onclick={() => goto('/pos')}
 	/>
+	<FamilyMenuItem
+	title="Star Trek"
+	description="LCARS Console"
+	image="/images/starfleet_command_insignia.png"
+	loggedIn={true}
+	onclick={() => goto('/star-trek')}
+/>
 </div>
 
 <style>

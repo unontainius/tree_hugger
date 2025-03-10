@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount } from 'svelte'
         // Engineering crew data
     const crewMembers = [
         { name: "LT CMDR JIM WEES", position: "SHIFT SUPERVISOR", onDuty: "ON DUTY", location: "ENG-4156", button: "PERSONNEL" },
@@ -300,6 +300,7 @@
         color: var(--lcars-white);
         width: 100%;
     }
+
     .detail-table {
         margin-top: 10px;
     }
@@ -559,7 +560,6 @@
         background-color: var(--lcars-lime);
 
         border-top: 8px solid var(--lcars-black);
-        border-bottom-left-radius: 3rem;
     }
     .bottom-left-top {
         display: flex;

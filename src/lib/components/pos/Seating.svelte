@@ -31,6 +31,14 @@
             <p class="seating-table-number">08</p>
             <MIcon name="tables" size="5rem" color="white"/>
         </button>
+        <button class="pos-seating-table-row-cell">
+            <p>Deep</p>
+            <p>Dish</p>
+        </button>
+        <button class="pos-seating-table-row-cell">
+            <p>Bar</p>
+            <p>Steward</p>
+        </button>
     </div>
 </div>
 
@@ -41,25 +49,45 @@
         overflow: hidden;
         background-color: transparent;
         border: 1px solid #5555552a;
-        margin:0;
-        padding:0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 130px; /* Increased overall height */
     }
 
     .seating-scroll {
         display: flex;
-        gap: 0.5rem;
-        overflow-x: auto;
+        /* gap: 0.5rem; */
+        overflow-x: scroll;
         overflow-y: hidden;
-        /* padding-bottom: 0.5rem; */
-        padding:0;
-        margin:0;
+        /* padding: 0.5rem; */
+        padding-block-start: 0.5rem;
+        margin-bottom: 4px; /* Space for scrollbar */
         width: 100%;
+        height: 120px; /* Fixed content height */
         scrollbar-width: thin;
         scrollbar-color: rgba(204, 0, 255, 0.993) transparent;
     }
 
+    /* Webkit scrollbar styles */
+    .seating-scroll::-webkit-scrollbar {
+        height: 8px;
+        width: auto;
+    }
+
+    .seating-scroll::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+
+    .seating-scroll::-webkit-scrollbar-thumb {
+        background: rgba(204, 0, 255, 0.7);
+        border-radius: 4px;
+    }
+
     .pos-seating-table-row-cell {
-        flex-shrink: 0; /* Prevent button shrinking */
+        flex-shrink: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -69,10 +97,11 @@
         background-color: #f3f3f3;
         border: 1px solid #5555552a;
         border-radius: 50%;
-        padding:0;
-        margin:1rem;
-        gap:0;
+        padding: 0;
+        margin: 0.5rem; /* Reduced margin */
+        gap: 0;
         color: #555555;
+        position: relative; /* For proper positioning */
     }
     .seating-table-icon {
         background-color: transparent;

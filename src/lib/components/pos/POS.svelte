@@ -27,9 +27,9 @@
     /* Adjust the container since nav is hidden */
     .pos-container {    
         display: grid;
-        grid-template-columns: 1.3fr 6fr 2.3fr;
+        grid-template-columns: 5fr 16fr 14fr;
         grid-template-rows: 1fr;
-        gap: 0.5rem;
+        gap: 0.25rem;
         align-items: stretch;
         justify-content: center;
         width: 100%;
@@ -42,19 +42,19 @@
             background: linear-gradient(180deg, rgba(0,19,33,1) 0%, rgba(1,72,125,1) 77%);
             filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#001321",endColorstr="#01487d",GradientType=1);    
             border-radius: 2rem;
+
         }
-    
 
     .pos-content {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 1.8fr 2.5fr 7fr;
+        grid-template-rows: 4fr 8fr 17fr;
         height: 100%;
         background-color: transparent;
         padding: 0;
         min-width: 0;
         overflow: hidden;
-        gap: 0.5rem;
+        /* gap: 0.5rem; */
     }
     .pos-nav {
         display: flex;
