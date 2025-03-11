@@ -10,12 +10,11 @@
 	import Window from '$lib/components/common/Window.svelte';
 	import MIcon from '$lib/components/common/MIcon.svelte';
 	import PageTransition from '$lib/components/common/PageTransition.svelte';
-	import { menuName, menuConfigs, menuRequired } from '$lib/stores/menuStore';
+	import { menuName, menuConfigs } from '$lib/stores/menuStore';
 	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
     import type { PageData } from './$types';
-	import { page } from '$app/stores';
 
 	let LoggedIn = $state(false);
 

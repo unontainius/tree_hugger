@@ -30,12 +30,20 @@
 		onclick={() => goto('/pos')}
 	/>
 	<FamilyMenuItem
-	title="Star Trek"
-	description="LCARS Console"
-	image="/images/starfleet_command_insignia.png"
-	loggedIn={true}
-	onclick={() => goto('/star-trek')}
-/>
+		title="Star Trek"
+		description="LCARS Console"
+		image="/images/starfleet_command_insignia.png"
+		loggedIn={true}
+		onclick={() => goto('/star-trek')}
+	/>
+
+	<FamilyMenuItem
+		title="Budget"
+		description="Budget"
+		image="/images/marcus.jpg"
+		loggedIn={true}
+		onclick={() => goto('/budget/cashflow')}
+	/>
 </div>
 
 <style>
