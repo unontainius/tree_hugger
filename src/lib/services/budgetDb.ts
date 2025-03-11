@@ -349,6 +349,64 @@ const budgetDb = {
 
             return true;
         }
+    },
+    Sharing: {
+        async getSharedUsers(userId: string): Promise<SharedUser[]> {
+            const { data, error } = await supabase
+                .from('shared_access')
+                .select(`
+                    shared_with_id,
+                    shared_users:shared_with_id(
+                        id,
+                        email,
+                        display_name
+                    )
+                `)
+                .eq('owner_id', userId);
+                
+            if (error) throw error;
+            return data?.map(item => item.shared_users[0] as SharedUser) ?? [];
+        },
+
+        async findUserByEmail(email: string): Promise<{ id: string } | null> {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .single();
+                
+            if (error) {
+                if (error.code === 'PGRST116') return null; // No rows returned
+                throw error;
+            }
+            return data;
+        },
+
+        async shareAccess(ownerId: string, sharedWithId: string): Promise<void> {
+            const { error } = await supabase
+                .from('shared_access')
+                .insert([{ 
+                    owner_id: ownerId, 
+                    shared_with_id: sharedWithId 
+                }]);
+                
+            if (error) {
+                if (error.code === '23505') { // Unique violation
+                    throw new Error('Already shared with this user');
+                }
+                throw error;
+            }
+        },
+
+        async removeAccess(ownerId: string, sharedWithId: string): Promise<void> {
+            const { error } = await supabase
+                .from('shared_access')
+                .delete()
+                .eq('owner_id', ownerId)
+                .eq('shared_with_id', sharedWithId);
+                
+            if (error) throw error;
+        }
     }
 };
 
@@ -582,4 +640,10 @@ export interface TransactionRow {
 
 export interface TransactionInsertRow extends Omit<TransactionRow, 'id' | 'created_at' | 'updated_at'> {
     entries: TransactionEntry[];
+}
+
+export interface SharedUser {
+    id: string;
+    email: string;
+    display_name?: string;
 } 

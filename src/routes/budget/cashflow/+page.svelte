@@ -107,7 +107,7 @@
                 
                 // Reset form
                 newRowName = '';
-                newRowType = 'income';
+                newRowType = 'expense';
                 newRowGroup = 'Other';
                 newRowIsRecurring = false;
                 newRowRecurringAmount = null;
@@ -270,7 +270,7 @@
         return Math.ceil(diff / oneWeek);
     }
     
-    let gridRef: HTMLDivElement;
+    let gridRef = $state<HTMLDivElement | null>(null);
     let currentWeek = $state(getCurrentWeek());
     
     function scrollToCurrentWeek() {

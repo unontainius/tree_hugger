@@ -1,13 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { supabase, user } from '$lib/supabase';
-    
-    interface SharedUser {
-        id: string;
-        email: string;
-        display_name?: string;
-    }
-    
+    import { currentUser } from '$lib/utils/authUtils';
+    import budgetDb, { type SharedUser } from '$lib/services/budgetDb';
+
     let sharedUsers: SharedUser[] = [];
     let email = '';
     let isSharing = false;
@@ -15,31 +10,17 @@
     let isLoading = true;
     
     onMount(async () => {
-        if ($user) {
+        if ($currentUser) {
             await loadSharedUsers();
         }
     });
     
     async function loadSharedUsers() {
+        if (!$currentUser) return;
         isLoading = true;
         
         try {
-            const { data, error } = await supabase
-                .from('shared_access')
-                .select(`
-                    shared_with_id,
-                    shared_users:shared_with_id(
-                        id,
-                        email,
-                        display_name
-                    )
-                `)
-                .eq('owner_id', $user.id);
-                
-            if (error) throw error;
-            
-            sharedUsers = data.map(item => item.shared_users);
-            console.log('Shared users:', sharedUsers);
+            sharedUsers = await budgetDb.Sharing.getSharedUsers($currentUser.id);
         } catch (err) {
             console.error('Error loading shared users:', err);
         } finally {
@@ -48,69 +29,43 @@
     }
     
     async function shareAccess() {
+        if (!$currentUser) return;
         isSharing = true;
         shareError = null;
         
         try {
-            // First find the user by email
-            const { data: users, error: userError } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('email', email);
-                
-            if (userError) throw userError;
+            // Find the user by email
+            const user = await budgetDb.Sharing.findUserByEmail(email);
             
-            if (!users || users.length === 0) {
+            if (!user) {
                 shareError = 'User not found';
                 return;
             }
             
-            const sharedWithId = users[0].id;
-            
             // Don't share with yourself
-            if (sharedWithId === $user.id) {
+            if (user.id === $currentUser.id) {
                 shareError = 'You cannot share with yourself';
                 return;
             }
             
             // Create the sharing record
-            const { error } = await supabase
-                .from('shared_access')
-                .insert([{ 
-                    owner_id: $user.id, 
-                    shared_with_id: sharedWithId 
-                }]);
-                
-            if (error) {
-                if (error.code === '23505') { // Unique violation
-                    shareError = 'Already shared with this user';
-                } else {
-                    throw error;
-                }
-            } else {
-                // Reload shared users
-                await loadSharedUsers();
-                email = '';
-            }
+            await budgetDb.Sharing.shareAccess($currentUser.id, user.id);
+            
+            // Reload shared users and reset form
+            await loadSharedUsers();
+            email = '';
         } catch (err) {
             console.error('Error sharing access:', err);
-            shareError = 'Failed to share access. Please try again.';
+            shareError = err instanceof Error ? err.message : 'Failed to share access. Please try again.';
         } finally {
             isSharing = false;
         }
     }
     
     async function removeAccess(sharedWithId: string) {
+        if (!$currentUser) return;
         try {
-            const { error } = await supabase
-                .from('shared_access')
-                .delete()
-                .eq('owner_id', $user.id)
-                .eq('shared_with_id', sharedWithId);
-                
-            if (error) throw error;
-            
-            // Reload shared users
+            await budgetDb.Sharing.removeAccess($currentUser.id, sharedWithId);
             await loadSharedUsers();
         } catch (err) {
             console.error('Error removing access:', err);
