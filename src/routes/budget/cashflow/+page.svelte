@@ -131,18 +131,26 @@
         }
     }
     
-    async function handleCellInput(event: Event, rowId: number, weekNumber: number) {
-        const input = event.target as HTMLInputElement;
-        const value = parseFloat(input.value);
-        
-        if (!isNaN(value)) {
-            try {
-                await budgetDb.Cashflow.updateCell(rowId, weekNumber, { amount: value });
-                await loadCashflowData();
-            } catch (err) {
-                console.error('Error updating cell:', err);
-                error = 'Failed to update cell';
+    // Add this function to handle cell updates
+    async function updateCell(rowId: number, weekNumber: number, amount: number) {
+        try {
+            const result = await budgetDb.Cashflow.updateCell(rowId, weekNumber, { amount });
+            if (result) {
+                // Find the row and update just that cell
+                const rowIndex = rows.findIndex(r => r.id === rowId);
+                if (rowIndex >= 0) {
+                    const row = rows[rowIndex];
+                    const cellIndex = row.cells.findIndex(c => c.week_number === weekNumber);
+                    if (cellIndex >= 0) {
+                        row.cells[cellIndex] = result;
+                    } else {
+                        row.cells = [...row.cells, result].sort((a, b) => a.week_number - b.week_number);
+                    }
+                }
             }
+        } catch (err) {
+            console.error('Error updating cell:', err);
+            error = 'Failed to update cell';
         }
     }
     
@@ -511,8 +519,21 @@
                                     <td class="amount-cell {week === currentWeek ? 'current-week' : ''}">
                                         <input
                                             type="number"
-                                            value={cell?.amount || 0}
-                                            oninput={(e) => handleCellInput(e, row.id, week)}
+                                            value={(cell?.amount ?? 0).toString()}
+                                            onchange={async ({ currentTarget }) => {
+                                                const newValue = parseFloat(currentTarget.value);
+                                                if (!isNaN(newValue) && newValue !== (cell?.amount ?? 0)) {
+                                                    const result = await budgetDb.Cashflow.updateCell(row.id, week, { amount: newValue });
+                                                    if (result) {
+                                                        const cellIndex = row.cells.findIndex(c => c.week_number === week);
+                                                        if (cellIndex >= 0) {
+                                                            row.cells[cellIndex] = result;
+                                                        } else {
+                                                            row.cells = [...row.cells, result].sort((a, b) => a.week_number - b.week_number);
+                                                        }
+                                                    }
+                                                }
+                                            }}
                                         />
                                         {#if cell?.note}
                                             <span class="note-indicator" title={cell.note}>📝</span>
@@ -729,9 +750,18 @@
         width: 100%;
         border: none;
         padding: 0.2rem;
-        padding-inline-end: 1rem;
+        padding-inline-end: 0;
         text-align: right;
         font-family: monospace;
+        /* Hide spinner controls */
+        -moz-appearance: textfield;
+    }
+
+    /* Hide spinner for Chrome, Safari, Edge, Opera */
+    .amount-cell input::-webkit-outer-spin-button,
+    .amount-cell input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
     
     .amount-cell input:focus {

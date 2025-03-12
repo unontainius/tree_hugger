@@ -416,6 +416,7 @@ export default {
     Category: budgetDb.Category,
     Transaction: budgetDb.Transaction,
     SharedAccess: budgetDb.SharedAccess,
+    Sharing: budgetDb.Sharing,
     Cashflow: {
         async getRows(userId: string): Promise<CashflowRowWithCells[]> {
             try {
@@ -501,48 +502,20 @@ export default {
         
         async updateCells(rowId: number, cells: { week_number: number; amount: number; note?: string }[]): Promise<boolean> {
             try {
-                // First, get existing cells
-                const { data: existingCells } = await supabase
+                // Upsert all cells in a single operation
+                const { error } = await supabase
                     .from('cashflow_cells')
-                    .select('week_number')
-                    .eq('row_id', rowId);
+                    .upsert(
+                        cells.map(c => ({
+                            row_id: rowId,
+                            week_number: c.week_number,
+                            amount: c.amount,
+                            note: c.note
+                        })),
+                        { onConflict: 'row_id,week_number' }
+                    );
                 
-                const existingWeeks = new Set(existingCells?.map(c => c.week_number) || []);
-                
-                // Separate cells into updates and inserts
-                const updates = cells.filter(c => existingWeeks.has(c.week_number));
-                const inserts = cells.filter(c => !existingWeeks.has(c.week_number));
-                
-                // Perform updates
-                if (updates.length > 0) {
-                    const { error: updateError } = await supabase
-                        .from('cashflow_cells')
-                        .upsert(
-                            updates.map(c => ({
-                                row_id: rowId,
-                                week_number: c.week_number,
-                                amount: c.amount,
-                                note: c.note
-                            }))
-                        );
-                    if (updateError) throw updateError;
-                }
-                
-                // Perform inserts
-                if (inserts.length > 0) {
-                    const { error: insertError } = await supabase
-                        .from('cashflow_cells')
-                        .insert(
-                            inserts.map(c => ({
-                                row_id: rowId,
-                                week_number: c.week_number,
-                                amount: c.amount,
-                                note: c.note
-                            }))
-                        );
-                    if (insertError) throw insertError;
-                }
-                
+                if (error) throw error;
                 return true;
             } catch (err) {
                 console.error('Error updating cashflow cells:', err);
@@ -552,15 +525,19 @@ export default {
         
         async updateCell(rowId: number, weekNumber: number, data: Partial<CashflowCell>): Promise<CashflowCell | null> {
             try {
+                // Ensure amount is initialized to 0 if not provided
                 const cellData = {
                     row_id: rowId,
                     week_number: weekNumber,
+                    amount: 0,
                     ...data
                 };
-                
+
                 const { data: result, error } = await supabase
                     .from('cashflow_cells')
-                    .upsert([cellData])
+                    .upsert([cellData], {
+                        onConflict: 'row_id,week_number'
+                    })
                     .select()
                     .single();
                     
