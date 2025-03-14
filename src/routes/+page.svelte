@@ -3,7 +3,15 @@
 	import { user } from '$lib/stores/authStore';
 	import { goto } from '$app/navigation';
 	import FamilyMenuItem from '$lib/components/family-tree/FamilyMenuItem.svelte';
+	import CookieConsent from '$lib/components/common/CookieConsent.svelte';
+	import { showLoading, hideLoading, withLoading } from '$lib/stores/loadingStore';
 
+	hideLoading();
+
+	function handleShowAccounting() {
+		showLoading("Loading budget data...");
+		goto('/budget/cashflow-2');
+	}
 </script>
 
 <div class="welcome-container">
@@ -42,9 +50,11 @@
 		description="Budget"
 		image="/images/marcus.jpg"
 		loggedIn={true}
-		onclick={() => goto('/budget/cashflow')}
+		onclick={handleShowAccounting}
 	/>
 </div>
+
+<CookieConsent />
 
 <style>
 	.welcome-container {

@@ -15,6 +15,7 @@
 	import type { Snippet } from 'svelte';
 	import { tick } from 'svelte';
     import type { PageData } from './$types';
+	import LoadingIndicator from '$lib/components/common/LoadingIndicator.svelte';
 
 	let LoggedIn = $state(false);
 
@@ -65,7 +66,7 @@
 </script>
 
 <Toast />
-
+<LoadingIndicator />
 
 	<nav>
 		{#each menuConfigs[$menuName].menuItems as item}

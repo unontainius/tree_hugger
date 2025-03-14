@@ -6,6 +6,7 @@
 	import { authService } from "$lib/services/authService";
 	import { onMount } from "svelte";
 	import Card from "./Card.svelte";
+	import LoadingExample from "$lib/components/examples/LoadingExample.svelte";
 	// JavaScript logic can be added here if needed
 	function imageSaved(path: string) {
 		// console.log(path);
@@ -192,6 +193,8 @@
 </div>
 
 <Card />
+
+<LoadingExample />
 <style>
 
 	.page-grid-1 {

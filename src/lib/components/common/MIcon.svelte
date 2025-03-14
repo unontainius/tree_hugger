@@ -82,4 +82,5 @@
 		font-weight: bold;
 		border-radius: 4px;
 	}
+
 </style>
