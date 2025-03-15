@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import type { BudgetGroup, BudgetAccount } from '$lib/services/cashflowService';
     import MIcon from '$lib/components/common/MIcon.svelte';
     
@@ -23,6 +23,10 @@
     let error = $state('');
     let modalTitle = $state('Add New Accounts');
     let modalId = $state(`account-modal-${Math.random().toString(36).substring(2, 9)}`);
+    let modalContainer: HTMLElement;
+    let modalHeader: HTMLElement;
+    let modalContent: HTMLElement;
+    let modalActions: HTMLElement;
     
     // Event dispatcher
     const dispatch = createEventDispatcher<{
@@ -35,8 +39,101 @@
     $effect(() => {
         if (show) {
             resetForm();
+            // Use setTimeout to ensure the DOM is updated before positioning
+            setTimeout(positionModal, 0);
         }
     });
+    
+    // Position the modal to ensure it's visible in the viewport
+    function positionModal() {
+        if (!modalContainer) return;
+        
+        // Get the viewport dimensions
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // Calculate estimated height based on content
+        let estimatedHeight = 0;
+        
+        if (modalHeader) {
+            estimatedHeight += modalHeader.offsetHeight;
+        }
+        
+        if (modalContent) {
+            // Calculate content height based on form elements
+            const formGroups = modalContent.querySelectorAll('.form-group');
+            formGroups.forEach(group => {
+                estimatedHeight += (group as HTMLElement).offsetHeight + 16; // Add margin
+            });
+            
+            // Add height for accounts container
+            const accountsContainer = modalContent.querySelector('.accounts-container');
+            if (accountsContainer) {
+                estimatedHeight += (accountsContainer as HTMLElement).offsetHeight + 24;
+            }
+            
+            // Add height for error message if present
+            const errorMessage = modalContent.querySelector('.error-message');
+            if (errorMessage) {
+                estimatedHeight += (errorMessage as HTMLElement).offsetHeight + 16;
+            }
+        }
+        
+        if (modalActions) {
+            estimatedHeight += modalActions.offsetHeight;
+        }
+        
+        // Add padding and margins
+        estimatedHeight += 40; // Additional padding for safety
+        
+        // Get actual dimensions after rendering
+        const modalRect = modalContainer.getBoundingClientRect();
+        const modalWidth = modalRect.width;
+        
+        // Use the larger of estimated or actual height
+        const modalHeight = Math.max(estimatedHeight, modalRect.height);
+        
+        // Define minimum bottom margin (1rem = 16px)
+        const BOTTOM_MARGIN = 16;
+        
+        // Calculate the ideal position (centered)
+        let top = Math.max(20, (viewportHeight - modalHeight) / 2);
+        
+        // Ensure the modal bottom is at least BOTTOM_MARGIN pixels from viewport bottom
+        if (top + modalHeight > viewportHeight - BOTTOM_MARGIN) {
+            // If the modal is taller than the available viewport space
+            if (modalHeight > viewportHeight - 40) {
+                // Set to top of viewport with padding and make it scrollable
+                top = 20;
+                modalContainer.style.maxHeight = `${viewportHeight - 40}px`;
+                modalContainer.style.overflowY = 'auto';
+            } else {
+                // Adjust top position to ensure bottom margin is respected
+                top = Math.max(20, viewportHeight - modalHeight - BOTTOM_MARGIN);
+            }
+        }
+        
+        // Center horizontally
+        let left = Math.max(20, (viewportWidth - modalWidth) / 2);
+        if (left + modalWidth > viewportWidth - 20) {
+            left = Math.max(20, viewportWidth - modalWidth - 20);
+        }
+        
+        // Apply the position directly as inline style
+        modalContainer.style.position = 'absolute';
+        modalContainer.style.top = `${top}px`;
+        modalContainer.style.left = `${left}px`;
+        modalContainer.style.margin = '0';
+        
+        // Force a small delay and recheck position to handle any layout shifts
+        setTimeout(() => {
+            const updatedRect = modalContainer.getBoundingClientRect();
+            if (updatedRect.bottom > viewportHeight - BOTTOM_MARGIN) {
+                const adjustedTop = Math.max(20, viewportHeight - updatedRect.height - BOTTOM_MARGIN);
+                modalContainer.style.top = `${adjustedTop}px`;
+            }
+        }, 50);
+    }
     
     // Reset the form to initial state
     function resetForm() {
@@ -59,6 +156,8 @@
     function addAccountField() {
         if (!editMode) {
             accounts = [...accounts, { name: '', isValid: false }];
+            // Reposition after adding a field
+            setTimeout(positionModal, 0);
         }
     }
     
@@ -66,6 +165,8 @@
     function removeAccountField(index: number) {
         if (!editMode && accounts.length > 1) {
             accounts = accounts.filter((_, i) => i !== index);
+            // Reposition after removing a field
+            setTimeout(positionModal, 0);
         }
     }
     
@@ -92,6 +193,8 @@
         
         if (!isFormValid()) {
             error = 'Please fill in all required fields';
+            // Reposition after showing error
+            setTimeout(positionModal, 0);
             return;
         }
         
@@ -128,6 +231,8 @@
         } catch (err) {
             console.error('Error processing account:', err);
             error = err instanceof Error ? err.message : 'An unknown error occurred';
+            // Reposition after showing error
+            setTimeout(positionModal, 0);
         } finally {
             isSubmitting = false;
         }
@@ -144,6 +249,24 @@
             handleClose();
         }
     }
+    
+    // Handle window resize
+    function handleResize() {
+        if (show) {
+            positionModal();
+        }
+    }
+    
+    // Set up event listeners
+    onMount(() => {
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('keydown', handleKeydown);
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('keydown', handleKeydown);
+        };
+    });
 </script>
 
 <!-- Modal backdrop -->
@@ -162,11 +285,12 @@
             aria-labelledby={`${modalId}-title`}
             aria-modal="true"
             aria-describedby={error ? `${modalId}-error` : undefined}
-            onclick={handleClose}
+            onclick={e => e.stopPropagation()}
+            bind:this={modalContainer}
         >
            
             <!-- Modal header -->
-            <div class="modal-header">
+            <div class="modal-header" bind:this={modalHeader}>
                 <h2 id={`${modalId}-title`}>{modalTitle}</h2>
                 <button 
                     class="close-button" 
@@ -179,8 +303,7 @@
             </div>
             
             <!-- Modal content -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <div class="modal-content" onclick={e => e.stopPropagation()}>
+            <div class="modal-content" bind:this={modalContent}>
                 {#if error}
                     <div 
                         class="error-message" 
@@ -270,7 +393,7 @@
                     </div>
                     
                     <!-- Form actions -->
-                    <div class="form-actions">
+                    <div class="form-actions" bind:this={modalActions}>
                         <button 
                             type="button" 
                             class="cancel-button" 
@@ -308,9 +431,11 @@
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         z-index: 1000;
+        overflow-y: auto;
+        padding: 20px;
     }
     
     .modal-container {
@@ -318,9 +443,9 @@
         border-radius: 8px;
         width: 90%;
         max-width: 500px;
-        max-height: 90vh;
-        overflow-y: auto;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
     }
     
     .modal-header {
@@ -329,6 +454,11 @@
         align-items: center;
         padding: 1rem;
         border-bottom: 1px solid #e5e7eb;
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 1;
+        border-radius: 8px 8px 0 0;
     }
     
     .modal-header h2 {
@@ -346,6 +476,7 @@
     
     .modal-content {
         padding: 1rem;
+        overflow-y: auto;
     }
     
     .form-group {
@@ -429,6 +560,13 @@
         justify-content: flex-end;
         gap: 1rem;
         margin-top: 1.5rem;
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 0.5rem 1rem 1rem;
+        border-top: 1px solid #f3f4f6;
+        z-index: 1;
+        border-radius: 0 0 8px 8px;
     }
     
     .cancel-button {
@@ -473,5 +611,12 @@
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border-width: 0;
+    }
+    
+    @media (max-height: 600px) {
+        .modal-backdrop {
+            align-items: flex-start;
+            padding: 10px;
+        }
     }
 </style> 

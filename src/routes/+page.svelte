@@ -48,7 +48,7 @@
 	<FamilyMenuItem
 		title="Budget"
 		description="Budget"
-		image="/images/marcus.jpg"
+		image="/images/budget.jpg"
 		loggedIn={true}
 		onclick={handleShowAccounting}
 	/>

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import MIcon from './common/MIcon.svelte';
+	import { onMount } from 'svelte';
+	
 	// Props
 	let {
 		show = false,
@@ -30,6 +32,7 @@
 	let weeklyDistribution = $state<WeekDistribution[]>([]);
 	let errors = $state({ amount: '', dueDate: '' });
 	let isValid = $derived(!errors.amount && !errors.dueDate);
+	let budgetAgentContainer: HTMLElement;
 
 	// Frequency options
 	const frequencyOptions = [
@@ -39,6 +42,54 @@
 		{ value: 'quarterly', label: 'Quarterly (every 13 weeks)', divisor: 13 },
 		{ value: 'annually', label: 'Annually (every 52 weeks)', divisor: 52 }
 	];
+
+	// Watch for show changes
+	$effect(() => {
+		if (show) {
+			// Use setTimeout to ensure the DOM is updated before positioning
+			setTimeout(positionBudgetAgent, 0);
+			// Prevent body scrolling when modal is open
+			document.body.style.overflow = 'hidden';
+		} else {
+			// Restore body scrolling when modal is closed
+			document.body.style.overflow = '';
+		}
+	});
+
+	// Position the budget agent to ensure it's visible in the viewport
+	function positionBudgetAgent() {
+		if (!budgetAgentContainer) return;
+		
+		// Get the viewport dimensions
+		const viewportHeight = window.innerHeight;
+		
+		// Get the modal dimensions
+		const containerRect = budgetAgentContainer.getBoundingClientRect();
+		const containerHeight = containerRect.height;
+		
+		// Check if the container is too tall for the viewport
+		if (containerHeight > viewportHeight - 40) {
+			// If it's too tall, make it scrollable
+			budgetAgentContainer.style.maxHeight = `${viewportHeight - 40}px`;
+			budgetAgentContainer.style.overflowY = 'auto';
+		}
+	}
+
+	// Handle window resize
+	function handleResize() {
+		if (show) {
+			positionBudgetAgent();
+		}
+	}
+
+	// Set up event listeners
+	onMount(() => {
+		window.addEventListener('resize', handleResize);
+		
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	});
 
 	// Get the divisor for the selected frequency
 	const getFrequencyDivisor = (): number => {
@@ -222,120 +273,207 @@
 </script>
 
 {#if show}
-	<div class="form-container">
-		<div class="form-group">
-			<label for="amount">Amount</label>
-			<input
-				id="amount"
-				type="number"
-				bind:value={amount}
-				placeholder="Enter payment amount"
-				class={errors.amount ? 'error' : ''}
-			/>
-			{#if errors.amount}
-				<p class="error-message">{errors.amount}</p>
-			{/if}
-		</div>
+	<div class="budget-agent-backdrop" onclick={handleCancel}>
+		<div class="budget-agent-container" bind:this={budgetAgentContainer} onclick={e => e.stopPropagation()}>
+			<div class="budget-agent-header">
+				<h2>Budget Agent</h2>
+				<button class="close-button" onclick={handleCancel} aria-label="Close">
+					<MIcon name="close" size="24px" />
+				</button>
+			</div>
+			
+			<div class="account-info">
+				<h3>Account: {accountName}</h3>
+				<p class="account-id">ID: {accountId}</p>
+			</div>
+			
+			<div class="form-container">
+				<div class="form-group">
+					<label for="amount">Amount</label>
+					<input
+						id="amount"
+						type="number"
+						bind:value={amount}
+						placeholder="Enter payment amount"
+						class={errors.amount ? 'error' : ''}
+					/>
+					{#if errors.amount}
+						<p class="error-message">{errors.amount}</p>
+					{/if}
+				</div>
 
-		<div class="form-group">
-			<label for="dueDate">Date Due</label>
-			<input
-				id="dueDate"
-				type="date"
-				bind:value={dueDate}
-				class={errors.dueDate ? 'error' : ''}
-			/>
-			{#if errors.dueDate}
-				<p class="error-message">{errors.dueDate}</p>
-			{/if}
-		</div>
+				<div class="form-group">
+					<label for="dueDate">Date Due</label>
+					<input
+						id="dueDate"
+						type="date"
+						bind:value={dueDate}
+						class={errors.dueDate ? 'error' : ''}
+					/>
+					{#if errors.dueDate}
+						<p class="error-message">{errors.dueDate}</p>
+					{/if}
+				</div>
 
-		<div class="form-group">
-			<label for="frequency">Frequency</label>
-			<select id="frequency" bind:value={frequency}>
-				{#each frequencyOptions as option}
-					<option value={option.value}>{option.label}</option>
-				{/each}
-			</select>
-		</div>
+				<div class="form-group">
+					<label for="frequency">Frequency</label>
+					<select id="frequency" bind:value={frequency}>
+						{#each frequencyOptions as option}
+							<option value={option.value}>{option.label}</option>
+						{/each}
+					</select>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="form-group toggle">
+					<label for="startFromCurrentWeek">
+						<input id="startFromCurrentWeek" type="checkbox" bind:checked={startFromCurrentWeek} />
+						<span>Start from Current Week (Week {currentWeek})</span>
+					</label>
+				</div>
 
-
-	</div>
-	<div class="row">
-		<div class="form-group toggle">
-			<label for="startFromCurrentWeek">
-				<input id="startFromCurrentWeek" type="checkbox" bind:checked={startFromCurrentWeek} />
-				<span>Start from Current Week (Week {currentWeek})</span>
-			</label>
-		</div>
-
-		<div class="form-group toggle">
-			<label for="enableCatchup">
-				<input
-					id="enableCatchup"
-					type="checkbox"
-					bind:checked={enableCatchup}
-					disabled={!startFromCurrentWeek}
-				/>
-				<span>Enable Catch-up</span>
-			</label>
-			{#if !startFromCurrentWeek && enableCatchup}
-				<p class="info-message">Catch-up is only available when starting from current week.</p>
-			{/if}
-		</div>
-	</div>
-		<div class="preview-section">
-			<h3>Distribution Preview</h3>
-			<div class="distribution-visualization">
-			<div class="weeks-container">
-				{#each weeklyDistribution as week}
-					{@const isCurrentWeek = week.week === currentWeek}
-					{@const hasAmount = week.amount > 0}
-					<div
-						class="week-bar {isCurrentWeek ? 'current-week' : ''} {hasAmount ? 'has-amount' : ''}"
-						style="height: {hasAmount ? Math.min(100, Math.max(10, (week.amount / Math.max(...weeklyDistribution.map(w => w.amount))) * 100)) : 0}%"
-						title="Week {week.week}: ${week.amount.toFixed(2)}"
-					>
-						{#if hasAmount && week.amount > Math.max(...weeklyDistribution.map((w) => w.amount)) * 0.3}
-							<span class="amount-label">${week.amount.toFixed(2)}</span>
-						{/if}
+				<div class="form-group toggle">
+					<label for="enableCatchup">
+						<input
+							id="enableCatchup"
+							type="checkbox"
+							bind:checked={enableCatchup}
+							disabled={!startFromCurrentWeek}
+						/>
+						<span>Enable Catch-up</span>
+					</label>
+					{#if !startFromCurrentWeek && enableCatchup}
+						<p class="info-message">Catch-up is only available when starting from current week.</p>
+					{/if}
+				</div>
+			</div>
+			
+			<div class="preview-section">
+				<h3>Distribution Preview</h3>
+				<div class="distribution-visualization">
+					<div class="weeks-container">
+						{#each weeklyDistribution as week}
+							{@const isCurrentWeek = week.week === currentWeek}
+							{@const hasAmount = week.amount > 0}
+							<div
+								class="week-bar {isCurrentWeek ? 'current-week' : ''} {hasAmount ? 'has-amount' : ''}"
+								style="height: {hasAmount ? Math.min(100, Math.max(10, (week.amount / Math.max(...weeklyDistribution.map(w => w.amount))) * 100)) : 0}%"
+								title="Week {week.week}: ${week.amount.toFixed(2)}"
+							>
+								{#if hasAmount && week.amount > Math.max(...weeklyDistribution.map((w) => w.amount)) * 0.3}
+									<span class="amount-label">${week.amount.toFixed(2)}</span>
+								{/if}
+							</div>
+						{/each}
 					</div>
-				{/each}
+					<div class="week-labels">
+						<span>Week 1</span>
+						<span>Week 13</span>
+						<span>Week 26</span>
+						<span>Week 39</span>
+						<span>Week 52</span>
+					</div>
+				</div>
+
+				<div class="distribution-summary">
+					<p>Total: ${weeklyDistribution.reduce((sum, week) => sum + week.amount, 0).toFixed(2)}</p>
+					<p>Payments: {weeklyDistribution.filter((week) => week.amount > 0).length}</p>
+				</div>
 			</div>
-			<div class="week-labels">
-				<span>Week 1</span>
-				<span>Week 13</span>
-				<span>Week 26</span>
-				<span>Week 39</span>
-				<span>Week 52</span>
+
+			<div class="modal-footer">
+				<button class="cancel-button" onclick={handleCancel}>Cancel</button>
+				<button class="apply-button" onclick={handleSubmit} disabled={!isValid}>Apply</button>
 			</div>
 		</div>
-
-		<div class="distribution-summary">
-			<p>Total: ${weeklyDistribution.reduce((sum, week) => sum + week.amount, 0).toFixed(2)}</p>
-			<p>Payments: {weeklyDistribution.filter((week) => week.amount > 0).length}</p>
-		</div>
-	</div>
-
-	<div class="modal-footer">
-		<button class="cancel-button" onclick={handleCancel}>Cancel</button>
-		<button class="apply-button" onclick={handleSubmit} disabled={!isValid}>Apply</button>
 	</div>
 {/if}
 
 <style>
+	.budget-agent-backdrop {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		z-index: 2000;
+		padding: 20px;
+		overflow-y: auto;
+	}
+	
+	.budget-agent-container {
+		background-color: white;
+		border-radius: 8px;
+		width: 90%;
+		max-width: 800px;
+		margin: 40px auto;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.budget-agent-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1rem 1.5rem;
+		border-bottom: 1px solid #e5e7eb;
+		position: sticky;
+		top: 0;
+		background-color: white;
+		z-index: 1;
+	}
+	
+	.budget-agent-header h2 {
+		margin: 0;
+		font-size: 1.5rem;
+		color: #1f2937;
+	}
+	
+	.close-button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		color: #6b7280;
+	}
+	
+	.account-info {
+		padding: 1rem 1.5rem;
+		background-color: #f3f4f6;
+		border-bottom: 1px solid #e5e7eb;
+	}
+	
+	.account-info h3 {
+		margin: 0;
+		font-size: 1.25rem;
+		color: #1f2937;
+	}
+	
+	.account-id {
+		margin: 0.5rem 0 0;
+		font-size: 0.875rem;
+		color: #6b7280;
+	}
+	
 	.form-container {
 		padding: 1.5rem;
 		display: flex;
 		flex-direction: row;
 		gap: 1.5rem;
 	}
+	
 	.row {
 		display: flex;
 		flex-direction: row;
 		gap: 1.5rem;
 		padding-inline-start: 1.5rem;
 	}
+	
 	.form-group {
 		display: flex;
 		flex-direction: column;
@@ -451,6 +589,10 @@
 		gap: 1rem;
 		padding: 1rem 1.5rem;
 		border-top: 1px solid #e5e7eb;
+		position: sticky;
+		bottom: 0;
+		background-color: white;
+		z-index: 1;
 	}
 
 	.cancel-button,
@@ -485,5 +627,25 @@
 	.apply-button:disabled {
 		background-color: #93c5fd;
 		cursor: not-allowed;
+	}
+	
+	@media (max-width: 768px) {
+		.form-container {
+			flex-direction: column;
+		}
+		
+		.row {
+			flex-direction: column;
+		}
+	}
+	
+	@media (max-height: 700px) {
+		.budget-agent-backdrop {
+			align-items: flex-start;
+		}
+		
+		.budget-agent-container {
+			margin: 10px auto;
+		}
 	}
 </style>
