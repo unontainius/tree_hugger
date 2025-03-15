@@ -84,12 +84,16 @@
 
 		<div class="side-content">
 			<div class="profile-image-container">
-				<img src="/images/marcus.jpg" alt="Marcus" class="profile-image" />
+				<img
+					src="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//marcus.jpg"
+					alt="Marcus"
+					class="profile-image"
+				/>
 			</div>
 			<div class="my-col">
 				<div class="fact">
 					<div class="fact-image-container">
-						<img src="/icons/facts/clients.svg" alt="Happy Clients"  />
+						<img src="/icons/facts/clients.svg" alt="Happy Clients" />
 					</div>
 					<div class="fact-number-container">
 						<span class="fact-number">69</span>
@@ -107,7 +111,7 @@
 				</div>
 				<div class="fact">
 					<div class="fact-image-container">
-						<img src="/icons/facts/hours.svg" alt="Hours"  />
+						<img src="/icons/facts/hours.svg" alt="Hours" />
 					</div>
 					<div class="fact-number-container">
 						<span class="fact-number">29,070</span>
@@ -116,7 +120,7 @@
 				</div>
 				<div class="fact">
 					<div class="fact-image-container">
-						<img src="/icons/facts/support.svg" alt="Support"  />
+						<img src="/icons/facts/support.svg" alt="Support" />
 					</div>
 					<div class="fact-number-container">
 						<span class="fact-number">7,650</span>
@@ -248,7 +252,9 @@
 		display: flex;
 		align-items: center;
 		gap: 1.5rem;
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
 		backdrop-filter: blur(10px);
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
@@ -294,7 +300,6 @@
 		letter-spacing: 0.05em;
 	}
 
-
 	.side-content {
 		display: flex;
 		flex-direction: column;
@@ -335,7 +340,6 @@
 
 	@media (max-width: 1200px) {
 		/* Adjust for smaller screens - two fact cards at 180px each */
-
 	}
 
 	@media (max-width: 768px) {
@@ -351,7 +355,6 @@
 		}
 	}
 
-	
 	@media (max-width: 1200px) {
 		.profile-image-container {
 			max-width: calc(360px + 1.5rem);
@@ -371,11 +374,11 @@
 		}
 
 		.about-title {
-			font-size: 2.0rem;
+			font-size: 2rem;
 		}
 
 		.about-info-block {
-			width:100%;
+			width: 100%;
 			margin: 1.5rem 0;
 			margin-inline-end: 1rem;
 		}

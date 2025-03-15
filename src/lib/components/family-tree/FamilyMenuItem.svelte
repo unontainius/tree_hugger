@@ -81,7 +81,6 @@
 			);
 		width: 200px;
 		height: 100%;
-
 	}
 
 	.gold-text {

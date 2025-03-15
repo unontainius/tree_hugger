@@ -9,7 +9,7 @@
 	hideLoading();
 
 	function handleShowAccounting() {
-		showLoading("Loading budget data...");
+		showLoading('Loading budget data...');
 		goto('/budget/cashflow-2');
 	}
 </script>
@@ -18,7 +18,7 @@
 	<FamilyMenuItem
 		title="Family Tree"
 		description="Record, browse and search family members"
-		image="/images/familytree.png"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//familytree.png"
 		loggedIn={$user !== null}
 		onclick={() => goto('/admin')}
 	/>
@@ -26,21 +26,21 @@
 	<FamilyMenuItem
 		title="Resume"
 		description="My professional journey"
-		image="/images/marcus.jpg"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//marcus.jpg"
 		loggedIn={true}
 		onclick={() => goto('/resume')}
 	/>
 	<FamilyMenuItem
 		title="POS"
 		description="Point of Sale"
-		image="/images/pos.jpg"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//pos.jpg"
 		loggedIn={true}
 		onclick={() => goto('/pos')}
 	/>
 	<FamilyMenuItem
 		title="Star Trek"
 		description="LCARS Console"
-		image="/images/starfleet_command_insignia.png"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//starfleet_command_insignia.png"
 		loggedIn={true}
 		onclick={() => goto('/star-trek')}
 	/>
@@ -48,7 +48,7 @@
 	<FamilyMenuItem
 		title="Budget"
 		description="Budget"
-		image="/images/budget.jpg"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//budget.jpg"
 		loggedIn={true}
 		onclick={handleShowAccounting}
 	/>

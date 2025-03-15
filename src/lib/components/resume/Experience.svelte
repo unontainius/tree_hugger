@@ -3,7 +3,11 @@
 	<div class="experience-container">
 		<div class="photo-frame">
 			<div class="image">
-				<img src="/images/marcus.jpg" alt="Marcus" class="experience-image" />
+				<img
+					src="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//marcus.jpg"
+					alt="Marcus"
+					class="experience-image"
+				/>
 			</div>
 		</div>
 		<div class="intro-text">
