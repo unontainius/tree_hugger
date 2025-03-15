@@ -6,14 +6,13 @@
 	async function setFamilyTreeMenu() {
 		goto('/admin/person');
 	}
-
 </script>
 
 <div class="welcome-container">
 	<FamilyMenuItem
 		title="Family Tree&nbsp;Hugger"
 		description="Show me the People"
-		image="/images/familytree.png"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//familytree.png"
 		loggedIn={$user !== null}
 		onclick={setFamilyTreeMenu}
 	/>
@@ -21,7 +20,7 @@
 	<FamilyMenuItem
 		title="Photos & Memories"
 		description="HEAD SHOT!"
-		image="/images/sniper.jpg"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//sniper.jpg"
 		loggedIn={$user !== null}
 		onclick={() => goto('/comming-soon')}
 	/>
@@ -29,7 +28,7 @@
 	<FamilyMenuItem
 		title="Stories & Tall&nbsp;Tales"
 		description="Once upon a time ..."
-		image="/images/book.jpg"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//book.jpg"
 		loggedIn={$user !== null}
 		onclick={() => goto('/comming-soon')}
 	/>
@@ -37,7 +36,7 @@
 	<FamilyMenuItem
 		title="Anniversaries & Birthdays"
 		description="Oh!  Was that today?"
-		image="/images/celebration.jpg"
+		image="https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//celebration.jpg"
 		loggedIn={$user !== null}
 		onclick={() => goto('/comming-soon')}
 	/>

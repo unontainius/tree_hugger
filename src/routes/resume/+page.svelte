@@ -44,7 +44,7 @@
 	}
 
 	function handleNavClick(event: MouseEvent) {
-		event.preventDefault();  // Prevent default anchor behavior
+		event.preventDefault(); // Prevent default anchor behavior
 		expandedSidebar = false;
 
 		// Get the href from the clicked anchor
@@ -126,7 +126,6 @@
 		<div id="section1" class="section snap-child">
 			<div class="section-overlay">
 				<div class="box">
-
 					<div id="section-content-1" class="section-content welcome-content">
 						<h1>Welcome</h1>
 						<div class="tooltip">
@@ -165,7 +164,6 @@
 </div>
 
 <style>
-
 	.top-nav {
 		position: fixed;
 		top: 0;
@@ -336,20 +334,24 @@
 		/* background-color:linear-gradient(to bottom, rgba(203, 238, 7, 0.507), rgba(22, 22, 22, 0.836)); */
 	}
 	#section3 {
-	--s: 179px; /* control the size*/
-	--c1: #b2b2b2;
-	--c2: #ffffff;
-	--c3: #d9d9d9;
-	
-	--_g: var(--c3) 0 120deg,#0000 0;
-	background:
-		conic-gradient(from -60deg at 50% calc(100%/3),var(--_g)),
-		conic-gradient(from 120deg at 50% calc(200%/3),var(--_g)),
-		conic-gradient(from  60deg at calc(200%/3),var(--c3) 60deg,var(--c2) 0 120deg,#0000 0),
-		conic-gradient(from 180deg at calc(100%/3),var(--c1) 60deg,var(--_g)),
-		linear-gradient(90deg,var(--c1)   calc(100%/6),var(--c2) 0 50%,
-							var(--c1) 0 calc(500%/6),var(--c2) 0);
-		background-size: calc(1.732*var(--s)) var(--s);
+		--s: 179px; /* control the size*/
+		--c1: #b2b2b2;
+		--c2: #ffffff;
+		--c3: #d9d9d9;
+
+		--_g: var(--c3) 0 120deg, #0000 0;
+		background: conic-gradient(from -60deg at 50% calc(100% / 3), var(--_g)),
+			conic-gradient(from 120deg at 50% calc(200% / 3), var(--_g)),
+			conic-gradient(from 60deg at calc(200% / 3), var(--c3) 60deg, var(--c2) 0 120deg, #0000 0),
+			conic-gradient(from 180deg at calc(100% / 3), var(--c1) 60deg, var(--_g)),
+			linear-gradient(
+				90deg,
+				var(--c1) calc(100% / 6),
+				var(--c2) 0 50%,
+				var(--c1) 0 calc(500% / 6),
+				var(--c2) 0
+			);
+		background-size: calc(1.732 * var(--s)) var(--s);
 	}
 	#section4 {
 		background-color: #3d3d3d;
@@ -382,7 +384,7 @@
 		box-shadow:
 			inset -5px -5px 5px rgba(0, 0, 0, 0.6),
 			15px 15px 2px rgba(0, 0, 0, 0.04);
-		background-image: url('/images/planets/moon.jpg');
+		background-image: url('https://axogabedvxdwvhrjcjpq.supabase.co/storage/v1/object/public/images//FullMoon2010.jpg');
 		background-size: cover;
 		background-position: center;
 		z-index: 1010;
@@ -399,7 +401,6 @@
 		animation:
 			moveX 9s linear 0s infinite alternate,
 			moveY 9.4s linear 0s infinite alternate;
-
 	}
 	@-webkit-keyframes moveX {
 		from {
@@ -477,112 +478,104 @@
 	}
 
 	@media (max-width: 768px) {
-
 		.box {
 			width: 100%;
 			height: 100vh;
 		}
-	
+
 		.box b4 {
 			width: 140px;
 			height: 140px;
 		}
-		
 	}
 
-
-.tooltip {
-  color: #fff;
-  font-size: 18px;
-  max-width: 78ch;
-  text-align: center;
-  z-index: 2000;
-}
-.tooltip {
-	/* tail dimension */
-	--b: 3em;   /* base */
-	--h: 1.8em; /* height */
-	--t: .6;    /* thickness (from 0 to 1) */
-
-	--p: 50%;  /* main position (0%:top 100%:bottom) */
-	--r: 1.2em; /* the radius */
-
-
-	padding: 1em;
-	border-radius: var(--r)/min(var(--r),var(--p) - (1 - var(--t))*var(--b)/2) var(--r) var(--r) min(var(--r),100% - var(--p) - (1 - var(--t))*var(--b)/2);
-	background: #eb6841; /* the main color */
-	position: relative;
-}
-.tooltip:before {
-	content: "";
-	position: absolute;
-	right: 100%;
-	top: clamp(-1*var(--t)*var(--b),var(--p) - (var(--t) + 1)*var(--b)/2,100% - var(--b));
-	width: var(--h);
-	height: var(--b);
-	background: inherit;
-	border-bottom-left-radius: 100%;
-	mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
-	-webkit-mask: radial-gradient(105% calc(var(--t)*100%) at 100% 0,#0000 99%,#000 101%);
-}
-
-
-@media (max-width: 768px) {
 	.tooltip {
-		width: 80%;
-
-	}
-	.intro-text {
+		color: #fff;
+		font-size: 18px;
+		max-width: 78ch;
 		text-align: center;
-		font-size: 1.5rem;
-
+		z-index: 2000;
 	}
-	.box b4 {
-		width: 90px;
-		height: 90px;
+	.tooltip {
+		/* tail dimension */
+		--b: 3em; /* base */
+		--h: 1.8em; /* height */
+		--t: 0.6; /* thickness (from 0 to 1) */
+
+		--p: 50%; /* main position (0%:top 100%:bottom) */
+		--r: 1.2em; /* the radius */
+
+		padding: 1em;
+		border-radius: var(--r) / min(var(--r), var(--p) - (1 - var(--t)) * var(--b) / 2) var(--r)
+			var(--r) min(var(--r), 100% - var(--p) - (1 - var(--t)) * var(--b) / 2);
+		background: #eb6841; /* the main color */
+		position: relative;
 	}
-	#section2  {
-		padding:0.25rem;
+	.tooltip:before {
+		content: '';
+		position: absolute;
+		right: 100%;
+		top: clamp(-1 * var(--t) * var(--b), var(--p) - (var(--t) + 1) * var(--b) / 2, 100% - var(--b));
+		width: var(--h);
+		height: var(--b);
+		background: inherit;
+		border-bottom-left-radius: 100%;
+		mask: radial-gradient(105% calc(var(--t) * 100%) at 100% 0, #0000 99%, #000 101%);
+		-webkit-mask: radial-gradient(105% calc(var(--t) * 100%) at 100% 0, #0000 99%, #000 101%);
 	}
 
-}
-
-@media (max-width: 768px) {
-	.nav-content {
-		flex-wrap: wrap;
+	@media (max-width: 768px) {
+		.tooltip {
+			width: 80%;
+		}
+		.intro-text {
+			text-align: center;
+			font-size: 1.5rem;
+		}
+		.box b4 {
+			width: 90px;
+			height: 90px;
+		}
+		#section2 {
+			padding: 0.25rem;
+		}
 	}
-}
 
-.back-to-top {
-	position: fixed;
-	bottom: 2rem;
-	right: 2rem;
-	background-color: rgb(1, 97, 134);
-	color: white;
-	border: none;
-	border-radius: 50%;
-	width: 2.5rem;
-	height: 2.5rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-	transition: all 0.2s ease-in-out;
-	z-index: 9999;
-	padding: 0;
-}
+	@media (max-width: 768px) {
+		.nav-content {
+			flex-wrap: wrap;
+		}
+	}
 
-.back-to-top:hover {
-	transform: translateY(-2px);
-	background-color: rgb(2, 116, 160);
-}
-
-@media (max-width: 768px) {
 	.back-to-top {
-		bottom: 1rem;
-		right: 1rem;
+		position: fixed;
+		bottom: 2rem;
+		right: 2rem;
+		background-color: rgb(1, 97, 134);
+		color: white;
+		border: none;
+		border-radius: 50%;
+		width: 2.5rem;
+		height: 2.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+		transition: all 0.2s ease-in-out;
+		z-index: 9999;
+		padding: 0;
 	}
 
-}
+	.back-to-top:hover {
+		transform: translateY(-2px);
+		background-color: rgb(2, 116, 160);
+	}
+
+	@media (max-width: 768px) {
+		.back-to-top {
+			bottom: 1rem;
+			right: 1rem;
+		}
+	}
 </style>
